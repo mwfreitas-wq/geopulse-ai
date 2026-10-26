@@ -1684,6 +1684,9 @@ async def dynamic_sitemap_xml(request: Request, db: AsyncSession = Depends(get_d
     """
     from fastapi.responses import Response
     base_url = str(request.base_url).rstrip("/")
+    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "onrender.com" in base_url):
+        base_url = "https://" + base_url[len("http://"):]
+
     result = await db.execute(select(Company).where(Company.is_paid == True).order_by(desc(Company.paid_at)))
     paid_entities = result.scalars().all()
 
@@ -1699,11 +1702,29 @@ async def dynamic_sitemap_xml(request: Request, db: AsyncSession = Depends(get_d
     <priority>0.9</priority>
   </url>"""
 
+    added_urls = set()
     for item in paid_entities:
         slug = SparkSyndicatorBridge.slugify(item.name)
-        urls_xml += f"""
+        art_url = f"{base_url}/static/published_articles/{slug}_artigo_autoridade.html"
+        if art_url not in added_urls:
+            added_urls.add(art_url)
+            urls_xml += f"""
   <url>
-    <loc>{base_url}/static/published_articles/{slug}_artigo_autoridade.html</loc>
+    <loc>{art_url}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>"""
+
+    # Inclui todos os artigos e guias educativos publicados no diretório físico
+    articles_dir = STATIC_DIR / "published_articles"
+    if articles_dir.exists():
+        for html_file in sorted(articles_dir.glob("*.html")):
+            file_url = f"{base_url}/static/published_articles/{html_file.name}"
+            if file_url not in added_urls:
+                added_urls.add(file_url)
+                urls_xml += f"""
+  <url>
+    <loc>{file_url}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>"""
@@ -1718,10 +1739,12 @@ async def dynamic_sitemap_xml(request: Request, db: AsyncSession = Depends(get_d
 async def dynamic_robots_txt(request: Request):
     """
     Diretivas oficiais de robots.txt com permissão explícita para rastreadores de IA
-    (GPTBot, PerplexityBot, ClaudeBot, Google-Extended, Applebot) e motores de busca.
+    (GPTBot, OAI-SearchBot, PerplexityBot, ClaudeBot, Googlebot, Google-Extended, Bingbot, Applebot) e motores de busca.
     """
     from fastapi.responses import PlainTextResponse
     base_url = str(request.base_url).rstrip("/")
+    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "onrender.com" in base_url):
+        base_url = "https://" + base_url[len("http://"):]
     content = f"""# Robots.txt — GeoPulse AI Engine
 User-agent: *
 Allow: /
@@ -1732,8 +1755,11 @@ Allow: /static/published_articles/
 Disallow: /admin
 Disallow: /api/admin/
 
-# Rastreadores de Inteligência Artificial Autorizados
+# Rastreadores de Inteligência Artificial e Motores de Busca Autorizados
 User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
 Allow: /
 
 User-agent: ChatGPT-User
@@ -1742,10 +1768,16 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-User-agent: ClaudeBot
+User-agent: Googlebot
 Allow: /
 
 User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: ClaudeBot
 Allow: /
 
 User-agent: Applebot-Extended

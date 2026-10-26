@@ -1,9 +1,11 @@
 import asyncio
 import base64
 import os
+import re
 import secrets
 import shutil
 import uuid
+from urllib.parse import quote
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from typing import List, Optional
@@ -116,13 +118,33 @@ async def _monitoring_loop():
         await asyncio.sleep(3600)
 
 
+async def _self_keep_alive_loop():
+    """Mantém a instância acordada no Render a cada 8 minutos para evitar spin-down (tempo de espera de 50s)."""
+    target_urls = ["https://geopulseai.store/health", "https://geopulse-ai-q6w1.onrender.com/health"]
+    while True:
+        await asyncio.sleep(480)
+        try:
+            async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
+                for u in target_urls:
+                    try:
+                        r = await client.get(u)
+                        if r.status_code == 200:
+                            break
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Inicializa tabelas do banco SQLite
     await init_db()
     task = asyncio.create_task(_monitoring_loop())
+    keep_alive_task = asyncio.create_task(_self_keep_alive_loop())
     yield
     task.cancel()
+    keep_alive_task.cancel()
 
 
 app = FastAPI(
@@ -292,10 +314,69 @@ async def get_public_checkout_config(db: AsyncSession = Depends(get_db)):
         price = settings.PLAN_PRICE
     return {
         "plan_price": price,
-        "pix_key": keys.get("pix_key") or "contato@geopulse.ai",
+        "pix_key": keys.get("pix_key") or "9d1c4025-abb8-49a1-9216-27241253b4df",
         "pix_beneficiary": keys.get("pix_beneficiary") or "GeoPulse AI Tecnologia",
         "mercadopago_configured": bool(keys.get("mercadopago_access_token")),
         "mercadopago_public_key": keys.get("mercadopago_public_key") or ""
+    }
+
+
+def generate_pix_emv(key: str, name: str, city: str, amount: float, txid: str = "***") -> str:
+    """Gera o código oficial EMV 'PIX Copia e Cola' padrão Banco Central do Brasil com valor e CRC16 embutidos."""
+    name_clean = re.sub(r'[^a-zA-Z0-9 ]', '', name)[:25].strip().upper() or "GEOPULSE AI"
+    city_clean = re.sub(r'[^a-zA-Z0-9 ]', '', city)[:15].strip().upper() or "SAO PAULO"
+    amt_str = f"{amount:.2f}"
+    
+    gui = "0014br.gov.bcb.pix"
+    key_field = f"01{len(key):02d}{key}"
+    merchant_account = f"26{len(gui + key_field):02d}{gui}{key_field}"
+    
+    add_data = f"05{len(txid):02d}{txid}"
+    add_field = f"62{len(add_data):02d}{add_data}"
+    
+    raw = (
+        "000201"
+        + merchant_account
+        + "52040000"
+        + "5303986"
+        + f"54{len(amt_str):02d}{amt_str}"
+        + "5802BR"
+        + f"59{len(name_clean):02d}{name_clean}"
+        + f"60{len(city_clean):02d}{city_clean}"
+        + add_field
+        + "6304"
+    )
+    crc = 0xFFFF
+    for char in raw.encode("utf-8"):
+        crc ^= (char << 8)
+        for _ in range(8):
+            if crc & 0x8000:
+                crc = ((crc << 1) ^ 0x1021) & 0xFFFF
+            else:
+                crc = (crc << 1) & 0xFFFF
+    return raw + f"{crc:04X}"
+
+
+@app.get("/api/checkout/pix-code")
+async def get_pix_emv_code(amount: Optional[float] = None, company_id: Optional[int] = None, order_bump: bool = False, db: AsyncSession = Depends(get_db)):
+    """Retorna o código PIX Copia e Cola oficial com QR Code pronto para leitura por qualquer banco."""
+    keys = await get_all_configured_keys(db)
+    pix_key = keys.get("pix_key") or "9d1c4025-abb8-49a1-9216-27241253b4df"
+    beneficiary = keys.get("pix_beneficiary") or "GeoPulse AI Tecnologia"
+    try:
+        base_price = float(amount or keys.get("plan_price") or 197.0)
+    except Exception:
+        base_price = 197.0
+    effective_amount = base_price + (50.0 if order_bump else 0.0)
+    txid = f"GP{company_id}" if company_id else "***"
+    code = generate_pix_emv(key=pix_key, name=beneficiary, city="SAO PAULO", amount=effective_amount, txid=txid[:25])
+    return {
+        "pix_key": pix_key,
+        "beneficiary": beneficiary,
+        "amount": effective_amount,
+        "order_bump": order_bump,
+        "emv_code": code,
+        "qr_image_url": f"https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data={quote(code)}"
     }
 
 
@@ -1269,6 +1350,7 @@ async def get_admin_overview(db: AsyncSession = Depends(get_db)):
 async def create_mercadopago_preference(
     company_id: int,
     request: Request,
+    order_bump: bool = False,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -1279,6 +1361,15 @@ async def create_mercadopago_preference(
     company = result.scalars().first()
     if not company:
         raise HTTPException(status_code=404, detail="Registro não encontrado.")
+
+    # Tenta ler order_bump do query param ou JSON body se enviado
+    if not order_bump:
+        try:
+            body = await request.json()
+            if isinstance(body, dict) and body.get("order_bump"):
+                order_bump = True
+        except Exception:
+            pass
 
     keys = await get_all_configured_keys(db)
     mp_token = keys.get("mercadopago_access_token")
@@ -1294,17 +1385,31 @@ async def create_mercadopago_preference(
         }
 
     base_url = str(request.base_url).rstrip("/")
+    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "onrender.com" in base_url):
+        base_url = "https://" + base_url[len("http://"):]
+
+    items_list = [
+        {
+            "id": f"geopulse-{company.id}",
+            "title": f"Pacote Dominância IA (GEO + AIO) - {company.name}",
+            "description": f"Ativação de Autoridade #1 em IA para {company.niche} em {company.city_region}",
+            "quantity": 1,
+            "currency_id": "BRL",
+            "unit_price": price
+        }
+    ]
+    if order_bump:
+        items_list.append({
+            "id": f"geopulse-bump-{company.id}",
+            "title": "Upgrade: Cobertura 3 Cidades Vizinhas + Kit Bio Redes Sociais",
+            "description": "Expansão de indexação semântica para cidades vizinhas e kit de autoridade",
+            "quantity": 1,
+            "currency_id": "BRL",
+            "unit_price": 50.0
+        })
+
     preference_payload = {
-        "items": [
-            {
-                "id": f"geopulse-{company.id}",
-                "title": f"Pacote Dominância IA (GEO + AIO) - {company.name}",
-                "description": f"Ativação de Autoridade #1 em IA para {company.niche} em {company.city_region}",
-                "quantity": 1,
-                "currency_id": "BRL",
-                "unit_price": price
-            }
-        ],
+        "items": items_list,
         "payer": {
             "name": company.name,
             "email": company.email if company.email and "@" in company.email else "cliente@geopulse.ai"

@@ -315,9 +315,14 @@
           <h2 id="res-company-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Relatório de Posicionamento IA</h2>
           <p id="res-company-url" class="text-xs font-mono text-slate-500"></p>
         </div>
-        <button id="res-top-cta-btn" onclick="openCheckoutModal()" class="px-6 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-glow">
-          🚀 Iniciar Desafio de 14 Dias (IA Trabalhando por Você — R$ 197)
-        </button>
+        <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          <button type="button" onclick="shareDiagnosticWhatsApp()" class="w-full sm:w-auto px-4 py-4 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 border border-slate-300 font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+            <span>📲</span> Enviar para o Sócio (WhatsApp)
+          </button>
+          <button id="res-top-cta-btn" onclick="openCheckoutModal()" class="w-full sm:w-auto px-6 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-glow">
+            🚀 Iniciar Desafio de 14 Dias (IA Trabalhando por Você — R$ 197)
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -642,28 +647,76 @@
   </div>
 
   <!-- MODAL DE CHECKOUT -->
-  <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-4 relative">
+  <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-4 relative my-8">
       <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 font-bold hover:bg-slate-200 transition">✕</button>
       <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🚀 Desafio Sprint de 14 Dias IA</span>
       <h3 class="text-2xl font-extrabold text-slate-900">Ativar 14 Dias de Trabalho da IA</h3>
       <p class="text-xs text-slate-600 leading-relaxed">
-        Investimento de <strong>R$ 197,00 taxa única</strong> (sem mensalidade). Garante a execução das 14 etapas da IA + publicação do Guia Oficial Top 5 + Schema.org JSON-LD + /llms.txt.
+        Investimento em <strong>taxa única</strong> (sem mensalidades). Inclui os 14 dias de engenharia semântica + 7 ativos vitais + publicação do Guia Oficial Top 5.
       </p>
 
-      <button onclick="startMercadoPagoCheckout()" class="w-full py-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2">
-        <span>💳</span> Pagar com Mercado Pago (PIX Imediato ou Cartão de Crédito)
+      <!-- ORDER BUMP OPÇÃO -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-emerald-50 border-2 border-amber-300 space-y-1.5 text-left">
+        <label class="flex items-start gap-2.5 cursor-pointer select-none">
+          <input type="checkbox" id="order-bump-checkbox" onchange="toggleOrderBump(this.checked)" class="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600 shrink-0" />
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-xs font-black text-slate-900">SIM! Adicionar Pacote Expansão Regional</span>
+              <span class="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 text-[9px] font-black uppercase">+ R$ 50,00</span>
+            </div>
+            <p class="text-[11px] text-slate-600 leading-snug">
+              Blindagem semântica em até <strong>3 cidades vizinhas</strong> da sua região + Kit com <strong>Bio de Alta Conversão & 5 Posts de Autoridade IA</strong> para Instagram e LinkedIn.
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <!-- TOTAL A PAGAR -->
+      <div class="flex items-center justify-between px-2 pt-1 border-t border-slate-100">
+        <span class="text-xs font-bold text-slate-600">Total a Pagar (Taxa Única):</span>
+        <span class="text-xl font-black text-slate-900 font-mono">R$ <span id="modal-total-display">197,00</span></span>
+      </div>
+
+      <!-- BOTÃO MERCADO PAGO -->
+      <button onclick="startMercadoPagoCheckout()" class="w-full py-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2">
+        <span>💳</span> Pagar com Mercado Pago (PIX ou Cartão em até 12x)
       </button>
 
-      <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3">
+      <!-- BLOCO PIX OFICIAL DO BANCO CENTRAL COM QR CODE VISUAL -->
+      <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3.5 text-left">
         <div class="flex items-center justify-between text-xs font-extrabold text-slate-700">
-          <span>Ou transfira via PIX Direto:</span>
-          <span class="text-emerald-700 font-bold">R$ 197,00</span>
+          <span>PIX Instantâneo Oficial (Banco Central):</span>
+          <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-mono font-black" id="pix-amount-badge">R$ 197,00</span>
         </div>
-        <div class="flex gap-2">
-          <input id="modal-pix-key" type="text" readonly value="9d1c4025-abb8-49a1-9216-27241253b4df" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 font-mono text-xs font-bold text-slate-800 select-all" />
-          <button onclick="copyPixKey()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shrink-0 transition">Copiar</button>
+
+        <!-- QR CODE VISUAL DINÂMICO -->
+        <div class="flex flex-col sm:flex-row items-center gap-4 bg-white p-3.5 rounded-2xl border border-slate-200">
+          <div class="w-32 h-32 rounded-xl border border-slate-200 shrink-0 shadow-sm bg-slate-50 flex items-center justify-center overflow-hidden">
+            <img id="modal-pix-qrcode-img" src="" alt="QR Code PIX" class="w-full h-full object-contain" />
+          </div>
+          <div class="space-y-2 text-left">
+            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-extrabold border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Escaneie no App do Banco
+            </div>
+            <p class="text-[11px] text-slate-600 leading-tight">
+              Abra o app do seu banco, escolha <strong>PIX</strong> e aponte a câmera para pagar com o valor exato já preenchido.
+            </p>
+            <button type="button" onclick="copyPixCopiaCola()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+              <span>📋</span> Copiar PIX Copia e Cola
+            </button>
+          </div>
         </div>
+
+        <!-- CHAVE MANUAL ALTERNATIVA -->
+        <details class="text-[11px] text-slate-500">
+          <summary class="cursor-pointer font-bold text-slate-600 hover:text-emerald-700">Ou prefere transferir pela Chave Aleatória simples? Clique aqui</summary>
+          <div class="pt-2 flex gap-2">
+            <input id="modal-pix-key" type="text" readonly value="9d1c4025-abb8-49a1-9216-27241253b4df" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono text-[11px] font-bold text-slate-800 select-all" />
+            <button onclick="copyPixKey()" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold text-xs shrink-0 transition">Copiar</button>
+          </div>
+        </details>
+
         <div class="text-[11px] text-slate-500 font-medium">
           Favorecido: <strong class="text-slate-700" id="modal-pix-beneficiary">GeoPulse AI Tecnologia</strong>
         </div>
@@ -683,6 +736,8 @@
     let currentDiagnosticData = null;
     let officialPixKey = "9d1c4025-abb8-49a1-9216-27241253b4df";
     let officialPrice = 197.0;
+    let currentOrderBump = false;
+    let currentPixEmvCode = "";
 
     const SCHEDULE_14 = [
       { day: 1, title: "Protocolo de Entidade & JSON-LD + /llms.txt" },
@@ -998,9 +1053,69 @@
       });
     }
 
-    function openCheckoutModal() { document.getElementById('checkout-modal').classList.remove('hidden'); }
+    /* COMPARTILHAMENTO DE DIAGNÓSTICO COM O SÓCIO / WHATSAPP */
+    function shareDiagnosticWhatsApp() {
+      const id = currentDiagnosticData?.company?.id;
+      if (!id || id === 999) {
+        alert('Realize primeiro o diagnóstico gratuito com o nome da sua empresa para gerar o link oficial!');
+        return;
+      }
+      const shareUrl = `${window.location.origin}/?report=${id}`;
+      const name = currentDiagnosticData.company.name;
+      const niche = currentDiagnosticData.company.niche;
+      const score = currentDiagnosticData.metrics.visibility_score;
+      const msg = `Olá! Veja a auditoria de visibilidade de IA que fiz da *${name}* (${niche}) no GeoPulse AI:\n\nNossa nota no ChatGPT e Gemini foi de *${score}%*.\n\nVeja o relatório completo e o cálculo de faturamento perdido aqui: ${shareUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    /* CHECKOUT & CARREGAMENTO DE PIX DINÂMICO */
+    async function refreshPixCode() {
+      const id = currentDiagnosticData?.company?.id;
+      const baseAmt = officialPrice || 197.0;
+      const isBump = currentOrderBump;
+      try {
+        const res = await fetch(`/api/checkout/pix-code?amount=${baseAmt}&order_bump=${isBump}&company_id=${id || ''}`);
+        if (res.ok) {
+          const data = await res.json();
+          currentPixEmvCode = data.emv_code;
+          const qrImg = document.getElementById('modal-pix-qrcode-img');
+          if (qrImg) qrImg.src = data.qr_image_url;
+          const amtBadge = document.getElementById('pix-amount-badge');
+          if (amtBadge) amtBadge.textContent = `R$ ${data.amount.toFixed(2).replace('.', ',')}`;
+          const totDisplay = document.getElementById('modal-total-display');
+          if (totDisplay) totDisplay.textContent = `${data.amount.toFixed(2).replace('.', ',')}`;
+        }
+      } catch (e) {
+        console.error('Erro ao gerar PIX dinâmico:', e);
+      }
+    }
+
+    function toggleOrderBump(checked) {
+      currentOrderBump = checked;
+      const total = officialPrice + (checked ? 50.0 : 0.0);
+      document.getElementById('modal-total-display').textContent = total.toFixed(2).replace('.', ',');
+      document.getElementById('pix-amount-badge').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      refreshPixCode();
+    }
+
+    function openCheckoutModal() {
+      document.getElementById('checkout-modal').classList.remove('hidden');
+      refreshPixCode();
+    }
     function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
     
+    function copyPixCopiaCola() {
+      if (!currentPixEmvCode) {
+        copyPixKey();
+        return;
+      }
+      navigator.clipboard.writeText(currentPixEmvCode);
+      const msg = document.getElementById('checkout-feedback-msg');
+      msg.classList.remove('hidden');
+      msg.textContent = '✓ Código PIX Copia e Cola copiado! Abra o app do seu banco e cole na opção PIX.';
+      setTimeout(() => { msg.classList.add('hidden'); }, 5000);
+    }
+
     function copyPixKey() {
       const key = document.getElementById('modal-pix-key').value;
       navigator.clipboard.writeText(key);
@@ -1014,15 +1129,15 @@
       const id = currentDiagnosticData?.company?.id;
       if (!id || id === 999) { alert('Rode primeiro o diagnóstico gratuito com os dados da sua empresa acima.'); return; }
       try {
-        const res = await fetch(`/api/companies/${id}/mercadopago-preference`, { method: 'POST' });
+        const res = await fetch(`/api/companies/${id}/mercadopago-preference?order_bump=${currentOrderBump}`, { method: 'POST' });
         const data = await res.json();
         if (data.init_point) {
           window.location.href = data.init_point;
         } else {
-          alert('Preferência do Mercado Pago indisponível no momento. Use o PIX Direto Copia e Cola para ativação imediata!');
+          alert('Preferência do Mercado Pago indisponível no momento. Use o PIX Copia e Cola para ativação imediata!');
         }
       } catch (e) {
-        alert('Erro ao conectar ao Mercado Pago. Utilize a chave PIX informada no modal.');
+        alert('Erro ao conectar ao Mercado Pago. Utilize o código PIX informado no modal.');
       }
     }
 
@@ -1133,6 +1248,11 @@
         const res = await fetch('/api/checkout/config');
         if (res.ok) {
           const cfg = await res.json();
+          if (cfg.plan_price) {
+            officialPrice = parseFloat(cfg.plan_price);
+            document.getElementById('modal-total-display').textContent = officialPrice.toFixed(2).replace('.', ',');
+            document.getElementById('pix-amount-badge').textContent = `R$ ${officialPrice.toFixed(2).replace('.', ',')}`;
+          }
           if (cfg.pix_key) {
             officialPixKey = cfg.pix_key;
             const inputPix = document.getElementById('modal-pix-key');
@@ -1147,8 +1267,22 @@
         console.warn('Usando chave PIX de contingência:', officialPixKey);
       }
 
-      // 3. Verifica retorno de pagamento do Mercado Pago na URL (?mp_success=1&company_id=...)
+      // 3. Verifica se veio com parâmetro de relatório compartilhado (?report=ID ou ?relatorio=ID ou ?diag=ID)
       const urlParams = new URLSearchParams(window.location.search);
+      const reportId = urlParams.get('report') || urlParams.get('relatorio') || urlParams.get('diag');
+      if (reportId) {
+        try {
+          const repRes = await fetch(`/api/companies/${reportId}`);
+          if (repRes.ok) {
+            const repData = await repRes.json();
+            renderDiagnosticResults(repData);
+          }
+        } catch (e) {
+          console.error('Erro ao carregar relatório compartilhado:', e);
+        }
+      }
+
+      // 4. Verifica retorno de pagamento do Mercado Pago na URL (?mp_success=1&company_id=...)
       const mpSuccess = urlParams.get('mp_success');
       const companyId = urlParams.get('company_id');
       const clientToken = urlParams.get('client_token');

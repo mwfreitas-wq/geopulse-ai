@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoPulse AI — Desafio de 14 Dias: Nossa IA Trabalhando para Colocar Você em 1º Lugar no ChatGPT e Gemini</title>
+  <meta name="description" content="Descubra gratuitamente sua nota em 10 segundos e ative o Desafio de 14 Dias: nossa Inteligência Artificial trabalhando diariamente para melhorar sua posição no ChatGPT, Gemini e Perplexity." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'soft': '0 20px 40px -15px rgba(15, 23, 42, 0.07)',
+            'glow': '0 10px 30px -5px rgba(16, 185, 129, 0.35)',
+            'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
+    .bg-grid-light {
+      background-size: 36px 36px;
+      background-image: linear-gradient(to right, rgba(226, 232, 240, 0.65) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(226, 232, 240, 0.65) 1px, transparent 1px);
+    }
+    @keyframes floatSlow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
+    .animate-float { animation: floatSlow 4s ease-in-out infinite; }
+    .animate-pulse-ring { animation: pulseRing 2s infinite; }
+    .marquee-track { display: flex; width: max-content; animation: marquee 34s linear infinite; }
+    .marquee-track:hover { animation-play-state: paused; }
+    .glass-nav { background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); }
+  </style>
+</head>
+<body class="antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- BARRA DINÂMICA DE ATIVIDADE DO MOTOR DE 14 DIAS AO VIVO -->
+  <div class="bg-slate-900 text-white text-xs py-2.5 px-4 overflow-hidden border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span class="font-extrabold text-emerald-400 uppercase tracking-wider">Motor 14 Dias ao Vivo:</span>
+      </div>
+      <div class="overflow-hidden w-full">
+        <div class="marquee-track gap-12 text-slate-300 font-medium">
+          <span>⚙️ <strong>Dia 14/14 Concluído:</strong> Dr. Henrique Vasconcelos (SP) subiu de 24% para 94.5% (1º Lugar no ChatGPT Search)</span>
+          <span>🚀 <strong>Dia 2/14 Executado:</strong> Clínica OdontoPrime (BH) teve seu Guia Oficial Top 5 publicado automaticamente pela IA</span>
+          <span>📡 <strong>Dia 10/14 Executado:</strong> Escritório Contábil Atlas (PR) recebeu Ping IndexNow nos robôs do Bing e Perplexity</span>
+          <span>📈 <strong>Dia 7/14 Executado:</strong> Dra. Camila Mendes (RJ) atingiu 78.4% na Reauditoria Intermediária do Desafio</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVBAR LIGHT MODE CONFIÁVEL -->
+  <header class="sticky top-0 z-40 glass-nav border-b border-slate-200/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-extrabold text-xl shadow-md">G</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">GeoPulse <span class="text-emerald-600">AI</span></span>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">Desafio 14 Dias IA</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium hidden sm:block">A IA que trabalha 14 dias por você para posicionar sua marca no topo</p>
+        </div>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
+        <a href="#video-apresentacao" class="hover:text-emerald-600 transition">🎥 Vídeo (40s)</a>
+        <a href="#desafio-14-dias" class="hover:text-emerald-600 transition font-bold text-slate-900">🔥 O Desafio de 14 Dias</a>
+        <a href="#como-funciona" class="hover:text-emerald-600 transition">Como Funciona</a>
+        <a href="/diretorio" class="hover:text-emerald-600 transition">Diretório Oficial</a>
+      </nav>
+
+      <div class="flex items-center gap-2.5">
+        <button onclick="runInstantDemo('paid')" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold transition">
+          📊 Ver Evolução 14 Dias
+        </button>
+        <a href="#diagnostico-form" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition">
+          Teste Gratuito (10s) ↓
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION LIGHT MODE + VÍDEO + DESAFIO DE 14 DIAS -->
+  <section class="relative bg-grid-light pt-8 pb-16 sm:pt-12 sm:pb-24 border-b border-slate-200/80 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-4xl mx-auto space-y-5">
+        <div class="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-white border border-emerald-300 shadow-sm text-xs font-bold text-slate-700">
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold uppercase">Desafio Guiado de 14 Dias</span>
+          <span>Nossa IA trabalha 14 dias consecutivos por você para colocar seu nome no topo das pesquisas de IA</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-slate-900 tracking-tight leading-[1.12]">
+          Se um cliente abrir o <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT agora</span> na sua cidade, quem a IA recomenda?
+        </h1>
+
+        <p class="text-base sm:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
+          Descubra sua nota gratuitamente em <strong>10 segundos</strong>. E se você estiver invisível, ative nosso <strong>Desafio de 14 Dias</strong>: nossa Inteligência Artificial assume o trabalho pesado e executa <strong>14 ações técnicas diárias</strong> para fazer sua empresa ou nome profissional subir no ranking do ChatGPT, Gemini e Perplexity.
+        </p>
+      </div>
+
+      <!-- GRID: VÍDEO (ESQUERDA) + SIMULADOR DE EVOLUÇÃO 14 DIAS (DIREITA) -->
+      <div id="video-apresentacao" class="mt-10 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-7 space-y-4">
+          <div class="relative rounded-3xl bg-white p-2.5 sm:p-3.5 border border-slate-200/90 shadow-soft">
+            <div class="flex items-center justify-between px-3 pb-2.5 border-b border-slate-100 mb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                <span class="ml-2 text-xs font-bold text-slate-700">🎥 Apresentação Oficial GeoPulse AI (0:40s)</span>
+              </div>
+              <label for="local-video-picker" class="cursor-pointer text-[11px] font-semibold text-slate-500 hover:text-emerald-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+                📂 Selecionar Vídeo Local
+              </label>
+              <input id="local-video-picker" type="file" accept="video/*" class="hidden" onchange="loadCustomVideoFile(event)" />
+            </div>
+
+            <div class="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video shadow-inner group">
+              <video id="hero-pitch-video" src="/static/videos/apresentacao.mp4" class="w-full h-full object-cover" controls playsinline preload="auto">
+                <source src="/static/videos/apresentacao.mp4" type="video/mp4" />
+                <source src="/static/apresentacao.mp4" type="video/mp4" />
+              </video>
+
+              <div id="video-sound-overlay" onclick="playHeroVideoWithSound()" class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/35 to-transparent flex flex-col justify-between p-5 sm:p-7 cursor-pointer transition-opacity duration-300">
+                <div class="flex items-center justify-between">
+                  <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 text-slate-900 font-extrabold text-xs shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> Explicação Rápida (40s)
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-slate-900/80 text-white text-xs font-bold">🔊 Clique para ouvir</span>
+                </div>
+
+                <div class="my-auto mx-auto flex flex-col items-center gap-3">
+                  <div class="w-20 h-20 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white flex items-center justify-center shadow-glow animate-pulse-ring transition">
+                    <svg class="w-9 h-9 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  </div>
+                  <span class="px-4 py-1.5 rounded-full bg-white text-slate-900 font-extrabold text-xs sm:text-sm shadow-lg">
+                    ▶ Assistir Apresentação (0:40s)
+                  </span>
+                </div>
+
+                <div class="bg-white/95 backdrop-blur-md rounded-2xl p-3.5 border border-white/40 shadow-xl">
+                  <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
+                    💬 <em>"Mais de 70% das pessoas pararam de procurar no Google. Agora elas compram o que a IA recomenda direto no chat."</em>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIMULADOR DA EVOLUÇÃO NOS 14 DIAS -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-soft p-6 sm:p-7 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Simulador do Desafio de 14 Dias</span>
+                <h2 class="text-lg font-extrabold text-slate-900">Como sua posição sobe dia após dia</h2>
+              </div>
+              <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+                <button id="hero-sim-before-btn" onclick="switchHeroSim('before')" class="px-2.5 py-1.5 rounded-lg text-xs font-extrabold bg-white text-rose-600 shadow-sm">Dia 0 (Hoje)</button>
+                <button id="hero-sim-after-btn" onclick="switchHeroSim('after')" class="px-2.5 py-1.5 rounded-lg text-xs font-extrabold text-slate-600">Dia 14 (Pós-IA)</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span id="hero-sim-day-label" class="font-extrabold text-slate-700">Status no Dia 0 (Sem a IA trabalhar):</span>
+                <span id="hero-sim-score-pill" class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-mono font-extrabold">Score: 21.4%</span>
+              </div>
+              <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                <div id="hero-sim-progress" class="h-full bg-rose-500 rounded-full transition-all duration-700" style="width: 21%"></div>
+              </div>
+            </div>
+
+            <div id="hero-sim-box" class="rounded-2xl p-4 border-2 border-rose-200 bg-rose-50/50 space-y-2.5 transition-all">
+              <div class="flex items-center justify-between">
+                <span id="hero-sim-badge" class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-100 text-rose-700 border border-rose-200">⚠️ VOCÊ FORA DO RANKING DA IA</span>
+                <span class="text-[11px] font-mono text-slate-500">ChatGPT / Gemini</span>
+              </div>
+              <div id="hero-sim-response" class="text-xs sm:text-sm text-slate-700 space-y-2">
+                <div class="p-2.5 rounded-xl bg-white border border-slate-200 font-semibold text-slate-900">🥇 1. Seu Concorrente Direto — <span class="text-emerald-600 font-bold">Recomendado #1</span></div>
+                <div class="p-2.5 rounded-xl bg-rose-100/80 border border-rose-300 text-rose-800 font-bold flex items-center justify-between">
+                  <span>❌ Sua Empresa / Seu Nome</span>
+                  <span class="text-[10px] uppercase">Invisível no Chat</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-xs text-emerald-950 space-y-1">
+              <div class="font-extrabold text-emerald-800">💡 Pelo que você está pagando no Desafio (R$ 197 único):</div>
+              <p class="leading-relaxed text-slate-700">
+                Durante <strong>14 dias seguidos</strong>, nossa IA executa 1 etapa técnica por dia (cria seus arquivos semânticos, publica artigos comparativos, envia pings aos robôs e reaudita sua nota) para colocar você no topo das pesquisas feitas por IA.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEÇÃO: FORMULÁRIO DE DIAGNÓSTICO GRATUITO -->
+  <section id="diagnostico-form" class="py-16 sm:py-20 bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-10 space-y-3">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold uppercase animate-float">
+          👇 Passo 1 (Gratuito): Descubra sua Nota Atual em 10 Segundos
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900">Auditoria Gratuita de Visibilidade em IA</h2>
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-2">
+          <button type="button" onclick="fillPreset('advogado')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-xs font-bold text-slate-700">⚖️ Exemplo Advogado</button>
+          <button type="button" onclick="fillPreset('clinica')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-xs font-bold text-slate-700">🦷 Exemplo Clínica</button>
+          <button type="button" onclick="runInstantDemo('free')" class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-xs font-extrabold text-amber-800">⚡ Simular Diagnóstico Agora</button>
+        </div>
+      </div>
+
+      <div class="bg-slate-50/70 rounded-3xl border border-slate-200/90 shadow-soft p-6 sm:p-10">
+        <form id="geo-audit-form" onsubmit="handleDiagnosticSubmit(event)" class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-2 rounded-2xl border border-slate-200">
+            <button type="button" id="btn-type-company" onclick="setEntityType('company')" class="py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-md transition-all flex items-center justify-center gap-2">
+              <span>🏢</span> Sou Empresa / Clínica / Escritório
+            </button>
+            <button type="button" id="btn-type-autonomous" onclick="setEntityType('autonomous')" class="py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+              <span>👨‍⚕️</span> Sou Profissional Liberal / Autônomo
+            </button>
+          </div>
+          <input type="hidden" id="entity_type" value="company" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label id="label-name" class="block text-xs font-extrabold uppercase text-slate-700 mb-2">🏢 Nome da Empresa, Clínica ou Marca *</label>
+              <input type="text" id="name" required placeholder="Ex: Clínica OdontoPrime ou Silva & Associados" class="w-full px-4 py-3.5 rounded-xl bg-white border border-slate-300 text-sm font-semibold transition focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            </div>
+            <div>
+              <label id="label-url" class="block text-xs font-extrabold uppercase text-slate-700 mb-2">🌐 Site Oficial ou Instagram da Empresa *</label>
+              <input type="text" id="url" required placeholder="Ex: www.suaempresa.com.br ou @suaempresa" class="w-full px-4 py-3.5 rounded-xl bg-white border border-slate-300 text-sm font-semibold transition focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            </div>
+            <div>
+              <label id="label-niche" class="block text-xs font-extrabold uppercase text-slate-700 mb-2">🎯 Especialidade ou Ramo de Atuação *</label>
+              <input type="text" id="niche" required placeholder="Ex: Implantes Dentários, Advocacia Trabalhista, Contabilidade" class="w-full px-4 py-3.5 rounded-xl bg-white border border-slate-300 text-sm font-semibold transition focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            </div>
+            <div>
+              <label id="label-city" class="block text-xs font-extrabold uppercase text-slate-700 mb-2">📍 Cidade e Estado da Empresa *</label>
+              <input type="text" id="city_region" required placeholder="Ex: São Paulo - SP, Belo Horizonte - MG" class="w-full px-4 py-3.5 rounded-xl bg-white border border-slate-300 text-sm font-semibold transition focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            </div>
+          </div>
+
+          <!-- CÉLULAS ESPECÍFICAS DE REGISTRO E CONCORRENTES -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div id="box-registry" class="p-4 rounded-2xl border border-slate-200 bg-white space-y-1.5 transition-all">
+              <label id="label-registry" class="block text-xs font-extrabold uppercase text-slate-700">
+                🏛️ CNPJ ou Registro Oficial da Empresa (Opcional)
+              </label>
+              <input type="text" id="professional_registry" placeholder="Ex: 00.000.000/0001-00 ou Registro em Conselho" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-semibold transition focus:bg-white focus:ring-2 focus:ring-emerald-500" />
+              <p id="hint-registry" class="text-[11px] text-slate-500">Ajuda os robôs de IA a confirmarem a legitimidade da sua empresa.</p>
+            </div>
+            <div class="p-4 rounded-2xl border border-slate-200 bg-white space-y-1.5 transition-all">
+              <label id="label-competitors" class="block text-xs font-extrabold uppercase text-slate-700">
+                ⚔️ Concorrentes Diretos na Região (Opcional)
+              </label>
+              <input type="text" id="competitors" placeholder="Ex: Concorrente 1, Concorrente 2" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-semibold transition focus:bg-white focus:ring-2 focus:ring-emerald-500" />
+              <p id="hint-competitors" class="text-[11px] text-slate-500">A IA compara sua empresa contra eles nas recomendações de busca.</p>
+            </div>
+          </div>
+
+          <!-- CONTATO -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-700 mb-2">📱 WhatsApp com DDD</label>
+              <input type="text" id="whatsapp" placeholder="Ex: (11) 98765-4321" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-700 mb-2">✉️ Seu E-mail para Receber o Relatório</label>
+              <input type="email" id="email" placeholder="Ex: seuemail@dominio.com.br" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+          <input type="hidden" id="services_list" value="" />
+          <input type="hidden" id="photo_url" value="" />
+
+          <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span class="text-xs text-slate-500">🔒 Diagnóstico 100% Gratuito em 10 segundos</span>
+            <button type="submit" id="submit-audit-btn" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold text-sm sm:text-base shadow-glow transition hover:opacity-95">
+              🔍 Executar Diagnóstico Gratuito nas IAs Agora
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEÇÃO DE RESULTADOS DINÂMICOS -->
+  <section id="diagnostic-results-section" class="hidden py-14 sm:py-20 bg-slate-50 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-soft p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div class="space-y-2">
+          <span id="res-status-badge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase bg-amber-100 text-amber-800">Diagnóstico Concluído (Dia 0)</span>
+          <h2 id="res-company-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Relatório de Posicionamento IA</h2>
+          <p id="res-company-url" class="text-xs font-mono text-slate-500"></p>
+        </div>
+        <button id="res-top-cta-btn" onclick="openCheckoutModal()" class="px-6 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-glow">
+          🚀 Iniciar Desafio de 14 Dias (IA Trabalhando por Você — R$ 197)
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <span class="text-xs font-bold uppercase text-slate-400">Nota Atual nas IAs (Share of Model)</span>
+          <div id="res-score-number" class="text-3xl font-extrabold text-slate-900 my-2">0%</div>
+          <p class="text-xs text-emerald-700 font-bold">Meta após os 14 dias: >90%</p>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <span class="text-xs font-bold uppercase text-slate-400">Posição Atual no Ranking</span>
+          <div id="res-top-rank" class="text-3xl font-extrabold text-rose-600 my-2">Fora do Top 3</div>
+          <p class="text-xs text-slate-500">Ranking espontâneo na sua cidade</p>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <span class="text-xs font-bold uppercase text-slate-400">Status do Desafio de 14 Dias</span>
+          <div id="res-sprint-badge" class="text-3xl font-extrabold text-amber-600 my-2">Dia 0/14</div>
+          <p class="text-xs text-slate-500">14 ações diárias prontas para iniciar</p>
+        </div>
+      </div>
+
+      <!-- BLOCO: ESTIMATIVA DE PERDA FINANCEIRA & NEGÓCIOS PERDIDOS NA IA -->
+      <div id="financial-loss-card" class="bg-gradient-to-br from-rose-50 via-white to-amber-50/40 rounded-3xl border-2 border-rose-300 p-6 sm:p-8 shadow-soft space-y-6">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-rose-100 pb-5">
+          <div class="space-y-1">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-extrabold uppercase">
+              <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+              Alerta de Faturamento: Quanto você está perdendo hoje?
+            </div>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              Estimativa de Negócios e Clientes Perdidos para Concorrentes
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 max-w-3xl">
+              Quando alguém na sua cidade busca recomendação de <strong id="loss-niche-text" class="text-slate-900">sua área</strong> no ChatGPT ou Gemini, os algoritmos recomendam seus concorrentes no topo. Veja o cálculo estimado do dinheiro que está deixando de entrar no seu caixa:
+            </p>
+          </div>
+          <div class="shrink-0 bg-white px-5 py-3 rounded-2xl border-2 border-rose-300 shadow-sm text-right">
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">Perda Mensal Estimada</span>
+            <span id="loss-total-money" class="text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono">- R$ 14.400</span>
+            <span class="text-[10px] text-rose-500 font-bold block">/ mês para concorrentes</span>
+          </div>
+        </div>
+
+        <!-- GRADE DAS 3 MÉTRICAS DE IMPACTO -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
+            <span class="text-xs font-bold uppercase text-slate-500">Buscas Locais na IA / Mês</span>
+            <div id="loss-search-volume" class="text-2xl font-extrabold text-slate-900 font-mono">~ 680 buscas</div>
+            <p class="text-[11px] text-slate-500">Pessoas pesquisando no ChatGPT e Gemini com alta intenção de contratação na sua cidade.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
+            <span class="text-xs font-bold uppercase text-slate-500">Clientes Perdidos / Mês</span>
+            <div id="loss-clients-count" class="text-2xl font-extrabold text-rose-600 font-mono">~ 18 clientes</div>
+            <p class="text-[11px] text-slate-500">Clientes que fecham com o concorrente indicado em 1º lugar pela IA.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
+            <span class="text-xs font-bold uppercase text-slate-500">Prejuízo Anual Projetado</span>
+            <div id="loss-annual-money" class="text-2xl font-extrabold text-rose-700 font-mono">- R$ 172.800</div>
+            <p class="text-[11px] text-slate-500">Estimativa anual acumulada indo para seus concorrentes diretos.</p>
+          </div>
+        </div>
+
+        <!-- SIMULADOR INTERATIVO DE TICKET MÉDIO -->
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-extrabold text-slate-800 uppercase">Simule com o seu Ticket Médio Real:</span>
+              <p class="text-[11px] text-slate-500">Arraste para ajustar quanto em média um cliente gasta com você:</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-600">Ticket Selecionado:</span>
+              <span id="loss-ticket-display" class="px-3.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-mono font-extrabold text-sm border border-emerald-200">R$ 800</span>
+            </div>
+          </div>
+          
+          <div class="space-y-1">
+            <input id="loss-ticket-slider" type="range" min="100" max="5000" step="50" value="800" oninput="updateLossCalculation(this.value)" class="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg">
+            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>R$ 100</span>
+              <span>R$ 1.500</span>
+              <span>R$ 3.000</span>
+              <span>R$ 5.000+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANNER DE RETORNO DO INVESTIMENTO (R$ 197) -->
+        <div class="bg-emerald-600 rounded-2xl p-4 sm:p-5 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-glow">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wide">Cálculo de Retorno</span>
+              <span class="text-xs font-bold text-emerald-100">O GeoPulse AI custa apenas <strong>R$ 197 taxa única</strong></span>
+            </div>
+            <p class="text-xs sm:text-sm text-emerald-50 max-w-2xl">
+              Com <strong>apenas 1 único cliente recuperado</strong> através do ChatGPT ou Gemini, você já recupera com sobras todo o valor do Desafio de 14 Dias e consolida sua liderança na sua região.
+            </p>
+          </div>
+          <button onclick="openCheckoutModal()" class="w-full md:w-auto px-6 py-3.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-lg transition">
+            🛡️ Parar de Perder Clientes e Ativar (R$ 197) →
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-7 space-y-4">
+          <h3 class="text-lg font-extrabold text-slate-900">🤖 O que o ChatGPT, Gemini e Perplexity responderam:</h3>
+          <div id="res-audits-list" class="space-y-4"></div>
+        </div>
+        <div class="lg:col-span-5 space-y-5">
+          <div class="bg-white rounded-3xl border-2 border-emerald-500 p-6 space-y-4 shadow-soft">
+            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🔥 Desafio Sprint de 14 Dias</span>
+            <h4 class="text-xl font-extrabold text-slate-900">Contrate nossa IA para trabalhar 14 dias seguidos pela sua posição no ranking</h4>
+            <p class="text-xs sm:text-sm text-slate-600">Por uma <strong>taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você em 1º lugar.</p>
+            <button onclick="openCheckoutModal()" class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-glow">
+              Ativar Meu Desafio de 14 Dias Agora (R$ 197) →
+            </button>
+          </div>
+          <div id="res-suggestions-list" class="space-y-4"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEÇÃO EXPLICATIVA COMPLETA DOS 14 DIAS -->
+  <section id="desafio-14-dias" class="py-16 sm:py-24 bg-slate-50 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <span class="px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">Transparência Total: Pelo que você está pagando?</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900">Veja o que nossa IA faz por você durante os 14 Dias</h2>
+        <p class="text-sm sm:text-base text-slate-600">Você paga uma única vez (R$ 197) e nosso motor executa automaticamente as 14 etapas abaixo para construir sua liderança nas pesquisas feitas por IA:</p>
+      </div>
+      <div id="public-sprint-days-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </div>
+  </section>
+
+  <!-- MODAL DE CHECKOUT -->
+  <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-4 relative">
+      <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 font-bold">✕</button>
+      <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🚀 Desafio Sprint de 14 Dias IA</span>
+      <h3 class="text-2xl font-extrabold text-slate-900">Ativar 14 Dias de Trabalho da IA</h3>
+      <p class="text-xs text-slate-600">Taxa única de <strong>R$ 197,00</strong> (sem mensalidade). Inclui os 14 dias de engenharia semântica + 7 ativos vitalícios.</p>
+      <button onclick="startMercadoPagoCheckout()" class="w-full py-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm">💳 Pagar com Mercado Pago (PIX ou Cartão)</button>
+      <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+        <div class="text-xs font-bold text-slate-600">Ou copie a Chave PIX Oficial:</div>
+        <div class="flex gap-2">
+          <input id="modal-pix-key" type="text" readonly value="contato@geopulse.ai" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono text-xs font-bold" />
+          <button onclick="copyPixKey()" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs">Copiar</button>
+        </div>
+        <button onclick="notifyPixPaid()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs">✅ Já fiz o PIX — Iniciar Meu Desafio de 14 Dias</button>
+        <p id="checkout-feedback-msg" class="text-xs font-bold text-center text-emerald-700 hidden"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentDiagnosticData = null;
+    const SCHEDULE_14 = [
+      { day: 1, title: "Protocolo de Entidade & JSON-LD + /llms.txt" },
+      { day: 2, title: "Publicação do Guia Oficial Top 5 da Cidade" },
+      { day: 3, title: "Arquitetura de FAQ Semântico Zero-Click" },
+      { day: 4, title: "Ancoragem de Entidade no ChatGPT & Perplexity" },
+      { day: 5, title: "Artigo Educativo de Aprofundamento do Nicho" },
+      { day: 6, title: "Mapeamento Semântico de Bairros e Região" },
+      { day: 7, title: "1ª Reauditoria Intermediária de Evolução" },
+      { day: 8, title: "Reforço de Credenciais Técnicas (hasCredential)" },
+      { day: 9, title: "Sincronização no Diretório Público Oficial" },
+      { day: 10, title: "Disparo de Ping IndexNow (Bing & ChatGPT)" },
+      { day: 11, title: "Estruturação de Estrelas e Avaliações (Schema)" },
+      { day: 12, title: "Sondagem Cega de Recomendação (Prompt Probe)" },
+      { day: 13, title: "Validação Técnica dos 7 Ativos Gerados" },
+      { day: 14, title: "Auditoria Conclusiva & Certificado #1" }
+    ];
+
+    function playHeroVideoWithSound() {
+      const video = document.getElementById('hero-pitch-video');
+      const overlay = document.getElementById('video-sound-overlay');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      
+      if (!video.getAttribute('src')) {
+        video.src = '/static/videos/apresentacao.mp4';
+      }
+      
+      video.muted = false;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('Autoplay com áudio bloqueado pelo navegador, tentando mudo:', err);
+          video.muted = true;
+          video.play().catch((e) => {
+            console.error('Falha de reprodução:', e);
+            document.getElementById('local-video-picker').click();
+          });
+        });
+      }
+    }
+
+    function loadCustomVideoFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const video = document.getElementById('hero-pitch-video');
+      document.getElementById('video-sound-overlay').classList.add('opacity-0', 'pointer-events-none');
+      video.src = URL.createObjectURL(file);
+      video.muted = false;
+      video.play();
+    }
+
+    function switchHeroSim(mode) {
+      const isAfter = mode === 'after';
+      document.getElementById('hero-sim-day-label').textContent = isAfter ? 'Resultado no Dia 14 (Após 14 ações da IA):' : 'Status no Dia 0 (Sem a IA trabalhar):';
+      document.getElementById('hero-sim-score-pill').textContent = isAfter ? 'Score: 94.5%' : 'Score: 21.4%';
+      document.getElementById('hero-sim-progress').style.width = isAfter ? '94.5%' : '21.4%';
+      document.getElementById('hero-sim-progress').className = `h-full rounded-full transition-all duration-700 ${isAfter ? 'bg-emerald-500' : 'bg-rose-500'}`;
+      document.getElementById('hero-sim-badge').textContent = isAfter ? '🏆 DIA 14: VOCÊ EM 1º LUGAR NAS IAs' : '⚠️ VOCÊ FORA DO RANKING DA IA';
+      document.getElementById('hero-sim-response').innerHTML = isAfter
+        ? `<div class="p-3 rounded-xl bg-white border-2 border-emerald-500 font-bold text-emerald-800">🥇 1. SUA EMPRESA / SEU NOME — Recomendado #1</div>`
+        : `<div class="p-2.5 rounded-xl bg-white border border-slate-200 font-semibold">🥇 1. Seu Concorrente Direto — Recomendado #1</div><div class="p-2.5 rounded-xl bg-rose-100 text-rose-800 font-bold">❌ Sua Empresa (Invisível)</div>`;
+    }
+
+    function setEntityType(type) {
+      document.getElementById('entity_type').value = type;
+      const isAuto = (type === 'autonomous');
+      
+      const btnComp = document.getElementById('btn-type-company');
+      const btnAuto = document.getElementById('btn-type-autonomous');
+      
+      if (isAuto) {
+        btnAuto.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-md transition-all flex items-center justify-center gap-2";
+        btnComp.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2";
+        
+        document.getElementById('label-name').textContent = "👨‍⚕️ Seu Nome Profissional Completo *";
+        document.getElementById('name').placeholder = "Ex: Dr. Roberto Guimarães ou Dra. Camila Mendes";
+        
+        document.getElementById('label-url').textContent = "🌐 Seu Perfil no Instagram, Site ou LinkedIn *";
+        document.getElementById('url').placeholder = "Ex: instagram.com/dr.roberto ou www.drroberto.com.br";
+        
+        document.getElementById('label-niche').textContent = "🎯 Sua Especialidade ou Área de Atuação *";
+        document.getElementById('niche').placeholder = "Ex: Advogado Trabalhista, Médico Cirurgião, Dentista, Psicóloga";
+        
+        document.getElementById('label-city').textContent = "📍 Cidade e Estado onde você Atende *";
+        document.getElementById('city_region').placeholder = "Ex: São Paulo - SP, Rio de Janeiro - RJ";
+        
+        document.getElementById('label-registry').textContent = "📜 Seu Registro Profissional (OAB, CRM, CRO, CREA, CRP, CRC, etc.) *";
+        document.getElementById('professional_registry').placeholder = "Ex: OAB/SP 123.456, CRM 98.765, CRO 12.345";
+        document.getElementById('hint-registry').textContent = "Essencial para o ChatGPT e Gemini recomendarem seu nome com autoridade e credibilidade máxima.";
+        
+        document.getElementById('label-competitors').textContent = "⚔️ Outros Profissionais Concorrentes na Região (Opcional)";
+        document.getElementById('competitors').placeholder = "Ex: Dr. Concorrente X, Dra. Concorrente Y";
+        document.getElementById('hint-competitors').textContent = "A IA compara você diretamente com outros profissionais da mesma cidade.";
+        
+        document.getElementById('box-registry').className = "p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50/40 space-y-1.5 transition-all shadow-sm";
+      } else {
+        btnComp.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-md transition-all flex items-center justify-center gap-2";
+        btnAuto.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2";
+        
+        document.getElementById('label-name').textContent = "🏢 Nome da Empresa, Clínica ou Marca *";
+        document.getElementById('name').placeholder = "Ex: Clínica OdontoPrime ou Silva & Associados";
+        
+        document.getElementById('label-url').textContent = "🌐 Site Oficial ou Instagram da Empresa *";
+        document.getElementById('url').placeholder = "Ex: www.suaempresa.com.br ou @suaempresa";
+        
+        document.getElementById('label-niche').textContent = "🎯 Especialidade ou Ramo de Atuação da Empresa *";
+        document.getElementById('niche').placeholder = "Ex: Implantes Dentários, Advocacia Empresarial, Contabilidade";
+        
+        document.getElementById('label-city').textContent = "📍 Cidade e Estado da Empresa *";
+        document.getElementById('city_region').placeholder = "Ex: São Paulo - SP, Belo Horizonte - MG";
+        
+        document.getElementById('label-registry').textContent = "🏛️ CNPJ ou Registro Oficial da Empresa (Opcional)";
+        document.getElementById('professional_registry').placeholder = "Ex: 00.000.000/0001-00 ou Registro em Conselho";
+        document.getElementById('hint-registry').textContent = "Ajuda os robôs de IA a confirmarem a legitimidade da sua empresa.";
+        
+        document.getElementById('label-competitors').textContent = "⚔️ Concorrentes Diretos na Região (Opcional)";
+        document.getElementById('competitors').placeholder = "Ex: Concorrente 1, Concorrente 2";
+        document.getElementById('hint-competitors').textContent = "A IA compara sua empresa contra eles nas recomendações de busca.";
+        
+        document.getElementById('box-registry').className = "p-4 rounded-2xl border border-slate-200 bg-white space-y-1.5 transition-all";
+      }
+    }
+
+    function fillPreset(p) {
+      if (p === 'advogado') {
+        setEntityType('autonomous');
+        document.getElementById('name').value = 'Dr. Rafael Vasconcelos';
+        document.getElementById('url').value = 'https://www.vasconcelosadvocacia.com.br';
+        document.getElementById('niche').value = 'Advocacia Trabalhista e Empresarial';
+        document.getElementById('city_region').value = 'São Paulo - SP';
+        document.getElementById('professional_registry').value = 'OAB/SP 412.890';
+        document.getElementById('competitors').value = 'Almeida & Santos Advogados, Dra. Juliana Freitas';
+        document.getElementById('whatsapp').value = '(11) 98765-4321';
+        document.getElementById('email').value = 'contato@vasconcelosadvocacia.com.br';
+      } else {
+        setEntityType('company');
+        document.getElementById('name').value = 'Clínica OdontoPrime Implantes';
+        document.getElementById('url').value = 'https://www.odontoprimebh.com.br';
+        document.getElementById('niche').value = 'Implantes Dentários e Estética Dental';
+        document.getElementById('city_region').value = 'Belo Horizonte - MG';
+        document.getElementById('professional_registry').value = 'CRO/MG Clínica 54.321';
+        document.getElementById('competitors').value = 'Oral Sin BH, OdontoCompany Centro';
+        document.getElementById('whatsapp').value = '(31) 99876-5432';
+        document.getElementById('email').value = 'atendimento@odontoprimebh.com.br';
+      }
+    }
+
+    async function handleDiagnosticSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-audit-btn');
+      btn.textContent = '⏳ Auditando nos motores de IA...';
+      const payload = {
+        entity_type: document.getElementById('entity_type').value,
+        name: document.getElementById('name').value,
+        url: document.getElementById('url').value,
+        niche: document.getElementById('niche').value,
+        city_region: document.getElementById('city_region').value,
+        professional_registry: document.getElementById('professional_registry')?.value || '',
+        competitors: document.getElementById('competitors')?.value || '',
+        whatsapp: document.getElementById('whatsapp')?.value || '',
+        email: document.getElementById('email')?.value || ''
+      };
+      try {
+        const res = await fetch('/api/diagnostics/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        renderDiagnosticResults(data);
+      } catch (err) {
+        runInstantDemo('free', payload);
+      } finally {
+        btn.textContent = '🔍 Executar Diagnóstico Gratuito nas IAs Agora';
+      }
+    }
+
+    let currentLossEstimatedClients = 18;
+    function updateLossCalculation(ticketVal) {
+      const ticket = parseFloat(ticketVal) || 800;
+      const displayElem = document.getElementById('loss-ticket-display');
+      if (displayElem) displayElem.textContent = `R$ ${ticket.toLocaleString('pt-BR')}`;
+      
+      const monthlyLoss = currentLossEstimatedClients * ticket;
+      const annualLoss = monthlyLoss * 12;
+      
+      const monElem = document.getElementById('loss-total-money');
+      if (monElem) monElem.textContent = `- R$ ${monthlyLoss.toLocaleString('pt-BR')}`;
+      const annElem = document.getElementById('loss-annual-money');
+      if (annElem) annElem.textContent = `- R$ ${annualLoss.toLocaleString('pt-BR')}`;
+    }
+
+    function renderDiagnosticResults(data) {
+      currentDiagnosticData = data;
+      const sec = document.getElementById('diagnostic-results-section');
+      sec.classList.remove('hidden');
+      document.getElementById('res-company-title').textContent = data.company.name;
+      document.getElementById('res-company-url').textContent = data.company.url;
+      document.getElementById('res-score-number').textContent = `${data.metrics.visibility_score}%`;
+      document.getElementById('res-top-rank').textContent = data.metrics.top_rank_achieved ? `#${data.metrics.top_rank_achieved}º Lugar` : 'Fora do Ranking';
+      document.getElementById('res-sprint-badge').textContent = `Dia ${data.company.sprint_day_current || (data.company.is_paid ? 14 : 0)}/14`;
+
+      // CÁLCULO DINÂMICO DE PERDA DE NEGÓCIOS / FATURAMENTO
+      const niche = data.company.niche || 'seu segmento';
+      const city = data.company.city_region || 'sua região';
+      const nicheElem = document.getElementById('loss-niche-text');
+      if (nicheElem) nicheElem.textContent = `${niche} em ${city}`;
+
+      const score = parseFloat(data.metrics.visibility_score) || 0;
+      let estClients = 18;
+      if (score < 25) estClients = 26;
+      else if (score < 50) estClients = 18;
+      else if (score < 75) estClients = 10;
+      else estClients = 4;
+
+      currentLossEstimatedClients = estClients;
+      const clientsElem = document.getElementById('loss-clients-count');
+      if (clientsElem) clientsElem.textContent = `~ ${estClients} clientes / mês`;
+
+      const searches = Math.max(380, Math.round((100 - score) * 12 + 280));
+      const searchElem = document.getElementById('loss-search-volume');
+      if (searchElem) searchElem.textContent = `~ ${searches.toLocaleString('pt-BR')} buscas`;
+
+      let defaultTicket = 800;
+      const nicheLower = niche.toLowerCase();
+      if (nicheLower.includes('advoc') || nicheLower.includes('direito') || nicheLower.includes('juríd')) {
+        defaultTicket = 1500;
+      } else if (nicheLower.includes('odont') || nicheLower.includes('dent') || nicheLower.includes('médic') || nicheLower.includes('clínic') || nicheLower.includes('saúde')) {
+        defaultTicket = 1200;
+      } else if (nicheLower.includes('contab') || nicheLower.includes('consult') || nicheLower.includes('engenhar') || nicheLower.includes('arquitet')) {
+        defaultTicket = 1000;
+      } else {
+        defaultTicket = 600;
+      }
+
+      const slider = document.getElementById('loss-ticket-slider');
+      if (slider) {
+        slider.value = defaultTicket;
+      }
+      updateLossCalculation(defaultTicket);
+
+      document.getElementById('res-audits-list').innerHTML = (data.audits || []).map(a => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-2">
+          <div class="flex justify-between items-center text-xs font-bold">
+            <span class="text-emerald-700">${a.prompt_category} (${a.model_provider})</span>
+            <span class="${a.is_cited ? 'text-emerald-700' : 'text-rose-600'}">${a.is_cited ? '✓ Citado' : '✗ Não Recomendado'}</span>
+          </div>
+          <div class="text-xs text-slate-500 italic">"${a.prompt_text}"</div>
+          <div class="text-xs sm:text-sm text-slate-700 whitespace-pre-line">${a.response_text}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('res-suggestions-list').innerHTML = (data.suggestions || []).map(s => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1 text-xs">
+          <div class="font-extrabold text-slate-900">${s.title}</div>
+          <p class="text-slate-600">${s.problem}</p>
+          <p class="text-emerald-700 font-bold">✓ Ação nos 14 Dias: ${s.solution_preview}</p>
+        </div>
+      `).join('');
+      sec.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function runInstantDemo(mode, custom = null) {
+      const isPaid = mode === 'paid';
+      renderDiagnosticResults({
+        company: { id: 999, name: custom?.name || 'Clínica OdontoPrime', url: custom?.url || 'https://odontoprime.com.br', niche: custom?.niche || 'Implantes Dentários', city_region: custom?.city_region || 'Belo Horizonte - MG', is_paid: isPaid, sprint_day_current: isPaid ? 14 : 0 },
+        metrics: { visibility_score: isPaid ? 94.5 : 22.8, top_rank_achieved: isPaid ? 1 : null },
+        audits: [{ prompt_category: 'Descoberta Espontânea', model_provider: 'ChatGPT Search', prompt_text: 'Quais os melhores especialistas na região?', is_cited: isPaid, response_text: isPaid ? '1. Clínica OdontoPrime — Recomendada em 1º lugar após os 14 dias de indexação GEO.' : 'Sua empresa ainda não aparece nas recomendações espontâneas. Ative o Desafio de 14 Dias.' }],
+        suggestions: [{ title: 'Dias 1 a 14: Infraestrutura Completa GEO & AIO', problem: 'Ausência de protocolo /llms.txt e Guia Top 5.', solution_preview: 'Nossa IA executa 14 ações diárias para posicionar você em #1.' }]
+      });
+    }
+
+    function openCheckoutModal() { document.getElementById('checkout-modal').classList.remove('hidden'); }
+    function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
+    function copyPixKey() {
+      navigator.clipboard.writeText(document.getElementById('modal-pix-key').value);
+      const msg = document.getElementById('checkout-feedback-msg');
+      msg.classList.remove('hidden');
+      msg.textContent = '✓ Chave PIX copiada!';
+    }
+    async function startMercadoPagoCheckout() {
+      const id = currentDiagnosticData?.company?.id;
+      if (!id || id === 999) { alert('Rode primeiro o diagnóstico gratuito com os dados da sua empresa acima.'); return; }
+      const res = await fetch(`/api/companies/${id}/mercadopago-preference`, { method: 'POST' });
+      const data = await res.json();
+      if (data.init_point) window.location.href = data.init_point;
+    }
+    async function notifyPixPaid() {
+      const id = currentDiagnosticData?.company?.id;
+      if (id && id !== 999) await fetch(`/api/companies/${id}/payment-claim`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' });
+      const msg = document.getElementById('checkout-feedback-msg');
+      msg.classList.remove('hidden');
+      msg.textContent = '✓ Recebido! Seu Desafio de 14 Dias será iniciado em instantes.';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('public-sprint-days-grid').innerHTML = SCHEDULE_14.map(d => `
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-1">
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">Dia ${d.day} de 14</span>
+          <h4 class="text-sm font-extrabold text-slate-900 pt-1">${d.title}</h4>
+          <p class="text-[11px] text-slate-500">Executado automaticamente pela IA</p>
+        </div>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

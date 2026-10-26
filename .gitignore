@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+geopulse.db*
+backups/
+logs/
+scratch/
+.venv/
+venv/
+PROJETO_COMPLETO_PARA_ANALISE.txt
+.vscode/
+.idea/

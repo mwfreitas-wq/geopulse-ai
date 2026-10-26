@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Administrativo — GeoPulse AI (Vendas, Clientes, Mercado Pago & APIs)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    [x-cloak] {
+      display: none !important;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    @media print {
+      header, .no-print, nav, button { display: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+    }
+  </style>
+</head>
+
+<body x-data="adminApp()" x-init="initAdmin()" class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white bg-slate-50 text-slate-800">
+
+  <!-- =================================================================== -->
+  <!-- TELA DE BLOQUEIO POR SENHA DO PROPRIETÁRIO (LIGHT MODE)             -->
+  <!-- =================================================================== -->
+  <div x-show="!isAuthenticated" x-cloak class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white border-2 border-emerald-500/40 rounded-3xl p-8 space-y-6 shadow-2xl">
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <span class="inline-block px-3 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+          Acesso Restrito ao Proprietário
+        </span>
+        <h1 class="text-2xl font-extrabold text-slate-900">Painel Admin GeoPulse AI</h1>
+        <p class="text-xs text-slate-600">Digite sua senha administrativa para gerenciar vendas, leads, Mercado Pago e chaves de API.</p>
+      </div>
+
+      <form @submit.prevent="submitLogin()" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Senha do Administrador:</label>
+          <input type="password" x-model="loginPassword" placeholder="Digite sua senha..." required autofocus
+            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+        </div>
+
+        <div x-show="loginError" x-cloak class="p-3 rounded-xl bg-rose-50 border border-rose-300 text-xs font-bold text-rose-700 text-center" x-text="loginError"></div>
+
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-105 text-white font-extrabold text-sm shadow-md transition">
+          🔓 Entrar no Painel Administrativo
+        </button>
+      </form>
+
+      <div class="text-center pt-2 border-t border-slate-200">
+        <a href="/" class="text-xs text-slate-500 hover:text-emerald-700 transition">← Voltar para a Página Inicial</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- CONTEÚDO DO PAINEL (VISÍVEL APÓS AUTENTICAÇÃO)                      -->
+  <!-- =================================================================== -->
+  <div x-show="isAuthenticated" x-cloak class="min-h-screen flex flex-col">
+
+    <!-- TOPO DO PAINEL ADMINISTRATIVO (LIGHT GLASSMORPHIC) -->
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-xl shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <a href="/" class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          </a>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-extrabold tracking-tight text-slate-900">GeoPulse <span class="text-emerald-600">Admin</span></span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">Protegido por Senha</span>
+            </div>
+            <p class="text-xs text-slate-500">Gestão de Vendas, Leads WhatsApp, Mercado Pago/PIX e Chaves de APIs Gratuitas</p>
+          </div>
+        </div>
+
+        <!-- Status de APIs + Ações Rápidas -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <div class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs">
+            <span class="w-2.5 h-2.5 rounded-full" :class="overview.api_status.active_mode === 'live' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"></span>
+            <span class="text-slate-700 font-semibold" x-text="overview.api_status.active_mode === 'live' ? ('APIs Reais Ativas (' + overview.api_status.configured_count + ')') : 'Modo Inspeção Local'"></span>
+          </div>
+
+          <button @click="loadOverview()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-700 transition flex items-center gap-1.5 shadow-sm">
+            <span :class="loading ? 'animate-spin' : ''">🔄</span> Atualizar
+          </button>
+
+          <a href="/diretorio" target="_blank" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-emerald-700 transition shadow-sm">
+            🌐 Diretório Público
+          </a>
+
+          <button @click="logoutAdmin()" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-bold text-rose-700 transition">
+            🔒 Sair
+          </button>
+
+          <a href="/" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-105 text-white font-extrabold text-xs transition shadow-md">
+            ← Ver Site Principal
+          </a>
+        </div>
+      </div>
+
+      <!-- BARRA DE NAVEGAÇÃO DE ABAS DO ADMIN -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-2 overflow-x-auto border-t border-slate-200 pt-2">
+        <button @click="activeTab = 'sales'"
+          :class="activeTab === 'sales' ? 'border-emerald-600 text-emerald-800 bg-emerald-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
+          class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
+          <span>💰</span> Vendas & Financeiro
+          <span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-mono font-bold" x-text="overview.financials.total_sales_count"></span>
+        </button>
+
+        <button @click="activeTab = 'leads'"
+          :class="activeTab === 'leads' ? 'border-emerald-600 text-emerald-800 bg-emerald-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
+          class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
+          <span>🎯</span> Leads do Dossiê PDF
+          <span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-mono font-bold" x-text="capturedLeads.length"></span>
+        </button>
+
+        <button @click="activeTab = 'customers'"
+          :class="activeTab === 'customers' ? 'border-emerald-600 text-emerald-800 bg-emerald-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
+          class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
+          <span>👥</span> Clientes & Histórico Geral
+          <span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-800 font-mono font-bold" x-text="overview.financials.total_consultations"></span>
+        </button>
+
+        <button @click="activeTab = 'payments'"
+          :class="activeTab === 'payments' ? 'border-sky-600 text-sky-800 bg-sky-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
+          class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
+          <span>💳</span> Pagamentos (Mercado Pago & PIX)
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold"
+            :class="overview.api_status.mercadopago_configured ? 'bg-emerald-600 text-white' : 'bg-sky-100 text-sky-800'"
+            x-text="overview.api_status.mercadopago_configured ? 'MP ATIVO' : 'CONFIGURAR'"></span>
+        </button>
+
+        <button @click="activeTab = 'apis'"
+          :class="activeTab === 'apis' ? 'border-emerald-600 text-emerald-800 bg-emerald-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
+          class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
+          <span>🔑</span> Central de APIs Gratuitas
+          <span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-600 text-white font-extrabold">7 OPÇÕES GRÁTIS</span>
+        </button>
+        <button @click="activeTab = 'funnel'; loadFunnel();"
+          :class="activeTab === 'funnel' ? 'border-indigo-600 text-indigo-800 bg-indigo-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
+          class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
+          <span>📊</span> Funil de Conversão
+          <span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-100 text-indigo-800 font-mono font-bold" x-text="(funnelData && funnelData.counts ? funnelData.counts.page_view : 0) + ' visitas'"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL DO ADMIN (LIGHT MODE) -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
+
+      <!-- Alerta de Feedback -->
+      <div x-show="toastMessage" x-cloak x-transition
+        class="p-4 rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-950 text-sm font-bold flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2">
+          <span>✅</span>
+          <span x-text="toastMessage"></span>
+        </div>
+        <button @click="toastMessage = ''" class="text-xs text-emerald-800 hover:underline">Fechar</button>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- KPI CARDS GERAIS (SEMPRE VISÍVEIS NO TOPO)                          -->
+      <!-- =================================================================== -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Faturamento Total -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider text-emerald-700">Faturamento Confirmado</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono text-[10px] font-bold">R$ BRL</span>
+          </div>
+          <div class="text-3xl font-extrabold text-slate-900" x-text="formatCurrency(overview.financials.total_revenue)"></div>
+          <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
+            <span>Preço Atual: <strong class="text-slate-800" x-text="formatCurrency(overview.api_status.plan_price)"></strong></span>
+            <span class="text-emerald-700 font-semibold" x-text="overview.financials.total_sales_count + ' vendas pagas'"></span>
+          </div>
+        </div>
+
+        <!-- Card 2: Total de Consultas / Leads -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider">Total de Diagnósticos</span>
+            <span>📊 Histórico</span>
+          </div>
+          <div class="text-3xl font-extrabold text-slate-900" x-text="overview.financials.total_consultations"></div>
+          <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
+            <span>👨‍⚖️ Autônomos: <strong class="text-indigo-600" x-text="overview.financials.autonomous_count"></strong></span>
+            <span>🏢 Empresas: <strong class="text-sky-600" x-text="overview.financials.company_count"></strong></span>
+          </div>
+        </div>
+
+        <!-- Card 3: Leads do Dossiê Capturados -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider text-amber-700">Leads Dossiê PDF</span>
+            <button @click="activeTab = 'leads'" class="text-amber-700 hover:underline font-bold">Ver Leads →</button>
+          </div>
+          <div class="text-3xl font-extrabold text-amber-600" x-text="capturedLeads.length"></div>
+          <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
+            <span>Pendentes s/ Compra: <strong class="text-slate-800" x-text="overview.financials.pending_leads_count"></strong></span>
+            <span>Conversão: <strong class="text-emerald-700" x-text="overview.financials.conversion_rate + '%'"></strong></span>
+          </div>
+        </div>
+
+        <!-- Card 4: Status das APIs Conectadas -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider">Motores & APIs Ativas</span>
+            <button @click="activeTab = 'apis'" class="text-emerald-700 hover:underline font-bold">Configurar →</button>
+          </div>
+          <div class="text-3xl font-extrabold" :class="overview.api_status.configured_count > 0 ? 'text-emerald-700' : 'text-slate-600'"
+            x-text="overview.api_status.configured_count + ' Ativas'"></div>
+          <div class="mt-2 text-xs text-slate-500 truncate">
+            <span x-show="overview.api_status.active_providers.length > 0" x-text="overview.api_status.active_providers.join(', ')"></span>
+            <span x-show="overview.api_status.active_providers.length === 0">Adicione chaves 100% gratuitas na aba APIs</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- ABA 1: VENDAS & FINANCEIRO                                          -->
+      <!-- =================================================================== -->
+      <section x-show="activeTab === 'sales'" x-cloak class="space-y-6">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                <span>💰</span> Relatório de Vendas Confirmadas e Ativações
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Acompanhe todos os clientes (Empresas e Profissionais Autônomos) que realizaram o pagamento para ativar o Motor de Dominância IA.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 text-xs">
+              <div class="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700">
+                ⚡ Vendas PIX / Mercado Pago: <strong class="text-emerald-700" x-text="overview.financials.pix_sales_count"></strong>
+              </div>
+              <div class="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700">
+                💳 Vendas Cartão: <strong class="text-sky-700" x-text="overview.financials.card_sales_count"></strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de Vendas -->
+          <div x-show="overview.sales.length > 0" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase text-[11px] tracking-wider bg-slate-50">
+                  <th class="py-3.5 px-4">ID / Data Pagamento</th>
+                  <th class="py-3.5 px-4">Cliente & Contato</th>
+                  <th class="py-3.5 px-4">Especialidade & Cidade</th>
+                  <th class="py-3.5 px-4">Plano & Método</th>
+                  <th class="py-3.5 px-4">Valor Pago</th>
+                  <th class="py-3.5 px-4">Evolução IA</th>
+                  <th class="py-3.5 px-4 text-right">Ações / Entregáveis</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="sale in overview.sales" :key="sale.id">
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-4 px-4 font-mono text-xs text-slate-600">
+                      <div class="font-bold text-slate-900" x-text="'#' + sale.id"></div>
+                      <div class="text-slate-500" x-text="formatDate(sale.paid_at || sale.created_at)"></div>
+                    </td>
+                    <td class="py-4 px-4">
+                      <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                          :class="sale.entity_type === 'autonomous' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-sky-50 text-sky-700 border border-sky-200'"
+                          x-text="sale.entity_type === 'autonomous' ? '👨‍⚖️ Autônomo' : '🏢 Empresa'"></span>
+                        <span class="font-extrabold text-slate-900" x-text="sale.name"></span>
+                      </div>
+                      <div class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                        <a :href="sale.url" target="_blank" class="text-emerald-700 hover:underline truncate max-w-[200px]" x-text="sale.url"></a>
+                        <span x-show="sale.whatsapp" class="text-emerald-800 font-mono text-[11px]" x-text="'📱 ' + sale.whatsapp"></span>
+                      </div>
+                    </td>
+                    <td class="py-4 px-4">
+                      <div class="font-semibold text-slate-800" x-text="sale.niche"></div>
+                      <div class="text-xs text-slate-500" x-text="'📍 ' + sale.city_region"></div>
+                    </td>
+                    <td class="py-4 px-4">
+                      <div class="text-xs font-bold text-slate-800" x-text="sale.payment_plan"></div>
+                      <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase"
+                        :class="sale.payment_method === 'credit_card' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
+                        x-text="sale.payment_method === 'credit_card' ? '💳 Cartão / MP' : '⚡ PIX / MP'"></span>
+                    </td>
+                    <td class="py-4 px-4">
+                      <span class="text-base font-extrabold text-emerald-700" x-text="formatCurrency(sale.payment_amount)"></span>
+                    </td>
+                    <td class="py-4 px-4">
+                      <div class="flex items-center gap-1.5 text-xs font-bold">
+                        <span class="text-rose-600" x-text="sale.initial_score + '%'"></span>
+                        <span class="text-slate-400">→</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-extrabold" x-text="sale.current_score + '% (#1)'"></span>
+                      </div>
+                    </td>
+                    <td class="py-4 px-4 text-right space-x-1.5 whitespace-nowrap">
+                      <a x-show="sale.published_url" :href="sale.published_url" target="_blank"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs transition">
+                        📰 Artigo
+                      </a>
+                      <button @click="inspectCustomer(sale.id)"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs transition shadow-sm">
+                        📄 Relatório / PDF
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div x-show="overview.sales.length === 0" class="text-center py-12 text-slate-400 text-xs">
+            Nenhuma venda confirmada registrada ainda.
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- ABA NOVO: LEADS DO DOSSIÊ PDF (SUGESTÃO 3)                           -->
+      <!-- =================================================================== -->
+      <section x-show="activeTab === 'leads'" x-cloak class="space-y-6">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 font-extrabold text-[11px] uppercase mb-1">
+                <span>🎯 Leads Qualificados</span>
+                <span>•</span>
+                <span>Alta Intenção</span>
+              </div>
+              <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                Contatos que Solicitaram o Dossiê Técnico em PDF
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Visitantes que digitaram seu WhatsApp e e-mail para receber o relatório do diagnóstico. Chame no WhatsApp com 1 clique para fechar a implementação de GEO!
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button @click="loadOverview()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                <span>🔄</span> Recarregar Leads
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabela de Leads Capturados -->
+          <div x-show="capturedLeads.length > 0" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase text-[11px] tracking-wider bg-slate-50">
+                  <th class="py-3.5 px-4">ID / Data</th>
+                  <th class="py-3.5 px-4">Contato (Nome & WhatsApp)</th>
+                  <th class="py-3.5 px-4">Empresa / Nicho / Cidade</th>
+                  <th class="py-3.5 px-4">Score IA</th>
+                  <th class="py-3.5 px-4">Status do Lead</th>
+                  <th class="py-3.5 px-4 text-right">Ação Direta</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="lead in capturedLeads" :key="lead.id">
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-4 px-4 font-mono text-xs text-slate-500">
+                      <div class="font-bold text-slate-900" x-text="'#' + lead.id"></div>
+                      <div x-text="formatDate(lead.created_at)"></div>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <div class="font-extrabold text-slate-900 text-sm" x-text="lead.contact_name || 'Não informado'"></div>
+                      <div class="text-xs text-slate-600 mt-0.5 flex flex-wrap items-center gap-2">
+                        <span x-show="lead.contact_phone" class="font-mono text-emerald-800 font-bold" x-text="'📱 ' + lead.contact_phone"></span>
+                        <span x-show="lead.contact_email" class="text-slate-500" x-text="'✉️ ' + lead.contact_email"></span>
+                      </div>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <div class="font-bold text-slate-900" x-text="lead.company_name"></div>
+                      <div class="text-xs text-slate-500" x-text="(lead.niche || '') + (lead.city_region ? (' • ' + lead.city_region) : '')"></div>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <span class="px-2.5 py-1 rounded-full text-xs font-extrabold"
+                        :class="lead.score >= 70 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'"
+                        x-text="lead.score + '%'"></span>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <select :value="lead.status" @change="updateLeadStatus(lead.id, $event.target.value)"
+                        class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-800 focus:outline-none focus:border-emerald-500">
+                        <option value="Novo Lead">⏳ Novo Lead</option>
+                        <option value="Em Contato">💬 Em Contato</option>
+                        <option value="Proposta Enviada">📑 Proposta Enviada</option>
+                        <option value="Convertido">✅ Convertido / Fechou</option>
+                        <option value="Perdido">❌ Perdido</option>
+                      </select>
+                    </td>
+
+                    <td class="py-4 px-4 text-right space-x-1.5 whitespace-nowrap">
+                      <!-- Chamar no WhatsApp -->
+                      <a x-show="lead.contact_phone" :href="buildWhatsAppLeadCapturedLink(lead)" target="_blank"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-extrabold text-xs transition shadow-sm">
+                        <span>💬 Chamar no WhatsApp</span>
+                      </a>
+
+                      <!-- Baixar PDF ou Excluir -->
+                      <a x-show="lead.company_id" :href="`/api/companies/${lead.company_id}/export-pdf`" target="_blank"
+                        class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs transition" title="Ver Dossiê PDF">
+                        📄
+                      </a>
+
+                      <button @click="deleteLead(lead.id)"
+                        class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition" title="Excluir Lead">
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <div x-show="capturedLeads.length === 0" class="text-center py-12 text-slate-400 text-xs">
+            Nenhum lead capturado via formulário de Dossiê PDF ainda.
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- ABA 2: CLIENTES, LEADS WHATSAPP & HISTÓRICO DE CONSULTAS (CRM)      -->
+      <!-- =================================================================== -->
+      <section x-show="activeTab === 'customers'" x-cloak class="space-y-6">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                <span>👥</span> CRM de Clientes, Recuperação de Vendas por WhatsApp & Histórico
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Chame os leads pendentes no WhatsApp com 1 clique (mensagem persuasiva já preenchida com a nota deles!), gere relatórios em PDF ou libere o acesso pago.
+              </p>
+            </div>
+
+            <!-- Busca e Filtros -->
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="text" x-model="searchQuery" placeholder="Buscar nome, WhatsApp, nicho, cidade..."
+                class="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 w-64 shadow-sm" />
+
+              <select x-model="statusFilter" class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 shadow-sm">
+                <option value="all">Todos os Status</option>
+                <option value="paid">✅ Pagos / Ativos</option>
+                <option value="lead">⏳ Leads (Consulta Grátis)</option>
+              </select>
+
+              <select x-model="typeFilter" class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 shadow-sm">
+                <option value="all">Todos os Perfis</option>
+                <option value="autonomous">👨‍⚖️ Profissionais Autônomos</option>
+                <option value="company">🏢 Empresas / Clínicas</option>
+              </select>
+
+              <button type="button" @click="exportLeadsCsv()"
+                class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
+                <span>📥 Exportar CSV / Excel</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabela Completa de Clientes e Histórico -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase text-[11px] tracking-wider bg-slate-50">
+                  <th class="py-3.5 px-4">ID / Data</th>
+                  <th class="py-3.5 px-4">Perfil, Nome & WhatsApp</th>
+                  <th class="py-3.5 px-4">Nicho, Cidade & Concorrentes</th>
+                  <th class="py-3.5 px-4">Status Comercial</th>
+                  <th class="py-3.5 px-4">Score IA</th>
+                  <th class="py-3.5 px-4 text-right">Ações & Abordagem Comercial</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="cust in filteredCustomers()" :key="cust.id">
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-4 px-4 font-mono text-xs text-slate-500">
+                      <div class="font-bold text-slate-900" x-text="'#' + cust.id"></div>
+                      <div x-text="formatDate(cust.created_at)"></div>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                          :class="cust.entity_type === 'autonomous' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-sky-50 text-sky-700 border border-sky-200'"
+                          x-text="cust.entity_type === 'autonomous' ? '👨‍⚖️ Autônomo' : '🏢 Empresa'"></span>
+                        <span class="font-extrabold text-slate-900" x-text="cust.name"></span>
+                        <span x-show="cust.payment_ref && !cust.is_paid" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse" :title="'Comprovante: ' + cust.payment_ref">
+                          ⚡ PIX Informado: <span class="font-mono" x-text="cust.payment_ref"></span>
+                        </span>
+                      </div>
+                      <div class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                        <a :href="cust.url" target="_blank" class="text-emerald-700 hover:underline truncate max-w-[200px]" x-text="cust.url"></a>
+                        <span x-show="cust.professional_registry" class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[10px] text-amber-800" x-text="cust.professional_registry"></span>
+                      </div>
+                      <div x-show="cust.whatsapp" class="mt-1 text-xs font-mono text-emerald-800 flex items-center gap-1 font-bold">
+                        <span>📱 WhatsApp:</span>
+                        <strong x-text="cust.whatsapp"></strong>
+                      </div>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <div class="font-bold text-slate-900" x-text="cust.niche + ' — ' + cust.city_region"></div>
+                      <div class="text-xs text-slate-500 mt-0.5" x-text="cust.competitors ? ('Concorrentes: ' + cust.competitors) : 'Sem concorrentes informados'"></div>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <template x-if="cust.is_paid">
+                        <div>
+                          <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 font-extrabold text-[11px]">
+                            ✅ PAGO & ATIVO
+                          </span>
+                          <div class="text-[11px] text-slate-500 mt-1" x-text="formatCurrency(cust.payment_amount)"></div>
+                        </div>
+                      </template>
+                      <template x-if="!cust.is_paid">
+                        <div>
+                          <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-300 font-bold text-[11px]">
+                            ⏳ LEAD GRATUITO
+                          </span>
+                          <div class="text-[11px] text-slate-500 mt-1">Pronto para abordagem</div>
+                        </div>
+                      </template>
+                    </td>
+
+                    <td class="py-4 px-4">
+                      <div class="flex items-center gap-2 text-xs font-bold">
+                        <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200" x-text="cust.initial_score + '%'"></span>
+                        <span class="text-slate-400">→</span>
+                        <span class="px-2 py-0.5 rounded font-extrabold"
+                          :class="cust.is_paid ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'"
+                          x-text="cust.current_score + '%'"></span>
+                      </div>
+                      <div x-show="cust.is_paid" class="mt-1">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200"
+                          x-text="'⚡ Sprint Dia ' + (cust.sprint_day_current || 1) + '/14'"></span>
+                      </div>
+                    </td>
+
+                    <td class="py-4 px-4 text-right space-x-1.5 whitespace-nowrap">
+                      <!-- Botão de Abordagem Comercial no WhatsApp -->
+                      <a x-show="cust.whatsapp" :href="buildWhatsAppLeadLink(cust)" target="_blank"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-extrabold text-xs transition shadow-sm">
+                        💬 Chamar WhatsApp
+                      </a>
+
+                      <button @click="inspectCustomer(cust.id)"
+                        class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs transition shadow-sm">
+                        👁️ Ver / PDF
+                      </button>
+
+                      <button x-show="!cust.is_paid" @click="manualActivate(cust.id, cust.name)"
+                        class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition shadow-sm">
+                        ⚡ Liberar Pago
+                      </button>
+
+                      <button x-show="cust.is_paid && (cust.sprint_day_current || 0) < 14" @click="advanceSprintDay(cust.id, cust.name)"
+                        class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-xs border border-indigo-200 transition shadow-sm"
+                        title="Executa a ação técnica do dia seguinte do Sprint de 14 dias">
+                        <span x-text="'▶️ Avançar Dia ' + ((cust.sprint_day_current || 0) + 1)"></span>
+                      </button>
+
+                      <a x-show="cust.is_paid && cust.published_url" :href="cust.published_url" target="_blank"
+                        class="inline-flex items-center px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-xs">
+                        📰 Artigo
+                      </a>
+
+                      <button @click="deleteCustomer(cust.id, cust.name)"
+                        class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition"
+                        title="Excluir registro">
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- ABA 3: PAGAMENTOS (MERCADO PAGO CHECKOUT PRO + CHAVE PIX + PREÇO)   -->
+      <!-- =================================================================== -->
+      <section x-show="activeTab === 'payments'" x-cloak class="space-y-6">
+        <div class="bg-gradient-to-r from-sky-50 via-white to-white border-2 border-sky-400/50 rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-sm">
+          <div class="space-y-2 max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-600 text-white font-extrabold text-xs uppercase shadow-sm">
+              💳 Gateway Oficial Mercado Pago + PIX Direto
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+              Configure Seu Mercado Pago, Sua Chave PIX e o Valor do Plano
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Quando você coloca seu <strong>Access Token do Mercado Pago</strong> abaixo, o botão de pagamento do site gera automaticamente links oficiais do <strong>Mercado Pago Checkout Pro</strong> (aceitando PIX, Cartão em até 12x e Saldo Mercado Pago), e quando o cliente retorna aprovado, o sistema libera os 7 ativos sozinho!
+            </p>
+          </div>
+          <button @click="saveAllApiKeys()" :disabled="savingKeys"
+            class="w-full lg:w-auto px-7 py-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-sm shadow-md transition">
+            <span x-text="savingKeys ? '⏳ Salvando...' : '💾 Salvar Configurações de Pagamento'"></span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Card Mercado Pago -->
+          <div class="bg-white border border-sky-300 rounded-3xl p-6 space-y-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-800 border border-sky-200 font-extrabold text-xs">
+                MERCADO PAGO CHECKOUT PRO
+              </span>
+              <span class="text-xs font-bold" :class="overview.api_status.mercadopago_configured ? 'text-emerald-700' : 'text-amber-700'"
+                x-text="overview.api_status.mercadopago_configured ? '● Token Mercado Pago Ativo' : '○ Aguardando Token'"></span>
+            </div>
+
+            <div class="space-y-2">
+              <h3 class="text-lg font-extrabold text-slate-900">Credenciais de Produção do Mercado Pago</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Para pegar seu token grátis no Mercado Pago: acesse <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" class="text-sky-700 underline font-bold">Mercado Pago Developers ↗</a>, clique em <strong>Suas integrações → Criar aplicação → Credenciais de Produção</strong> e copie o <strong>Access Token (`APP_USR-...`)</strong>.
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Access Token do Mercado Pago (`MERCADOPAGO_ACCESS_TOKEN`):</label>
+                <input type="password" x-model="keyForm.mercadopago_access_token"
+                  :placeholder="overview.api_status.mercadopago_configured ? '•••••••••••••••• (Configurado e Ativo)' : 'APP_USR-1234567890-...'"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-sky-500 focus:bg-white shadow-sm" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Public Key do Mercado Pago (Opcional - `APP_USR-...`):</label>
+                <input type="text" x-model="keyForm.mercadopago_public_key"
+                  placeholder="APP_USR-..."
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-sky-500 focus:bg-white shadow-sm" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Preço do Plano & Chave PIX Direta -->
+          <div class="bg-white border border-emerald-300 rounded-3xl p-6 space-y-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold text-xs">
+                PREÇO DA OFERTA & PIX DIRETO
+              </span>
+              <span class="text-xs font-bold text-emerald-700">● Ativo no Checkout</span>
+            </div>
+
+            <div class="space-y-2">
+              <h3 class="text-lg font-extrabold text-slate-900">Valor do Pacote & Sua Chave PIX</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Defina o preço cobrado dos clientes no site e a sua chave PIX direta (CPF, CNPJ, E-mail, Telefone ou Chave Aleatória) exibida no modal de pagamento.
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Valor do Plano em Reais (R$):</label>
+                <input type="number" step="0.01" x-model="keyForm.plan_price"
+                  placeholder="197.00"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-emerald-800 font-extrabold font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Sua Chave PIX Oficial (Exibida para Copia e Cola):</label>
+                <input type="text" x-model="keyForm.pix_key"
+                  placeholder="Seu CPF, CNPJ, E-mail ou Chave PIX..."
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nome do Recebedor / Empresa no PIX:</label>
+                <input type="text" x-model="keyForm.pix_beneficiary"
+                  placeholder="Ex: Matheus - GeoPulse AI"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- ABA 4: CENTRAL DE APIS GRATUITAS & INTEGRAÇÕES                      -->
+      <!-- =================================================================== -->
+      <section x-show="activeTab === 'apis'" x-cloak class="space-y-8">
+        <!-- Banner Explicativo de APIs Gratuitas -->
+        <div class="bg-gradient-to-r from-emerald-50 via-white to-white border-2 border-emerald-400/50 rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-sm">
+          <div class="space-y-2 max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-600 text-white font-extrabold text-xs uppercase shadow-sm">
+              🎁 7 Integrações com Plano 100% Gratuito Disponíveis
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+              Central de Chaves de API Gratuitas & Sindicação
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Suas chaves do <strong>Google Gemini</strong>, <strong>Groq Cloud</strong>, <strong>Dev.to</strong> e <strong>Make.com</strong> já estão salvas e funcionando! Você pode atualizar ou adicionar novas chaves abaixo quando desejar.
+            </p>
+          </div>
+          <button @click="saveAllApiKeys()" :disabled="savingKeys"
+            class="w-full lg:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-105 text-white font-extrabold text-sm shadow-md transition flex items-center justify-center gap-2">
+            <span x-text="savingKeys ? '⏳ Salvando Chaves...' : '💾 Salvar Todas as Chaves de API'"></span>
+          </button>
+        </div>
+
+        <!-- BLOCO 1: APIS GRATUITAS DE INTELIGÊNCIA ARTIFICIAL -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+            <span>🤖</span> 1. APIs Gratuitas de IA Generativa (Para Diagnósticos em Tempo Real)
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- 1. Google Gemini -->
+            <div class="bg-white border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm"
+              :class="overview.api_status.gemini_configured ? 'border-emerald-400' : 'border-slate-200'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold text-[10px]">100% GRATUITA</span>
+                  <span class="text-xs font-bold" :class="overview.api_status.gemini_configured ? 'text-emerald-700' : 'text-slate-400'"
+                    x-text="overview.api_status.gemini_configured ? '● Ativa & Operando' : '○ Não configurada'"></span>
+                </div>
+                <h4 class="text-base font-extrabold text-slate-900">Google Gemini Flash</h4>
+                <p class="text-xs text-slate-500">Até 1.500 requisições grátis por dia no Google AI Studio.</p>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700 hover:underline">
+                  🔗 Gerar Chave no Google AI Studio ↗
+                </a>
+              </div>
+              <input type="password" x-model="keyForm.gemini_api_key"
+                :placeholder="overview.api_status.gemini_configured ? '•••••••••••••••• (Configurada)' : 'Cole sua chave AIzaSy...'"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+            </div>
+
+            <!-- 2. Groq Cloud -->
+            <div class="bg-white border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm"
+              :class="overview.api_status.groq_configured ? 'border-emerald-400' : 'border-slate-200'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold text-[10px]">100% GRATUITA & RÁPIDA</span>
+                  <span class="text-xs font-bold" :class="overview.api_status.groq_configured ? 'text-emerald-700' : 'text-slate-400'"
+                    x-text="overview.api_status.groq_configured ? '● Ativa & Operando' : '○ Não configurada'"></span>
+                </div>
+                <h4 class="text-base font-extrabold text-slate-900">Groq Cloud (GPT-OSS / Llama)</h4>
+                <p class="text-xs text-slate-500">Respostas em menos de 1 segundo com cota diária gratuita.</p>
+                <a href="https://console.groq.com/keys" target="_blank" class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700 hover:underline">
+                  🔗 Gerar Chave na Groq Cloud ↗
+                </a>
+              </div>
+              <input type="password" x-model="keyForm.groq_api_key"
+                :placeholder="overview.api_status.groq_configured ? '•••••••••••••••• (Configurada)' : 'Cole sua chave gsk_...'"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+            </div>
+
+            <!-- 3. OpenRouter -->
+            <div class="bg-white border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm"
+              :class="overview.api_status.openrouter_configured ? 'border-emerald-400' : 'border-slate-200'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold text-[10px]">MODELOS :FREE</span>
+                  <span class="text-xs font-bold" :class="overview.api_status.openrouter_configured ? 'text-emerald-700' : 'text-slate-400'"
+                    x-text="overview.api_status.openrouter_configured ? '● Ativa' : '○ Não configurada'"></span>
+                </div>
+                <h4 class="text-base font-extrabold text-slate-900">OpenRouter (Modelos Gratuitos)</h4>
+                <p class="text-xs text-slate-500">Conecta aos modelos gratuitos do OpenRouter.</p>
+                <a href="https://openrouter.ai/keys" target="_blank" class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700 hover:underline">
+                  🔗 Gerar Chave no OpenRouter ↗
+                </a>
+              </div>
+              <input type="password" x-model="keyForm.openrouter_api_key"
+                :placeholder="overview.api_status.openrouter_configured ? '•••••••••••••••• (Configurada)' : 'sk-or-v1-...'"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+            </div>
+
+            <!-- 4. Mistral AI -->
+            <div class="bg-white border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm"
+              :class="overview.api_status.mistral_configured ? 'border-emerald-400' : 'border-slate-200'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold text-[10px]">TIER GRATUITO</span>
+                  <span class="text-xs font-bold" :class="overview.api_status.mistral_configured ? 'text-emerald-700' : 'text-slate-400'"
+                    x-text="overview.api_status.mistral_configured ? '● Ativa' : '○ Não configurada'"></span>
+                </div>
+                <h4 class="text-base font-extrabold text-slate-900">Mistral AI (La Plateforme)</h4>
+                <p class="text-xs text-slate-500">Modelo `mistral-small-latest` com plano gratuito.</p>
+                <a href="https://console.mistral.ai/api-keys/" target="_blank" class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700 hover:underline">
+                  🔗 Gerar Chave na Mistral AI ↗
+                </a>
+              </div>
+              <input type="password" x-model="keyForm.mistral_api_key"
+                :placeholder="overview.api_status.mistral_configured ? '•••••••••••••••• (Configurada)' : 'Cole sua chave Mistral...'"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+            </div>
+
+            <!-- 5. Tavily AI Search -->
+            <div class="bg-white border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm"
+              :class="overview.api_status.tavily_configured ? 'border-emerald-400' : 'border-slate-200'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold text-[10px]">1.000 BUSCAS/MÊS</span>
+                  <span class="text-xs font-bold" :class="overview.api_status.tavily_configured ? 'text-emerald-700' : 'text-slate-400'"
+                    x-text="overview.api_status.tavily_configured ? '● Ativa' : '○ Não configurada'"></span>
+                </div>
+                <h4 class="text-base font-extrabold text-slate-900">Tavily AI Web Search</h4>
+                <p class="text-xs text-slate-500">Pesquisa web em tempo real para agentes de IA.</p>
+                <a href="https://app.tavily.com/home" target="_blank" class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700 hover:underline">
+                  🔗 Gerar Chave na Tavily ↗
+                </a>
+              </div>
+              <input type="password" x-model="keyForm.tavily_api_key"
+                :placeholder="overview.api_status.tavily_configured ? '•••••••••••••••• (Configurada)' : 'tvly-...'"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+            </div>
+
+            <!-- 6. Dev.to API -->
+            <div class="bg-white border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm"
+              :class="overview.api_status.devto_configured ? 'border-emerald-400' : 'border-slate-200'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold text-[10px]">PUBLICAÇÃO GRÁTIS</span>
+                  <span class="text-xs font-bold" :class="overview.api_status.devto_configured ? 'text-emerald-700' : 'text-slate-400'"
+                    x-text="overview.api_status.devto_configured ? '● Ativa & Operando' : '○ Não configurada'"></span>
+                </div>
+                <h4 class="text-base font-extrabold text-slate-900">Dev.to API (Backlink Automático)</h4>
+                <p class="text-xs text-slate-500">Publica o Guia Top 5 do cliente automaticamente no `dev.to`.</p>
+                <a href="https://dev.to/settings/extensions" target="_blank" class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700 hover:underline">
+                  🔗 Gerar Chave no Dev.to ↗
+                </a>
+              </div>
+              <input type="password" x-model="keyForm.devto_api_key"
+                :placeholder="overview.api_status.devto_configured ? '•••••••••••••••• (Configurada)' : 'API Key do Dev.to...'"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Webhook Make.com -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-3 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h4 class="text-base font-extrabold text-slate-900">🔗 Webhook Externo (Make.com / n8n / Zapier)</h4>
+            <span class="text-xs font-bold" :class="overview.api_status.spark_configured ? 'text-emerald-700' : 'text-slate-400'"
+              x-text="overview.api_status.spark_configured ? '● Conectado ao Make.com' : '○ Opcional'"></span>
+          </div>
+          <input type="url" x-model="keyForm.spark_webhook_url"
+            placeholder="https://hook.eu2.make.com/..."
+            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL DE INSPEÇÃO + IMPRESSÃO EXECUTIVA PDF DO CLIENTE              -->
+  <!-- =================================================================== -->
+  <div x-show="selectedDiagnostic" x-cloak
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div @click.outside="selectedDiagnostic = null"
+      class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl text-slate-900">
+
+      <template x-if="selectedDiagnostic">
+        <div class="space-y-6">
+          <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold"
+                  :class="selectedDiagnostic.company.is_paid ? 'bg-emerald-600 text-white' : 'bg-amber-100 text-amber-800'"
+                  x-text="selectedDiagnostic.company.is_paid ? 'CLIENTE PAGO & ATIVO' : 'LEAD (CONSULTA GRATUITA)'"></span>
+                <span class="text-xs text-slate-500 font-mono" x-text="'ID #' + selectedDiagnostic.company.id"></span>
+              </div>
+              <h3 class="text-2xl font-extrabold text-slate-900 mt-1" x-text="selectedDiagnostic.company.name"></h3>
+              <p class="text-xs text-slate-500" x-text="selectedDiagnostic.company.niche + ' • ' + selectedDiagnostic.company.city_region"></p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <a :href="`/api/companies/${selectedDiagnostic.company.id}/export-pdf`" target="_blank"
+                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+                <span>🖨️ Baixar Dossiê em PDF</span>
+              </a>
+              <button @click="selectedDiagnostic = null" class="text-slate-400 hover:text-slate-700 text-xl font-bold p-1">✕</button>
+            </div>
+          </div>
+
+          <!-- Métricas do Diagnóstico -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+              <span class="text-xs text-slate-500 uppercase font-bold">Nota de Visibilidade:</span>
+              <div class="text-2xl font-extrabold text-slate-900 mt-1" x-text="selectedDiagnostic.metrics.visibility_score + '%'"></div>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+              <span class="text-xs text-slate-500 uppercase font-bold">Posição no Ranking:</span>
+              <div class="text-2xl font-extrabold text-slate-900 mt-1" x-text="selectedDiagnostic.metrics.top_rank_achieved ? '#' + selectedDiagnostic.metrics.top_rank_achieved + 'º Lugar' : 'Sem Citação'"></div>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+              <span class="text-xs text-slate-500 uppercase font-bold">Taxa de Citação:</span>
+              <div class="text-2xl font-extrabold text-slate-900 mt-1" x-text="selectedDiagnostic.metrics.citation_rate + '%'"></div>
+            </div>
+          </div>
+
+          <!-- Respostas das IAs -->
+          <div class="space-y-4">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Auditorias Multi-IA Executadas:</h4>
+            <div class="space-y-3">
+              <template x-for="audit in selectedDiagnostic.audits" :key="audit.id">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-900" x-text="audit.prompt_category + ' (' + audit.model_provider + ')'"></span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold"
+                      :class="audit.is_cited ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                      x-text="audit.is_cited ? 'Citado em #' + (audit.rank_position || 1) : 'Ausente'"></span>
+                  </div>
+                  <p class="text-xs text-slate-600 italic" x-text="'Pergunta: ' + audit.prompt_text"></p>
+                  <div class="p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 max-h-40 overflow-y-auto whitespace-pre-line leading-relaxed" x-text="audit.response_text"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+        </div>
+      </template>
+
+    </div>
+  </div>
+
+  <!-- LOGICA ALPINE.JS DO PAINEL ADMINISTRATIVO -->
+  <script>
+    // Anexa automaticamente a senha administrativa (guardada na sessão) às chamadas protegidas da API
+    (function () {
+      const nativeFetch = window.fetch.bind(window);
+      window.fetch = function (input, init) {
+        init = init || {};
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        const needsAuth = url.startsWith('/api/admin') && !url.startsWith('/api/admin/login')
+          || url.startsWith('/api/settings/keys') && (init.method || 'GET').toUpperCase() !== 'GET'
+          || /^\/api\/companies\/\d+\/diagnostic/.test(url);
+        if (needsAuth) {
+          const headers = new Headers(init.headers || {});
+          headers.set('X-Admin-Password', sessionStorage.getItem('geopulse_admin_auth') || '');
+          init.headers = headers;
+        }
+        return nativeFetch(input, init);
+      };
+    })();
+
+    function adminApp() {
+      return {
+        isAuthenticated: false,
+        loginPassword: '',
+        loginError: '',
+        activeTab: 'sales',
+        loading: false,
+        savingKeys: false,
+        toastMessage: '',
+        searchQuery: '',
+        statusFilter: 'all',
+        typeFilter: 'all',
+        selectedDiagnostic: null,
+        funnelData: null,
+        capturedLeads: [],
+
+        overview: {
+          financials: {
+            total_revenue: 0,
+            total_sales_count: 0,
+            total_consultations: 0,
+            pending_leads_count: 0,
+            captured_leads_count: 0,
+            conversion_rate: 0,
+            average_ticket: 197,
+            autonomous_count: 0,
+            company_count: 0,
+            pix_sales_count: 0,
+            card_sales_count: 0
+          },
+          api_status: {
+            gemini_configured: false,
+            groq_configured: false,
+            openrouter_configured: false,
+            mistral_configured: false,
+            huggingface_configured: false,
+            tavily_configured: false,
+            devto_configured: false,
+            medium_configured: false,
+            openai_configured: false,
+            perplexity_configured: false,
+            spark_configured: false,
+            mercadopago_configured: false,
+            mercadopago_public_key: '',
+            pix_key: 'contato@geopulse.ai',
+            pix_beneficiary: 'GeoPulse AI Tecnologia',
+            plan_price: 197.0,
+            spark_webhook_url: '',
+            configured_count: 0,
+            active_providers: [],
+            active_mode: 'simulation'
+          },
+          sales: [],
+          customers: []
+        },
+
+        keyForm: {
+          gemini_api_key: '',
+          groq_api_key: '',
+          openrouter_api_key: '',
+          mistral_api_key: '',
+          huggingface_api_key: '',
+          tavily_api_key: '',
+          devto_api_key: '',
+          medium_api_token: '',
+          openai_api_key: '',
+          perplexity_api_key: '',
+          spark_webhook_url: '',
+          mercadopago_access_token: '',
+          mercadopago_public_key: '',
+          pix_key: '',
+          pix_beneficiary: '',
+          plan_price: '197.00'
+        },
+
+        async initAdmin() {
+          const savedAuth = sessionStorage.getItem('geopulse_admin_auth');
+          if (savedAuth) {
+            this.isAuthenticated = true;
+            const ok = await this.loadOverview();
+            if (ok === false) {
+              this.isAuthenticated = false;
+              sessionStorage.removeItem('geopulse_admin_auth');
+            }
+          }
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('tab')) {
+            this.activeTab = params.get('tab');
+          }
+        },
+
+        async submitLogin() {
+          this.loginError = '';
+          try {
+            const res = await fetch('/api/admin/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: this.loginPassword })
+            });
+            if (res.ok) {
+              sessionStorage.setItem('geopulse_admin_auth', this.loginPassword.trim());
+              this.isAuthenticated = true;
+              await this.loadOverview();
+            } else {
+              this.loginError = 'Senha incorreta! Tente novamente.';
+            }
+          } catch (e) {
+            this.loginError = 'Erro ao validar senha.';
+          }
+        },
+
+        logoutAdmin() {
+          sessionStorage.removeItem('geopulse_admin_auth');
+          this.isAuthenticated = false;
+          this.loginPassword = '';
+        },
+
+        
+        async loadFunnel() {
+          try {
+            const res = await fetch('/api/admin/funnel?days=30');
+            if (res.ok) {
+              this.funnelData = await res.json();
+            }
+          } catch (e) {
+            console.error('Erro ao carregar funil:', e);
+          }
+        },
+
+        async loadOverview() {
+          this.loading = true;
+          try {
+            const [resOverview, resLeads] = await Promise.all([
+              fetch('/api/admin/overview'),
+              fetch('/api/admin/leads')
+            ]);
+
+            if (resOverview.status === 401 || resOverview.status === 403) {
+              this.isAuthenticated = false;
+              sessionStorage.removeItem('geopulse_admin_auth');
+              return false;
+            }
+
+            if (resOverview.ok) {
+              this.overview = await resOverview.json();
+              this.loadFunnel();
+              if (this.overview.api_status.spark_webhook_url) {
+                this.keyForm.spark_webhook_url = this.overview.api_status.spark_webhook_url;
+              }
+              if (this.overview.api_status.mercadopago_public_key) {
+                this.keyForm.mercadopago_public_key = this.overview.api_status.mercadopago_public_key;
+              }
+              this.keyForm.pix_key = this.overview.api_status.pix_key || 'contato@geopulse.ai';
+              this.keyForm.pix_beneficiary = this.overview.api_status.pix_beneficiary || 'GeoPulse AI Tecnologia';
+              this.keyForm.plan_price = String(this.overview.api_status.plan_price || 197.0);
+            }
+
+            if (resLeads.ok) {
+              this.capturedLeads = await resLeads.json();
+            }
+          } catch (e) {
+            console.error('Erro ao carregar dados do painel admin:', e);
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        filteredCustomers() {
+          return this.overview.customers.filter(c => {
+            if (this.statusFilter === 'paid' && !c.is_paid) return false;
+            if (this.statusFilter === 'lead' && c.is_paid) return false;
+            if (this.typeFilter !== 'all' && c.entity_type !== this.typeFilter) return false;
+
+            if (this.searchQuery.trim() !== '') {
+              const q = this.searchQuery.toLowerCase();
+              const matchName = (c.name || '').toLowerCase().includes(q);
+              const matchNiche = (c.niche || '').toLowerCase().includes(q);
+              const matchCity = (c.city_region || '').toLowerCase().includes(q);
+              const matchReg = (c.professional_registry || '').toLowerCase().includes(q);
+              const matchWpp = (c.whatsapp || '').toLowerCase().includes(q);
+              return matchName || matchNiche || matchCity || matchReg || matchWpp;
+            }
+            return true;
+          });
+        },
+
+        buildWhatsAppLeadLink(cust) {
+          const digits = (cust.whatsapp || '').replace(/\D/g, '');
+          const phone = digits.startsWith('55') ? digits : ('55' + digits);
+          const reportUrl = `${window.location.origin}/?relatorio=${cust.id}`;
+          const msg = `Olá ${cust.name}! Tudo bem? Vi que você realizou o diagnóstico de visibilidade na IA aqui no GeoPulse AI para a área de *${cust.niche}* em *${cust.city_region}* e sua nota atual ficou em *${cust.initial_score}%*.\n\nVocê pode rever seu relatório completo aqui: ${reportUrl}\n\nPosso te mostrar como ativar seu posicionamento em #1º lugar no ChatGPT e Google Gemini ainda hoje?`;
+          return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        },
+
+        buildWhatsAppLeadCapturedLink(lead) {
+          const digits = (lead.contact_phone || '').replace(/\D/g, '');
+          const phone = digits.startsWith('55') ? digits : ('55' + digits);
+          const name = lead.contact_name ? lead.contact_name.split(' ')[0] : 'tudo bem';
+          const msg = `Olá ${name}! Vi que você solicitou o Dossiê Técnico em PDF da *${lead.company_name}* no GeoPulse AI.\n\nConseguiu visualizar os dados da auditoria nos motores de IA? Gostaria de tirar alguma dúvida sobre o plano para posicionar sua marca em 1º lugar no ChatGPT e Gemini?`;
+          return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        },
+
+        async updateLeadStatus(leadId, newStatus) {
+          try {
+            const res = await fetch(`/api/admin/leads/${leadId}/status`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+              this.toastMessage = `Status do lead #${leadId} atualizado para "${newStatus}"!`;
+              await this.loadOverview();
+              setTimeout(() => { this.toastMessage = ''; }, 3000);
+            }
+          } catch (e) {
+            this.toastMessage = '⚠️ ' + 'Erro ao atualizar status do lead.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          }
+        },
+
+        async deleteLead(leadId) {
+          if (!confirm(`Deseja realmente excluir o lead #${leadId}?`)) return;
+          try {
+            const res = await fetch(`/api/admin/leads/${leadId}`, { method: 'DELETE' });
+            if (res.ok) {
+              this.toastMessage = `Lead #${leadId} excluído com sucesso.`;
+              await this.loadOverview();
+              setTimeout(() => { this.toastMessage = ''; }, 3000);
+            }
+          } catch (e) {
+            this.toastMessage = '⚠️ ' + 'Erro ao excluir lead.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          }
+        },
+
+        async saveAllApiKeys() {
+          this.savingKeys = true;
+          try {
+            const payload = {};
+            Object.keys(this.keyForm).forEach(k => {
+              if (this.keyForm[k] && String(this.keyForm[k]).trim() !== '') {
+                payload[k] = String(this.keyForm[k]).trim();
+              }
+            });
+
+            const res = await fetch('/api/settings/keys', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              this.toastMessage = 'Configurações de Pagamento, Mercado Pago e APIs salvas com sucesso!';
+              await this.loadOverview();
+              setTimeout(() => { this.toastMessage = ''; }, 5000);
+            }
+          } catch (e) {
+            this.toastMessage = '⚠️ ' + 'Erro ao salvar configurações.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          } finally {
+            this.savingKeys = false;
+          }
+        },
+
+        async inspectCustomer(companyId) {
+          try {
+            const res = await fetch(`/api/companies/${companyId}/diagnostic`);
+            if (res.ok) {
+              this.selectedDiagnostic = await res.json();
+            }
+          } catch (e) {
+            this.toastMessage = '⚠️ ' + 'Não foi possível abrir o diagnóstico deste cliente.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          }
+        },
+
+        async advanceSprintDay(companyId, name) {
+          try {
+            const res = await fetch(`/api/admin/companies/${companyId}/sprint-advance`, { method: 'POST' });
+            if (res.ok) {
+              const data = await res.json();
+              this.toastMessage = `Avançado para o Dia ${data.advanced_to_day}/14 para "${name}"!`;
+              await this.loadOverview();
+              setTimeout(() => { this.toastMessage = ''; }, 4000);
+            }
+          } catch (e) {
+            this.toastMessage = '⚠️ Erro ao avançar dia do sprint.';
+            setTimeout(() => { this.toastMessage = ''; }, 4000);
+          }
+        },
+
+        async manualActivate(companyId, name) {
+          if (!confirm(`Deseja liberar manualmente o Pacote Dominância IA para "${name}"? Isso irá gerar os 7 ativos, o Selo Verificado e publicar o artigo no Dev.to e no Portal.`)) {
+            return;
+          }
+          try {
+            const res = await fetch(`/api/admin/companies/${companyId}/activate`, { method: 'POST' });
+            if (res.ok) {
+              this.toastMessage = `Cliente "${name}" ativado com sucesso! Os 7 artefatos e o Artigo Top 5 foram gerados.`;
+              await this.loadOverview();
+            }
+          } catch (e) {
+            this.toastMessage = '⚠️ ' + 'Erro ao ativar cliente manualmente.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          }
+        },
+
+        async deleteCustomer(companyId, name) {
+          if (!confirm(`Tem certeza que deseja excluir o registro de "${name}" do histórico?`)) {
+            return;
+          }
+          try {
+            const res = await fetch(`/api/admin/companies/${companyId}`, { method: 'DELETE' });
+            if (res.ok) {
+              this.toastMessage = `Registro "${name}" removido do histórico.`;
+              await this.loadOverview();
+            }
+          } catch (e) {
+            this.toastMessage = '⚠️ ' + 'Erro ao excluir registro.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          }
+        },
+
+        formatCurrency(value) {
+          return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+        },
+
+        formatDate(dateStr) {
+          if (!dateStr) return '-';
+          const d = new Date(dateStr);
+          return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        },
+
+        exportLeadsCsv() {
+          const list = this.filteredCustomers();
+          if (!list || list.length === 0) {
+            this.toastMessage = '⚠️ ' + 'Nenhum lead encontrado para exportar.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+            return;
+          }
+          const headers = ['ID', 'Data', 'Tipo', 'Nome', 'WhatsApp', 'URL/Perfil', 'Especialidade/Nicho', 'Cidade', 'Status', 'Valor Pago', 'Nota Inicial', 'Nota Final'];
+          const rows = list.map(c => [
+            c.id,
+            `"${this.formatDate(c.created_at)}"`,
+            `"${c.entity_type === 'autonomous' ? 'Autônomo' : 'Empresa'}"`,
+            `"${(c.name || '').replace(/"/g, '""')}"`,
+            `"${(c.whatsapp || '').replace(/"/g, '""')}"`,
+            `"${(c.url || '').replace(/"/g, '""')}"`,
+            `"${(c.niche || '').replace(/"/g, '""')}"`,
+            `"${(c.city_region || '').replace(/"/g, '""')}"`,
+            `"${c.is_paid ? 'PAGO' : 'LEAD_GRATIS'}"`,
+            `"${c.payment_amount || 0}"`,
+            `"${c.initial_score}%"`,
+            `"${c.current_score}%"`
+          ]);
+
+          const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.setAttribute('href', url);
+          link.setAttribute('download', `leads_geopulse_ai_${new Date().toISOString().slice(0, 10)}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      };
+    }
+  </script>
+</body>
+
+</html>

@@ -129,10 +129,9 @@
                 <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
                 <span class="ml-2 text-xs font-bold text-slate-700">🎥 Apresentação Oficial GeoPulse AI (0:40s)</span>
               </div>
-              <label for="local-video-picker" class="cursor-pointer text-[11px] font-semibold text-slate-500 hover:text-emerald-600 bg-slate-100 px-2.5 py-1 rounded-lg">
-                📂 Selecionar Vídeo Local
-              </label>
-              <input id="local-video-picker" type="file" accept="video/*" class="hidden" onchange="loadCustomVideoFile(event)" />
+              <span class="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                ▶ Alta Definição (HD)
+              </span>
             </div>
 
             <div class="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video shadow-inner group">
@@ -339,6 +338,28 @@
         </div>
       </div>
 
+      <!-- BANNER DE ESCASSEZ: EXCLUSIVIDADE DE 1º LUGAR NA CIDADE -->
+      <div class="bg-gradient-to-r from-amber-500/15 via-amber-50/70 to-emerald-50/50 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-start gap-3.5">
+          <span class="text-3xl shrink-0">⚡</span>
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px] font-extrabold uppercase tracking-wide">Status de Exclusividade Regional</span>
+              <span class="text-xs font-bold text-slate-600">Regra de Ouro da IA:</span>
+            </div>
+            <h4 class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
+              Vaga #1 Oficial em <span id="scarcity-city" class="text-emerald-700 font-black underline">sua cidade</span> para <span id="scarcity-niche" class="text-emerald-700 font-black underline">seu segmento</span>: <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-mono font-black text-xs sm:text-sm">DISPONÍVEL AGORA</span>
+            </h4>
+            <p class="text-xs text-slate-600 max-w-2xl">
+              Os algoritmos de IA só recomendam <strong>1 único profissional ou empresa no topo #1 do Guia Oficial</strong>. Ao ativar o Desafio de 14 Dias, você assegura a primazia antes que um concorrente local ocupe a indicação canônica.
+            </p>
+          </div>
+        </div>
+        <button onclick="openCheckoutModal()" class="w-full md:w-auto shrink-0 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition">
+          Garantir Exclusividade da Vaga #1 →
+        </button>
+      </div>
+
       <!-- BLOCO: ESTIMATIVA DE PERDA FINANCEIRA & NEGÓCIOS PERDIDOS NA IA -->
       <div id="financial-loss-card" class="bg-gradient-to-br from-rose-50 via-white to-amber-50/40 rounded-3xl border-2 border-rose-300 p-6 sm:p-8 shadow-soft space-y-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-rose-100 pb-5">
@@ -453,28 +474,216 @@
     </div>
   </section>
 
+  <!-- SEÇÃO: GARANTIA BLINDADA DE 7 DIAS + FAQ QUEBRA DE OBJEÇÕES -->
+  <section id="garantia-faq" class="py-16 sm:py-24 bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      
+      <!-- CARD DE GARANTIA BLINDADA 7 DIAS -->
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 text-white p-8 sm:p-10 border border-slate-800 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-emerald-500/15 border-2 border-emerald-500/40 flex items-center justify-center shrink-0 shadow-inner">
+            <span class="text-5xl">🛡️</span>
+          </div>
+          <div class="space-y-3 text-center md:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-extrabold uppercase border border-emerald-500/30">
+              Risco Zero Absoluto • Proteção ao Consumidor
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-white">
+              Garantia Incondicional de 7 Dias: Devolução de 100%
+            </h3>
+            <p class="text-sm text-slate-300 leading-relaxed max-w-2xl">
+              Confiamos tanto na eficácia da nossa tecnologia de engenharia semântica que assumimos todo o risco: se em até <strong>7 dias</strong> após a contratação sua estrutura GEO, seu arquivo <code>/llms.txt</code> e seu Guia Oficial Top 5 não forem publicados e entregues no servidor, basta nos enviar uma única mensagem e <strong>devolvemos 100% do seu valor via PIX na mesma hora</strong>, sem perguntas e sem letras miúdas.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ QUEBRA DE OBJEÇÕES -->
+      <div class="space-y-8">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <span class="px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">Tire suas Dúvidas</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Perguntas Frequentes sobre o Desafio</h2>
+          <p class="text-xs sm:text-sm text-slate-500">Tudo o que você precisa saber antes de ativar a autoridade da sua marca na IA.</p>
+        </div>
+
+        <div class="space-y-3 max-w-3xl mx-auto">
+          <!-- FAQ 1 -->
+          <details class="group bg-slate-50 rounded-2xl border border-slate-200 p-5 transition-all open:bg-white open:shadow-md">
+            <summary class="flex justify-between items-center cursor-pointer font-extrabold text-sm sm:text-base text-slate-900 list-none">
+              <span>📱 Não tenho site oficial, uso apenas o Instagram ou WhatsApp. Funciona para mim?</span>
+              <span class="transition group-open:rotate-180 text-emerald-600 font-bold ml-2">▼</span>
+            </summary>
+            <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <strong>Sim, 100%!</strong> O GeoPulse AI gera e hospeda externamente sua página oficial de autoridade (com dados estruturados Schema.org JSON-LD e o arquivo canônico <code>/llms.txt</code>) dentro do domínio indexado <code>geopulseai.store</code>. O seu perfil do Instagram, WhatsApp ou LinkedIn é cadastrado como o canal oficial de contato para onde a IA direcionará os clientes recomendados.
+            </p>
+          </details>
+
+          <!-- FAQ 2 -->
+          <details class="group bg-slate-50 rounded-2xl border border-slate-200 p-5 transition-all open:bg-white open:shadow-md">
+            <summary class="flex justify-between items-center cursor-pointer font-extrabold text-sm sm:text-base text-slate-900 list-none">
+              <span>💻 Preciso entender de programação ou contratar um programador?</span>
+              <span class="transition group-open:rotate-180 text-emerald-600 font-bold ml-2">▼</span>
+            </summary>
+            <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <strong>Absolutamente nada!</strong> O trabalho técnico complexo (geração de grafos semânticos, redação dos artigos Top 5, pings para robôs via IndexNow e auditorias nos modelos generativos) é executado de forma 100% autônoma pelo nosso motor no servidor. Você só acompanha o diário de bordo.
+            </p>
+          </details>
+
+          <!-- FAQ 3 -->
+          <details class="group bg-slate-50 rounded-2xl border border-slate-200 p-5 transition-all open:bg-white open:shadow-md">
+            <summary class="flex justify-between items-center cursor-pointer font-extrabold text-sm sm:text-base text-slate-900 list-none">
+              <span>💳 O valor de R$ 197 é uma taxa única ou existe mensalidade escondida?</span>
+              <span class="transition group-open:rotate-180 text-emerald-600 font-bold ml-2">▼</span>
+            </summary>
+            <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <strong>Taxa única promocional de R$ 197,00.</strong> Não existe nenhuma mensalidade, assinatura ou taxa recorrente surpresa. O valor cobre os 14 dias de execuções ativas do motor de IA e garante a permanência vitalícia dos seus ativos gerados no nosso diretório público indexado.
+            </p>
+          </details>
+
+          <!-- FAQ 4 -->
+          <details class="group bg-slate-50 rounded-2xl border border-slate-200 p-5 transition-all open:bg-white open:shadow-md">
+            <summary class="flex justify-between items-center cursor-pointer font-extrabold text-sm sm:text-base text-slate-900 list-none">
+              <span>🤖 Quanto tempo leva para os robôs do ChatGPT, Gemini e Google lerem minha página?</span>
+              <span class="transition group-open:rotate-180 text-emerald-600 font-bold ml-2">▼</span>
+            </summary>
+            <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              No momento da ativação, nosso sistema emite o ping oficial do protocolo <strong>IndexNow</strong> (validado pelo Bing, Yandex e pelo mecanismo de busca em tempo real do ChatGPT). Enquanto os métodos tradicionais de SEO demoram até 6 meses, a indexação de autoridade em IA costuma ser rastreada entre algumas horas e poucos dias.
+            </p>
+          </details>
+
+          <!-- FAQ 5 -->
+          <details class="group bg-slate-50 rounded-2xl border border-slate-200 p-5 transition-all open:bg-white open:shadow-md">
+            <summary class="flex justify-between items-center cursor-pointer font-extrabold text-sm sm:text-base text-slate-900 list-none">
+              <span>📈 Como acompanho o progresso durante os 14 Dias?</span>
+              <span class="transition group-open:rotate-180 text-emerald-600 font-bold ml-2">▼</span>
+            </summary>
+            <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Assim que sua ativação é realizada, você recebe um link privativo do seu <strong>Diário de Bordo do Desafio</strong>. A cada 24 horas, o sistema registra exatamente qual tarefa técnica foi concluída e atualiza sua nota na reauditoria dos modelos de IA até o Dia 14.
+            </p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL DE PROGRESSO CINEMATOGRÁFICO DO DIAGNÓSTICO -->
+  <div id="diagnostic-loading-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-6 text-center">
+      <div class="relative w-20 h-20 mx-auto">
+        <div class="w-20 h-20 rounded-full border-4 border-slate-100 border-t-emerald-500 animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center text-2xl font-black text-emerald-600">
+          <span id="diag-load-pct">15%</span>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase">Auditoria em Tempo Real</span>
+        <h3 id="diag-load-title" class="text-lg font-extrabold text-slate-900">Consultando Motores de IA...</h3>
+        <p id="diag-load-subtitle" class="text-xs text-slate-500 leading-relaxed min-h-[36px]">
+          Conectando ao leitor semântico e extraindo dados públicos do seu site/perfil...
+        </p>
+      </div>
+      <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+        <div id="diag-load-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300" style="width: 15%"></div>
+      </div>
+      <p class="text-[11px] text-slate-400 font-mono">Simulando consultas no ChatGPT Search, Gemini e Perplexity</p>
+    </div>
+  </div>
+
+  <!-- ASSISTENTE DE VENDAS COM IA FLUTUANTE (CLOSER 24H) -->
+  <div class="fixed bottom-5 right-5 z-40">
+    <button id="ai-chat-toggle-btn" onclick="toggleAiChat()" class="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-slate-900 text-white font-extrabold text-xs shadow-2xl hover:bg-slate-800 transition border border-slate-700">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+      <span>💬 Dúvidas sobre o Desafio? Fale com a IA</span>
+    </button>
+  </div>
+
+  <!-- JANELA DO CHAT DE VENDAS COM IA -->
+  <div id="ai-chat-panel" class="fixed bottom-20 right-5 z-40 hidden w-96 max-w-[calc(100vw-2.5rem)] bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col transition-all" style="height: 480px;">
+    <!-- HEADER -->
+    <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between border-b border-slate-800">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center font-bold text-xs text-slate-950">AI</div>
+        <div>
+          <h4 class="text-xs font-extrabold leading-tight">Especialista GeoPulse AI</h4>
+          <span class="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online 24h • Tira-dúvidas
+          </span>
+        </div>
+      </div>
+      <button onclick="toggleAiChat()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+    </div>
+
+    <!-- MENSAGENS -->
+    <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50 text-xs">
+      <div class="flex gap-2">
+        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-800 font-bold flex items-center justify-center text-[10px] shrink-0">AI</div>
+        <div class="bg-white p-3 rounded-2xl rounded-tl-sm border border-slate-200 text-slate-800 space-y-1 shadow-sm leading-relaxed">
+          <p>Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você em 1º Lugar nas recomendações?</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTÕES RÁPIDOS -->
+    <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto text-[11px] font-bold text-slate-600 shrink-0">
+      <button onclick="sendQuickChatMessage('Como funciona o Desafio de 14 Dias?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">Como funciona?</button>
+      <button onclick="sendQuickChatMessage('Preciso ter site ou serve com Instagram?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">Serve sem site?</button>
+      <button onclick="sendQuickChatMessage('Tem mensalidade?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">Tem mensalidade?</button>
+      <button onclick="sendQuickChatMessage('Qual a garantia de devolução?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">Garantia</button>
+    </div>
+
+    <!-- INPUT -->
+    <form id="ai-chat-form" onsubmit="handleChatMessageSubmit(event)" class="p-3 bg-white border-t border-slate-200 flex gap-2 shrink-0">
+      <input id="ai-chat-input" type="text" placeholder="Digite sua dúvida aqui..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 text-xs text-slate-900 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+      <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition">
+        Enviar
+      </button>
+    </form>
+  </div>
+
   <!-- MODAL DE CHECKOUT -->
   <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-4 relative">
-      <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 font-bold">✕</button>
+      <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 font-bold hover:bg-slate-200 transition">✕</button>
       <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🚀 Desafio Sprint de 14 Dias IA</span>
       <h3 class="text-2xl font-extrabold text-slate-900">Ativar 14 Dias de Trabalho da IA</h3>
-      <p class="text-xs text-slate-600">Taxa única de <strong>R$ 197,00</strong> (sem mensalidade). Inclui os 14 dias de engenharia semântica + 7 ativos vitalícios.</p>
-      <button onclick="startMercadoPagoCheckout()" class="w-full py-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm">💳 Pagar com Mercado Pago (PIX ou Cartão)</button>
-      <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
-        <div class="text-xs font-bold text-slate-600">Ou copie a Chave PIX Oficial:</div>
-        <div class="flex gap-2">
-          <input id="modal-pix-key" type="text" readonly value="contato@geopulse.ai" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono text-xs font-bold" />
-          <button onclick="copyPixKey()" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs">Copiar</button>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Investimento de <strong>R$ 197,00 taxa única</strong> (sem mensalidade). Garante a execução das 14 etapas da IA + publicação do Guia Oficial Top 5 + Schema.org JSON-LD + /llms.txt.
+      </p>
+
+      <button onclick="startMercadoPagoCheckout()" class="w-full py-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2">
+        <span>💳</span> Pagar com Mercado Pago (PIX Imediato ou Cartão de Crédito)
+      </button>
+
+      <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3">
+        <div class="flex items-center justify-between text-xs font-extrabold text-slate-700">
+          <span>Ou transfira via PIX Direto:</span>
+          <span class="text-emerald-700 font-bold">R$ 197,00</span>
         </div>
-        <button onclick="notifyPixPaid()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs">✅ Já fiz o PIX — Iniciar Meu Desafio de 14 Dias</button>
+        <div class="flex gap-2">
+          <input id="modal-pix-key" type="text" readonly value="9d1c4025-abb8-49a1-9216-27241253b4df" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 font-mono text-xs font-bold text-slate-800 select-all" />
+          <button onclick="copyPixKey()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shrink-0 transition">Copiar</button>
+        </div>
+        <div class="text-[11px] text-slate-500 font-medium">
+          Favorecido: <strong class="text-slate-700" id="modal-pix-beneficiary">GeoPulse AI Tecnologia</strong>
+        </div>
+        <button onclick="notifyPixPaid()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition">
+          ✅ Já fiz o PIX — Iniciar Meu Desafio de 14 Dias
+        </button>
         <p id="checkout-feedback-msg" class="text-xs font-bold text-center text-emerald-700 hidden"></p>
+      </div>
+
+      <div class="flex items-center justify-center gap-2 text-[11px] text-slate-500 pt-1">
+        <span>🛡️ Garantia Blindada de 7 Dias</span> • <span>🔒 Ambiente 100% Seguro</span>
       </div>
     </div>
   </div>
 
   <script>
     let currentDiagnosticData = null;
+    let officialPixKey = "9d1c4025-abb8-49a1-9216-27241253b4df";
+    let officialPrice = 197.0;
+
     const SCHEDULE_14 = [
       { day: 1, title: "Protocolo de Entidade & JSON-LD + /llms.txt" },
       { day: 2, title: "Publicação do Guia Oficial Top 5 da Cidade" },
@@ -509,20 +718,9 @@
           video.muted = true;
           video.play().catch((e) => {
             console.error('Falha de reprodução:', e);
-            document.getElementById('local-video-picker').click();
           });
         });
       }
-    }
-
-    function loadCustomVideoFile(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const video = document.getElementById('hero-pitch-video');
-      document.getElementById('video-sound-overlay').classList.add('opacity-0', 'pointer-events-none');
-      video.src = URL.createObjectURL(file);
-      video.muted = false;
-      video.play();
     }
 
     function switchHeroSim(mode) {
@@ -621,10 +819,59 @@
       }
     }
 
+    /* BARRA DE PROGRESSO CINEMATOGRÁFICA DO DIAGNÓSTICO */
+    let diagnosticProgressInterval = null;
+    function startCinematicLoading() {
+      const modal = document.getElementById('diagnostic-loading-modal');
+      const bar = document.getElementById('diag-load-bar');
+      const pct = document.getElementById('diag-load-pct');
+      const subtitle = document.getElementById('diag-load-subtitle');
+      modal.classList.remove('hidden');
+
+      let currentPct = 12;
+      bar.style.width = '12%';
+      pct.textContent = '12%';
+      subtitle.textContent = "Conectando ao leitor semântico e extraindo dados públicos do seu site/perfil...";
+
+      const steps = [
+        { at: 28, text: "🔍 Lendo metadados técnicos, autoridade e área de atendimento..." },
+        { at: 52, text: "🤖 Simulando buscas de clientes no ChatGPT Search, Gemini e Perplexity..." },
+        { at: 74, text: "📊 Mapeando concorrentes diretos recomendados pelos algoritmos na região..." },
+        { at: 90, text: "💰 Calculando estimativa de clientes e faturamento perdido para terceiros..." },
+        { at: 96, text: "✨ Estruturando o relatório oficial de posicionamento..." }
+      ];
+
+      diagnosticProgressInterval = setInterval(() => {
+        if (currentPct < 96) {
+          currentPct += Math.floor(Math.random() * 6) + 3;
+          if (currentPct > 96) currentPct = 96;
+          bar.style.width = `${currentPct}%`;
+          pct.textContent = `${currentPct}%`;
+          const currentStep = steps.find(s => currentPct <= s.at);
+          if (currentStep) subtitle.textContent = currentStep.text;
+        }
+      }, 700);
+    }
+
+    function stopCinematicLoading(success = true) {
+      clearInterval(diagnosticProgressInterval);
+      const bar = document.getElementById('diag-load-bar');
+      const pct = document.getElementById('diag-load-pct');
+      const subtitle = document.getElementById('diag-load-subtitle');
+      bar.style.width = '100%';
+      pct.textContent = '100%';
+      subtitle.textContent = success ? "✓ Auditoria concluída com sucesso!" : "Finalizando...";
+      setTimeout(() => {
+        document.getElementById('diagnostic-loading-modal').classList.add('hidden');
+      }, 450);
+    }
+
     async function handleDiagnosticSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('submit-audit-btn');
       btn.textContent = '⏳ Auditando nos motores de IA...';
+      startCinematicLoading();
+
       const payload = {
         entity_type: document.getElementById('entity_type').value,
         name: document.getElementById('name').value,
@@ -636,11 +883,14 @@
         whatsapp: document.getElementById('whatsapp')?.value || '',
         email: document.getElementById('email')?.value || ''
       };
+
       try {
         const res = await fetch('/api/diagnostics/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const data = await res.json();
+        stopCinematicLoading(true);
         renderDiagnosticResults(data);
       } catch (err) {
+        stopCinematicLoading(false);
         runInstantDemo('free', payload);
       } finally {
         btn.textContent = '🔍 Executar Diagnóstico Gratuito nas IAs Agora';
@@ -672,9 +922,15 @@
       document.getElementById('res-top-rank').textContent = data.metrics.top_rank_achieved ? `#${data.metrics.top_rank_achieved}º Lugar` : 'Fora do Ranking';
       document.getElementById('res-sprint-badge').textContent = `Dia ${data.company.sprint_day_current || (data.company.is_paid ? 14 : 0)}/14`;
 
-      // CÁLCULO DINÂMICO DE PERDA DE NEGÓCIOS / FATURAMENTO
+      // ATUALIZA O BANNER DE ESCASSEZ
       const niche = data.company.niche || 'seu segmento';
       const city = data.company.city_region || 'sua região';
+      const scCity = document.getElementById('scarcity-city');
+      const scNiche = document.getElementById('scarcity-niche');
+      if (scCity) scCity.textContent = city;
+      if (scNiche) scNiche.textContent = niche;
+
+      // CÁLCULO DINÂMICO DE PERDA DE NEGÓCIOS / FATURAMENTO
       const nicheElem = document.getElementById('loss-niche-text');
       if (nicheElem) nicheElem.textContent = `${niche} em ${city}`;
 
@@ -744,35 +1000,185 @@
 
     function openCheckoutModal() { document.getElementById('checkout-modal').classList.remove('hidden'); }
     function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
+    
     function copyPixKey() {
-      navigator.clipboard.writeText(document.getElementById('modal-pix-key').value);
+      const key = document.getElementById('modal-pix-key').value;
+      navigator.clipboard.writeText(key);
       const msg = document.getElementById('checkout-feedback-msg');
       msg.classList.remove('hidden');
-      msg.textContent = '✓ Chave PIX copiada!';
+      msg.textContent = '✓ Chave PIX copiada com sucesso!';
+      setTimeout(() => { msg.classList.add('hidden'); }, 4000);
     }
+
     async function startMercadoPagoCheckout() {
       const id = currentDiagnosticData?.company?.id;
       if (!id || id === 999) { alert('Rode primeiro o diagnóstico gratuito com os dados da sua empresa acima.'); return; }
-      const res = await fetch(`/api/companies/${id}/mercadopago-preference`, { method: 'POST' });
-      const data = await res.json();
-      if (data.init_point) window.location.href = data.init_point;
-    }
-    async function notifyPixPaid() {
-      const id = currentDiagnosticData?.company?.id;
-      if (id && id !== 999) await fetch(`/api/companies/${id}/payment-claim`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' });
-      const msg = document.getElementById('checkout-feedback-msg');
-      msg.classList.remove('hidden');
-      msg.textContent = '✓ Recebido! Seu Desafio de 14 Dias será iniciado em instantes.';
+      try {
+        const res = await fetch(`/api/companies/${id}/mercadopago-preference`, { method: 'POST' });
+        const data = await res.json();
+        if (data.init_point) {
+          window.location.href = data.init_point;
+        } else {
+          alert('Preferência do Mercado Pago indisponível no momento. Use o PIX Direto Copia e Cola para ativação imediata!');
+        }
+      } catch (e) {
+        alert('Erro ao conectar ao Mercado Pago. Utilize a chave PIX informada no modal.');
+      }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('public-sprint-days-grid').innerHTML = SCHEDULE_14.map(d => `
-        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-1">
-          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">Dia ${d.day} de 14</span>
-          <h4 class="text-sm font-extrabold text-slate-900 pt-1">${d.title}</h4>
-          <p class="text-[11px] text-slate-500">Executado automaticamente pela IA</p>
+    async function notifyPixPaid() {
+      const id = currentDiagnosticData?.company?.id;
+      if (id && id !== 999) {
+        await fetch(`/api/companies/${id}/payment-claim`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' });
+      }
+      const msg = document.getElementById('checkout-feedback-msg');
+      msg.classList.remove('hidden');
+      msg.textContent = '✓ Aviso enviado! Estamos confirmando seu pagamento e seu Desafio de 14 Dias será ativado em instantes.';
+    }
+
+    /* CHAT DE VENDAS COM IA FLUTUANTE */
+    function toggleAiChat() {
+      const panel = document.getElementById('ai-chat-panel');
+      panel.classList.toggle('hidden');
+      if (!panel.classList.contains('hidden')) {
+        document.getElementById('ai-chat-input').focus();
+      }
+    }
+
+    function appendChatMessage(sender, text) {
+      const container = document.getElementById('ai-chat-messages');
+      const isAi = (sender === 'ai');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = isAi ? "flex gap-2" : "flex gap-2 justify-end";
+      msgDiv.innerHTML = isAi ? `
+        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-800 font-bold flex items-center justify-center text-[10px] shrink-0">AI</div>
+        <div class="bg-white p-3 rounded-2xl rounded-tl-sm border border-slate-200 text-slate-800 space-y-1 shadow-sm leading-relaxed max-w-[85%]">
+          <p>${text.replace(/\n/g, '<br/>')}</p>
         </div>
-      `).join('');
+      ` : `
+        <div class="bg-emerald-600 text-white p-3 rounded-2xl rounded-tr-sm space-y-1 shadow-sm leading-relaxed max-w-[85%] font-medium">
+          <p>${text}</p>
+        </div>
+      `;
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendQuickChatMessage(txt) {
+      appendChatMessage('user', txt);
+      await requestAiChatReply(txt);
+    }
+
+    async function handleChatMessageSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-chat-input');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+      appendChatMessage('user', val);
+      await requestAiChatReply(val);
+    }
+
+    async function requestAiChatReply(userMessage) {
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'ai-typing-indicator';
+      typingDiv.className = "flex gap-2";
+      typingDiv.innerHTML = `
+        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-800 font-bold flex items-center justify-center text-[10px] shrink-0">AI</div>
+        <div class="bg-white p-2.5 rounded-2xl border border-slate-200 text-slate-400 text-xs italic">
+          Digitando resposta...
+        </div>
+      `;
+      document.getElementById('ai-chat-messages').appendChild(typingDiv);
+      document.getElementById('ai-chat-messages').scrollTop = document.getElementById('ai-chat-messages').scrollHeight;
+
+      try {
+        const payload = {
+          message: userMessage,
+          company_name: currentDiagnosticData?.company?.name || null,
+          niche: currentDiagnosticData?.company?.niche || null,
+          city_region: currentDiagnosticData?.company?.city_region || null,
+          score: currentDiagnosticData?.metrics?.visibility_score || null
+        };
+        const res = await fetch('/api/support/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        document.getElementById('ai-typing-indicator')?.remove();
+        appendChatMessage('ai', data.reply || 'Estamos à sua disposição para ativar seu Desafio de 14 Dias e colocar sua marca no topo das IAs!');
+      } catch (err) {
+        document.getElementById('ai-typing-indicator')?.remove();
+        appendChatMessage('ai', 'O GeoPulse AI ativa sua presença em 1º Lugar nas IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias. Se quiser falar diretamente com a diretoria técnica, nos envie uma mensagem!');
+      }
+    }
+
+    /* INICIALIZAÇÃO DA PÁGINA (CARREGA DADOS DO BACKEND & RETORNO DO CHECKOUT) */
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 1. Preenche a grade explicativa dos 14 dias
+      const grid = document.getElementById('public-sprint-days-grid');
+      if (grid) {
+        grid.innerHTML = SCHEDULE_14.map(d => `
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-1">
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">Dia ${d.day} de 14</span>
+            <h4 class="text-sm font-extrabold text-slate-900 pt-1">${d.title}</h4>
+            <p class="text-[11px] text-slate-500">Executado automaticamente pela IA</p>
+          </div>
+        `).join('');
+      }
+
+      // 2. Busca configurações oficiais de checkout (Chave PIX e Preço Real)
+      try {
+        const res = await fetch('/api/checkout/config');
+        if (res.ok) {
+          const cfg = await res.json();
+          if (cfg.pix_key) {
+            officialPixKey = cfg.pix_key;
+            const inputPix = document.getElementById('modal-pix-key');
+            if (inputPix) inputPix.value = cfg.pix_key;
+          }
+          if (cfg.pix_beneficiary) {
+            const benElem = document.getElementById('modal-pix-beneficiary');
+            if (benElem) benElem.textContent = cfg.pix_beneficiary;
+          }
+        }
+      } catch (e) {
+        console.warn('Usando chave PIX de contingência:', officialPixKey);
+      }
+
+      // 3. Verifica retorno de pagamento do Mercado Pago na URL (?mp_success=1&company_id=...)
+      const urlParams = new URLSearchParams(window.location.search);
+      const mpSuccess = urlParams.get('mp_success');
+      const companyId = urlParams.get('company_id');
+      const clientToken = urlParams.get('client_token');
+
+      if (mpSuccess === '1' && companyId) {
+        try {
+          const verifyRes = await fetch(`/api/companies/${companyId}/verify-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          if (verifyRes.ok) {
+            const paidData = await verifyRes.json();
+            renderDiagnosticResults(paidData);
+            alert('🎉 Pagamento Confirmado com Sucesso! Seu Desafio de 14 Dias está Ativo e seus Ativos Oficiais já foram gerados e publicados!');
+          }
+        } catch (e) {
+          console.error('Verificação pendente:', e);
+        }
+      } else if (clientToken) {
+        try {
+          const clientRes = await fetch(`/api/client/${clientToken}`);
+          if (clientRes.ok) {
+            const clientData = await clientRes.json();
+            renderDiagnosticResults(clientData);
+          }
+        } catch (e) {
+          console.error('Erro ao carregar área do cliente:', e);
+        }
+      }
     });
   </script>
 </body>

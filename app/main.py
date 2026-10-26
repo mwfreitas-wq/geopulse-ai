@@ -1795,6 +1795,13 @@ async def serve_indexnow_key():
     return PlainTextResponse("geopulse8f92a1c4b3e7d60192837465\n")
 
 
+@app.get("/google1d442299eeed5594.html")
+async def serve_google_search_console_verification():
+    """Entrega a validação de propriedade do Google Search Console."""
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse("google-site-verification: google1d442299eeed5594.html\n")
+
+
 # ==========================================
 # ATENDIMENTO INTELIGENTE COM IA & CONTATO OCULTO POR E-MAIL
 # ==========================================

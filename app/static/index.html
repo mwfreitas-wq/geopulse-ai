@@ -1329,16 +1329,34 @@
         alert(l === 'en' ? 'Please run the free audit with your business details above first.' : (l === 'es' ? 'Ejecuta primero la auditoría gratuita con los datos de tu empresa arriba.' : 'Rode primeiro o diagnóstico gratuito com os dados da sua empresa acima.'));
         return;
       }
+
+      // Se o usuário estiver em Inglês ou Espanhol, direciona para o Checkout Internacional PayPal oficial em USD
+      if (l === 'en' || l === 'es') {
+        const dict = I18N[l] || I18N.en;
+        const total = dict.planPrice + (currentOrderBump ? dict.bumpPrice : 0.0);
+        const itemName = encodeURIComponent(`GeoPulse AI 14-Day Challenge - Company ID ${id}${currentOrderBump ? ' (+ Regional Expansion)' : ''}`);
+        const customParam = encodeURIComponent(String(id));
+        const returnUrl = encodeURIComponent(`${window.location.origin}/?paypal_success=1&company_id=${id}`);
+        const cancelUrl = encodeURIComponent(`${window.location.origin}/?paypal_cancel=1`);
+        
+        // Redirecionamento oficial PayPal Cartão Internacional / Saldo (sem exigir CPF)
+        const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mwfreitas%40gmail.com&item_name=${itemName}&amount=${total.toFixed(2)}&currency_code=USD&custom=${customParam}&return=${returnUrl}&cancel_return=${cancelUrl}&no_shipping=1`;
+        
+        window.location.href = paypalUrl;
+        return;
+      }
+
+      // No Brasil (PT), segue pelo Mercado Pago Pro / Cartão Parcelado / PIX
       try {
         const res = await fetch(`/api/companies/${id}/mercadopago-preference?order_bump=${currentOrderBump}`, { method: 'POST' });
         const data = await res.json();
         if (data.init_point) {
           window.location.href = data.init_point;
         } else {
-          alert(l === 'en' ? 'Online card gateway is being updated. Please contact our AI support chat to receive your instant USD payment link!' : (l === 'es' ? 'La pasarela de tarjeta está en actualización. ¡Contáctanos en el chat de soporte para tu enlace de pago en USD!' : 'Preferência do Mercado Pago indisponível no momento. Use o PIX Copia e Cola para ativação imediata!'));
+          alert('Preferência do Mercado Pago indisponível no momento. Use o PIX Copia e Cola para ativação imediata!');
         }
       } catch (e) {
-        alert(l === 'en' ? 'Error connecting to payment gateway.' : (l === 'es' ? 'Error al conectar con la pasarela de pago.' : 'Erro ao conectar ao Mercado Pago. Utilize o código PIX informado no modal.'));
+        alert('Erro ao conectar ao Mercado Pago. Utilize o código PIX informado no modal.');
       }
     }
 
@@ -1491,12 +1509,21 @@
         }
       }
 
-      // 4. Verifica retorno de pagamento do Mercado Pago na URL (?mp_success=1&company_id=...)
+      // 4. Verifica retorno de pagamento do Mercado Pago ou PayPal na URL
       const mpSuccess = urlParams.get('mp_success');
+      const paypalSuccess = urlParams.get('paypal_success');
       const companyId = urlParams.get('company_id');
       const clientToken = urlParams.get('client_token');
 
-      if (mpSuccess === '1' && companyId) {
+      if ((mpSuccess === '1' || paypalSuccess === '1') && companyId) {
+        if (paypalSuccess === '1') {
+          // Avisa o backend para registrar a confirmação de pagamento PayPal
+          fetch(`/api/companies/${companyId}/payment-claim`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ payment_ref: 'PayPal mwfreitas@gmail.com', method: 'paypal' })
+          }).catch(console.error);
+        }
         try {
           const verifyRes = await fetch(`/api/companies/${companyId}/verify-payment`, {
             method: 'POST',

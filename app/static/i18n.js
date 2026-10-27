@@ -565,7 +565,7 @@ const I18N = {
       bumpBadge: "+ $15.00 USD",
       bumpDesc: "Semantic shielding in up to <strong>3 neighboring cities</strong> in your region + Kit with <strong>High-Converting Bio & 5 AI Authority Posts</strong> for Instagram and LinkedIn.",
       totalLabel: "Total to Pay (One-Time Fee):",
-      mpBtn: "💳 Pay with Credit Card / PayPal (USD)",
+      mpBtn: "💳 Pay with PayPal / International Credit Card ($47 USD)",
       pixBtn: "✅ I have sent the payment — Start My 14-Day Challenge",
       footerGuar: "🛡️ 7-Day Ironclad Guarantee",
       footerSec: "🔒 100% Secure Environment"
@@ -849,7 +849,7 @@ const I18N = {
       bumpBadge: "+ $15.00 USD",
       bumpDesc: "Blindaje semántico en hasta <strong>3 ciudades vecinas</strong> de tu región + Kit con <strong>Biografía de Alta Conversión y 5 Posts de Autoridad IA</strong> para Instagram y LinkedIn.",
       totalLabel: "Total a Pagar (Tarifa Única):",
-      mpBtn: "💳 Pagar con Tarjeta / PayPal (USD)",
+      mpBtn: "💳 Pagar con PayPal / Tarjeta Internacional ($47 USD)",
       pixBtn: "✅ Ya realicé el pago — Iniciar Mi Desafío de 14 Días",
       footerGuar: "🛡️ Garantía Blindada de 7 Días",
       footerSec: "🔒 Ambiente 100% Seguro"
@@ -1376,7 +1376,17 @@ function applyLanguage(lang) {
   if (currSym) currSym.textContent = dict.currencySymbol;
 
   const mpBtn = document.getElementById("checkout-mp-btn");
-  if (mpBtn) mpBtn.innerHTML = `<span>💳</span> ${dict.checkout.mpBtn.replace("💳 ", "")}`;
+  if (mpBtn) {
+    const isBump = window.currentOrderBump || false;
+    const price = dict.planPrice + (isBump ? dict.bumpPrice : 0);
+    if (lang === "en") {
+      mpBtn.innerHTML = `<span>💳</span> Pay with PayPal or Card ($${price.toFixed(2)} USD)`;
+    } else if (lang === "es") {
+      mpBtn.innerHTML = `<span>💳</span> Pagar con PayPal o Tarjeta ($${price.toFixed(2)} USD)`;
+    } else {
+      mpBtn.innerHTML = `<span>💳</span> ${dict.checkout.mpBtn.replace("💳 ", "")}`;
+    }
+  }
 
   const pixBox = document.getElementById("pix-payment-box");
   if (pixBox) {

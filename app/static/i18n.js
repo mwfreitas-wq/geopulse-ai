@@ -38,6 +38,8 @@ const I18N = {
     heroHeadline: 'Se um cliente abrir o <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT agora</span> na sua cidade, quem a IA recomenda?',
     heroParagraph: "Descubra sua nota gratuitamente em <strong>10 segundos</strong>. E se você estiver invisível, ative nosso <strong>Desafio de 14 Dias</strong>: nossa Inteligência Artificial assume o trabalho pesado e executa <strong>14 ações técnicas diárias</strong> para fazer sua empresa ou nome profissional subir no ranking do ChatGPT, Gemini e Perplexity.",
     heroVideoTitle: "🎥 Apresentação Oficial GeoPulse AI (0:40s)",
+    videoBadge: "Explicação Rápida (40s)",
+    videoListen: "🔊 Clique para ouvir",
 
     simBtnDay0: "Dia 0 (Hoje)",
     simBtnDay14: "Dia 14 (Pós-IA)",
@@ -192,6 +194,8 @@ const I18N = {
     heroHeadline: 'If a customer opens <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT right now</span> in your city, who does the AI recommend?',
     heroParagraph: "Discover your visibility score for free in <strong>10 seconds</strong>. And if you are invisible, activate our <strong>14-Day Challenge</strong>: our Artificial Intelligence takes over the heavy lifting and executes <strong>14 daily technical actions</strong> to elevate your brand to the top of ChatGPT, Gemini, and Perplexity.",
     heroVideoTitle: "🎥 Official GeoPulse AI Presentation (0:40s)",
+    videoBadge: "Quick Overview (40s)",
+    videoListen: "🔊 Click to listen",
 
     simBtnDay0: "Day 0 (Today)",
     simBtnDay14: "Day 14 (Post-AI)",
@@ -346,6 +350,8 @@ const I18N = {
     heroHeadline: 'Si un cliente abre <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT ahora</span> en tu ciudad, ¿a quién recomienda la IA?',
     heroParagraph: "Descubre tu puntuación de visibilidad gratis en <strong>10 segundos</strong>. Y si eres invisible, activa nuestro <strong>Desafío de 14 Días</strong>: nuestra Inteligencia Artificial asume el trabajo pesado y ejecuta <strong>14 acciones técnicas diarias</strong> para elevar tu marca a la cima de ChatGPT, Gemini y Perplexity.",
     heroVideoTitle: "🎥 Presentación Oficial GeoPulse AI (0:40s)",
+    videoBadge: "Explicación Rápida (40s)",
+    videoListen: "🔊 Clic para escuchar",
 
     simBtnDay0: "Día 0 (Hoy)",
     simBtnDay14: "Día 14 (Con IA)",
@@ -589,6 +595,32 @@ function applyLanguage(lang) {
 
   const heroVideoTitle = document.getElementById("hero-video-title");
   if (heroVideoTitle) heroVideoTitle.textContent = dict.heroVideoTitle;
+
+  const vidBadge = document.getElementById("video-overlay-badge");
+  if (vidBadge && dict.videoBadge) vidBadge.textContent = dict.videoBadge;
+
+  const vidListen = document.getElementById("video-overlay-listen");
+  if (vidListen && dict.videoListen) vidListen.textContent = dict.videoListen;
+
+  // Gerenciamento de Vídeo Multilíngue e Legendas
+  const videoElem = document.getElementById("hero-pitch-video");
+  if (videoElem) {
+    // 1. Se existir vídeo gravado no idioma, carrega ele, senão mantém o padrão
+    const specificVideoUrl = `/static/videos/apresentacao_${lang}.mp4`;
+    const defaultVideoUrl = `/static/videos/apresentacao.mp4`;
+
+    // 2. Ativa automaticamente a faixa de legendas correspondente ao idioma
+    if (videoElem.textTracks && videoElem.textTracks.length > 0) {
+      for (let i = 0; i < videoElem.textTracks.length; i++) {
+        const track = videoElem.textTracks[i];
+        if (track.language === lang) {
+          track.mode = "showing";
+        } else {
+          track.mode = "hidden";
+        }
+      }
+    }
+  }
 
   // Simulator
   const simBtn0 = document.getElementById("hero-sim-before-btn");

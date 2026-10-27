@@ -685,6 +685,7 @@ async def activate_paid_geo_engine(
 
     entity_type = company.entity_type or "company"
     prof_reg = company.professional_registry or ""
+    detected_lang = AuditorService.detect_entity_language("pt", company.city_region, company.niche, company.url, company.name)
 
     # 1. Reconstrói o cenário ANTES da ativação para comparação fiel lado a lado
     before_profile = AuditorService.compute_real_site_profile(
@@ -755,7 +756,8 @@ async def activate_paid_geo_engine(
         photo_url=company.photo_url or "",
         rating_value=company.rating_value,
         review_count=company.review_count,
-        services_list=company.services_list or ""
+        services_list=company.services_list or "",
+        language=detected_lang
     )
 
     created_assets = []
@@ -780,7 +782,8 @@ async def activate_paid_geo_engine(
         api_keys=keys,
         is_paid=True,
         entity_type=entity_type,
-        professional_registry=prof_reg
+        professional_registry=prof_reg,
+        language=detected_lang
     )
 
     created_audits = []

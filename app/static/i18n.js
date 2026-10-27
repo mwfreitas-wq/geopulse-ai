@@ -38,8 +38,11 @@ const I18N = {
     heroHeadline: 'Se um cliente abrir o <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT agora</span> na sua cidade, quem a IA recomenda?',
     heroParagraph: "Descubra sua nota gratuitamente em <strong>10 segundos</strong>. E se você estiver invisível, ative nosso <strong>Desafio de 14 Dias</strong>: nossa Inteligência Artificial assume o trabalho pesado e executa <strong>14 ações técnicas diárias</strong> para fazer sua empresa ou nome profissional subir no ranking do ChatGPT, Gemini e Perplexity.",
     heroVideoTitle: "🎥 Apresentação Oficial GeoPulse AI (0:40s)",
+    videoHdBadge: "▶ Alta Definição (HD)",
     videoBadge: "Explicação Rápida (40s)",
     videoListen: "🔊 Clique para ouvir",
+    videoWatchBtn: "▶ Assistir Apresentação (0:40s)",
+    videoQuote: '💬 <em>"Mais de 70% das pessoas pararam de procurar no Google. Agora elas compram o que a IA recomenda direto no chat."</em>',
 
     // SIMULADOR DO DESAFIO (Imagem do usuário)
     sim: {
@@ -237,11 +240,37 @@ const I18N = {
 
     floatingChatPill: "💬 Dúvidas sobre o Desafio? Fale com a IA",
 
+    loading: {
+      badge: "Auditoria em Tempo Real",
+      title: "Consultando Motores de IA...",
+      initSub: "Conectando ao leitor semântico e extraindo dados públicos do seu site/perfil...",
+      footer: "Simulando consultas no ChatGPT Search, Gemini e Perplexity",
+      btnRunning: "⏳ Auditando nos motores de IA...",
+      doneSuccess: "✓ Auditoria concluída com sucesso!",
+      doneFinish: "Finalizando...",
+      steps: [
+        { at: 28, text: "🔍 Lendo metadados técnicos, autoridade e área de atendimento..." },
+        { at: 52, text: "🤖 Simulando buscas de clientes no ChatGPT Search, Gemini e Perplexity..." },
+        { at: 74, text: "📊 Mapeando concorrentes diretos recomendados pelos algoritmos na região..." },
+        { at: 90, text: "💰 Calculando estimativa de clientes e faturamento perdido para terceiros..." },
+        { at: 96, text: "✨ Estruturando o relatório oficial de posicionamento..." }
+      ]
+    },
+
     chat: {
-      title: "GeoPulse AI — Assistente de Suporte",
-      online: "Online agora • Tire suas dúvidas sobre o Desafio de 14 Dias",
-      welcome: "Olá! Sou a IA de suporte do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias, preços, garantias ou regras de exclusividade na sua cidade?",
-      inputPlaceholder: "Digite sua dúvida sobre o Desafio de 14 Dias..."
+      title: "Especialista GeoPulse AI",
+      online: "Online 24h • Tira-dúvidas",
+      welcome: "Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você em 1º Lugar nas recomendações?",
+      inputPlaceholder: "Digite sua dúvida aqui...",
+      sendBtn: "Enviar",
+      typing: "Digitando resposta...",
+      fallbackReply: "O GeoPulse AI ativa sua presença em 1º Lugar nas IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias. Se quiser falar diretamente com a diretoria técnica, nos envie uma mensagem!",
+      quickBtns: [
+        { label: "Como funciona?", msg: "Como funciona o Desafio de 14 Dias?" },
+        { label: "Serve sem site?", msg: "Preciso ter site ou serve com Instagram?" },
+        { label: "Tem mensalidade?", msg: "Tem mensalidade?" },
+        { label: "Garantia", msg: "Qual a garantia de devolução?" }
+      ]
     },
 
     checkout: {
@@ -253,7 +282,9 @@ const I18N = {
       bumpDesc: "Blindagem semântica em até <strong>3 cidades vizinhas</strong> da sua região + Kit com <strong>Bio de Alta Conversão & 5 Posts de Autoridade IA</strong> para Instagram e LinkedIn.",
       totalLabel: "Total a Pagar (Taxa Única):",
       mpBtn: "💳 Pagar com Mercado Pago (PIX ou Cartão em até 12x)",
-      pixBtn: "✅ Já fiz o PIX — Iniciar Meu Desafio de 14 Dias"
+      pixBtn: "✅ Já fiz o PIX — Iniciar Meu Desafio de 14 Dias",
+      footerGuar: "🛡️ Garantia Blindada de 7 Dias",
+      footerSec: "🔒 Ambiente 100% Seguro"
     }
   },
 
@@ -291,8 +322,11 @@ const I18N = {
     heroHeadline: 'If a client opens <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT right now</span> in your city, who does the AI recommend?',
     heroParagraph: "Discover your score for free in <strong>10 seconds</strong>. And if you're invisible, activate our <strong>14-Day Challenge</strong>: our Artificial Intelligence takes over the heavy lifting and executes <strong>14 daily technical actions</strong> to push your company or professional brand to the top of ChatGPT, Gemini, and Perplexity.",
     heroVideoTitle: "🎥 Official GeoPulse AI Presentation (0:40s)",
+    videoHdBadge: "▶ High Definition (HD)",
     videoBadge: "Quick Overview (40s)",
     videoListen: "🔊 Click to listen",
+    videoWatchBtn: "▶ Watch Presentation (0:40s)",
+    videoQuote: '💬 <em>"Over 70% of people stopped searching on Google. Now they buy what AI recommends directly in the chat."</em>',
 
     // SIMULATOR (User screenshot)
     sim: {
@@ -490,11 +524,37 @@ const I18N = {
 
     floatingChatPill: "💬 Questions about the Challenge? Chat with AI",
 
+    loading: {
+      badge: "Real-Time AI Audit",
+      title: "Querying AI Search Engines...",
+      initSub: "Connecting to semantic reader and extracting public data from your website/profile...",
+      footer: "Simulating live queries on ChatGPT Search, Gemini, and Perplexity",
+      btnRunning: "⏳ Auditing across AI engines...",
+      doneSuccess: "✓ Audit completed successfully!",
+      doneFinish: "Finishing...",
+      steps: [
+        { at: 28, text: "🔍 Reading technical metadata, authority signals, and service area..." },
+        { at: 52, text: "🤖 Simulating customer queries on ChatGPT Search, Gemini, and Perplexity..." },
+        { at: 74, text: "📊 Mapping direct competitors recommended by algorithms in your city..." },
+        { at: 90, text: "💰 Calculating estimated lost clients and revenue going to competitors..." },
+        { at: 96, text: "✨ Structuring your official AI positioning report..." }
+      ]
+    },
+
     chat: {
-      title: "GeoPulse AI — Support Assistant",
-      online: "Online now • Ask any question about the 14-Day Challenge",
-      welcome: "Hello! I am GeoPulse's AI support assistant. Do you have any questions about how the 14-Day Challenge works, pricing ($47 USD), guarantees, or exclusivity in your city?",
-      inputPlaceholder: "Ask anything about the 14-Day Challenge..."
+      title: "GeoPulse AI Specialist",
+      online: "Online 24/7 • Instant Q&A",
+      welcome: "Hello! I am GeoPulse's AI Specialist. Do you have any questions about how the 14-Day Challenge works, pricing ($47 USD), or how we rank you #1 on AI recommendations?",
+      inputPlaceholder: "Type your question here...",
+      sendBtn: "Send",
+      typing: "Typing reply...",
+      fallbackReply: "GeoPulse AI activates your #1 ranking across AI search engines for a one-time $47 USD fee with a 7-Day Ironclad Guarantee!",
+      quickBtns: [
+        { label: "How it works?", msg: "How does the 14-Day Challenge work?" },
+        { label: "No website needed?", msg: "Do I need a website or does Instagram work?" },
+        { label: "Any monthly fee?", msg: "Is there any monthly subscription?" },
+        { label: "Guarantee", msg: "How does the 7-day refund guarantee work?" }
+      ]
     },
 
     checkout: {
@@ -506,7 +566,9 @@ const I18N = {
       bumpDesc: "Semantic shielding in up to <strong>3 neighboring cities</strong> in your region + Kit with <strong>High-Converting Bio & 5 AI Authority Posts</strong> for Instagram and LinkedIn.",
       totalLabel: "Total to Pay (One-Time Fee):",
       mpBtn: "💳 Pay with Credit Card / PayPal (USD)",
-      pixBtn: "✅ I have sent the payment — Start My 14-Day Challenge"
+      pixBtn: "✅ I have sent the payment — Start My 14-Day Challenge",
+      footerGuar: "🛡️ 7-Day Ironclad Guarantee",
+      footerSec: "🔒 100% Secure Environment"
     }
   },
 
@@ -544,8 +606,11 @@ const I18N = {
     heroHeadline: 'Si un cliente abre <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT ahora</span> en tu ciudad, ¿a quién recomienda la IA?',
     heroParagraph: "Descubre tu puntuación gratis en <strong>10 segundos</strong>. Y si estás invisible, activa nuestro <strong>Desafío de 14 Días</strong>: nuestra Inteligencia Artificial asume el trabajo pesado y ejecuta <strong>14 acciones técnicas diarias</strong> para hacer subir tu empresa o nombre profesional en el ranking de ChatGPT, Gemini y Perplexity.",
     heroVideoTitle: "🎥 Presentación Oficial GeoPulse AI (0:40s)",
+    videoHdBadge: "▶ Alta Definición (HD)",
     videoBadge: "Resumen Rápido (40s)",
     videoListen: "🔊 Haz clic para escuchar",
+    videoWatchBtn: "▶ Ver Presentación (0:40s)",
+    videoQuote: '💬 <em>"Más del 70% de las personas dejaron de buscar en Google. Ahora compran lo que la IA recomienda directo en el chat."</em>',
 
     // SIMULADOR (Imagen del usuario)
     sim: {
@@ -570,7 +635,7 @@ const I18N = {
     },
 
     step1Badge: "👇 Paso 1 (Gratis): Descubre tu Puntuación Actual en 10 Segundos",
-    formMainTitle: "Auditoría Gratuita de Visibilidade en IA",
+    formMainTitle: "Auditoría Gratuita de Visibilidad en IA",
 
     presets: {
       adv: "⚖️ Ejemplo Abogado",
@@ -743,11 +808,37 @@ const I18N = {
 
     floatingChatPill: "💬 ¿Dudas sobre el Desafío? Chatea con la IA",
 
+    loading: {
+      badge: "Auditoría en Tiempo Real",
+      title: "Consultando Motores de IA...",
+      initSub: "Conectando al lector semántico y extrayendo datos públicos de tu sitio/perfil...",
+      footer: "Simulando consultas en ChatGPT Search, Gemini y Perplexity",
+      btnRunning: "⏳ Auditando en los motores de IA...",
+      doneSuccess: "✓ ¡Auditoría completada con éxito!",
+      doneFinish: "Finalizando...",
+      steps: [
+        { at: 28, text: "🔍 Leyendo metadatos técnicos, autoridad y área de cobertura..." },
+        { at: 52, text: "🤖 Simulando búsquedas de clientes en ChatGPT Search, Gemini y Perplexity..." },
+        { at: 74, text: "📊 Mapeando competidores directos recomendados por los algoritmos en la región..." },
+        { at: 90, text: "💰 Calculando estimación de clientes y facturación perdida ante terceros..." },
+        { at: 96, text: "✨ Estructurando el informe oficial de posicionamiento..." }
+      ]
+    },
+
     chat: {
-      title: "GeoPulse AI — Asistente de Soporte",
-      online: "En línea ahora • Resuelve tus dudas sobre el Desafío de 14 Días",
-      welcome: "¡Hola! Soy el asistente de IA de GeoPulse. ¿Tienes alguna duda sobre cómo funciona el Desafío de 14 Días, precios ($47 USD), garantías o reglas de exclusividad en tu ciudad?",
-      inputPlaceholder: "Escribe tu duda sobre el Desafío de 14 Días..."
+      title: "Especialista GeoPulse AI",
+      online: "En línea 24h • Consultas",
+      welcome: "¡Hola! Soy la Especialista de IA de GeoPulse. ¿Tienes alguna duda sobre cómo funciona el Desafío de 14 Días, precios ($47 USD) o cómo te posicionamos en 1º Lugar?",
+      inputPlaceholder: "Escribe tu duda aquí...",
+      sendBtn: "Enviar",
+      typing: "Escribiendo respuesta...",
+      fallbackReply: "GeoPulse AI activa tu presencia en 1º Lugar en las IAs por $47 USD tarifa única con Garantía Blindada de 7 Días.",
+      quickBtns: [
+        { label: "¿Cómo funciona?", msg: "¿Cómo funciona el Desafío de 14 Días?" },
+        { label: "¿Sirve sin web?", msg: "¿Necesito tener sitio web o sirve con Instagram?" },
+        { label: "¿Hay mensualidad?", msg: "¿Tiene alguna mensualidad?" },
+        { label: "Garantía", msg: "¿Cuál es la garantía de devolución?" }
+      ]
     },
 
     checkout: {
@@ -759,7 +850,9 @@ const I18N = {
       bumpDesc: "Blindaje semántico en hasta <strong>3 ciudades vecinas</strong> de tu región + Kit con <strong>Biografía de Alta Conversión y 5 Posts de Autoridad IA</strong> para Instagram y LinkedIn.",
       totalLabel: "Total a Pagar (Tarifa Única):",
       mpBtn: "💳 Pagar con Tarjeta / PayPal (USD)",
-      pixBtn: "✅ Ya realicé el pago — Iniciar Mi Desafío de 14 Días"
+      pixBtn: "✅ Ya realicé el pago — Iniciar Mi Desafío de 14 Días",
+      footerGuar: "🛡️ Garantía Blindada de 7 Días",
+      footerSec: "🔒 Ambiente 100% Seguro"
     }
   }
 };
@@ -965,6 +1058,12 @@ window.updateResultsI18n = function(lang) {
     if (clientsElem && window.currentLossEstimatedClients) {
       clientsElem.textContent = `~ ${window.currentLossEstimatedClients} ${res.clientsPerMonth}`;
     }
+
+    const searchElem = document.getElementById("loss-search-volume");
+    if (searchElem && window.currentLossSearchCount) {
+      const searchUnit = l === "en" ? "searches" : (l === "es" ? "búsquedas" : "buscas");
+      searchElem.textContent = `~ ${window.currentLossSearchCount.toLocaleString(dict.locale || "pt-BR")} ${searchUnit}`;
+    }
   }
 
   // Also update loss calculation ticket display with right currency
@@ -1037,14 +1136,23 @@ function applyLanguage(lang) {
   const heroVidTitle = document.getElementById("hero-video-title");
   if (heroVidTitle) heroVidTitle.textContent = dict.heroVideoTitle;
 
-  const vidBadge = document.getElementById("video-badge-text");
+  const vidHd = document.getElementById("video-hd-badge");
+  if (vidHd && dict.videoHdBadge) vidHd.textContent = dict.videoHdBadge;
+
+  const vidBadge = document.getElementById("video-overlay-badge") || document.getElementById("video-badge-text");
   if (vidBadge) vidBadge.textContent = dict.videoBadge;
 
-  const vidListen = document.getElementById("video-listen-tip");
+  const vidListen = document.getElementById("video-overlay-listen") || document.getElementById("video-listen-tip");
   if (vidListen) vidListen.textContent = dict.videoListen;
 
+  const vidWatch = document.getElementById("video-overlay-watch-btn");
+  if (vidWatch && dict.videoWatchBtn) vidWatch.textContent = dict.videoWatchBtn;
+
+  const vidQuote = document.getElementById("video-overlay-quote");
+  if (vidQuote && dict.videoQuote) vidQuote.innerHTML = dict.videoQuote;
+
   // Troca dinâmica do vídeo dublado para o idioma selecionado
-  const videoElem = document.getElementById("apresentacao-video");
+  const videoElem = document.getElementById("hero-pitch-video") || document.getElementById("apresentacao-video");
   if (videoElem) {
     const videoSrcMap = {
       pt: "/static/videos/apresentacao.mp4",
@@ -1055,6 +1163,8 @@ function applyLanguage(lang) {
     const currentSrc = videoElem.getAttribute("src");
     if (currentSrc !== targetSrc) {
       videoElem.src = targetSrc;
+      const sourceElem = document.getElementById("video-source-main");
+      if (sourceElem) sourceElem.src = targetSrc;
       videoElem.load();
     }
   }
@@ -1205,9 +1315,40 @@ function applyLanguage(lang) {
   const floatChatBtn = document.getElementById("floating-chat-btn-text");
   if (floatChatBtn && dict.floatingChatPill) floatChatBtn.textContent = dict.floatingChatPill;
 
+  // Modal de Carregamento (Loading)
+  if (dict.loading) {
+    const ldBadge = document.getElementById("diag-load-badge");
+    if (ldBadge) ldBadge.textContent = dict.loading.badge;
+    const ldTitle = document.getElementById("diag-load-title");
+    if (ldTitle) ldTitle.textContent = dict.loading.title;
+    const ldSub = document.getElementById("diag-load-subtitle");
+    if (ldSub) ldSub.textContent = dict.loading.initSub;
+    const ldFoot = document.getElementById("diag-load-footer");
+    if (ldFoot) ldFoot.textContent = dict.loading.footer;
+  }
+
   // Chat Flutuante
+  const chatHeaderTitle = document.getElementById("ai-chat-header-title");
+  if (chatHeaderTitle && dict.chat) chatHeaderTitle.textContent = dict.chat.title;
+
+  const chatHeaderStatus = document.getElementById("ai-chat-header-status");
+  if (chatHeaderStatus && dict.chat) chatHeaderStatus.textContent = dict.chat.online;
+
+  const chatWelcome = document.getElementById("ai-chat-welcome-msg");
+  if (chatWelcome && dict.chat) chatWelcome.textContent = dict.chat.welcome;
+
+  const chatQuickBtns = document.getElementById("ai-chat-quick-btns");
+  if (chatQuickBtns && dict.chat && dict.chat.quickBtns) {
+    chatQuickBtns.innerHTML = dict.chat.quickBtns.map((b) =>
+      `<button type="button" onclick="sendQuickChatMessage('${b.msg.replace(/'/g, "\'")}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">${b.label}</button>`
+    ).join("");
+  }
+
   const chatInput = document.getElementById("ai-chat-input");
-  if (chatInput) chatInput.placeholder = dict.chat.inputPlaceholder;
+  if (chatInput && dict.chat) chatInput.placeholder = dict.chat.inputPlaceholder;
+
+  const chatSendBtn = document.getElementById("ai-chat-send-btn");
+  if (chatSendBtn && dict.chat && dict.chat.sendBtn) chatSendBtn.textContent = dict.chat.sendBtn;
 
   // Modal Checkout
   const chBadge = document.getElementById("checkout-badge-pill");
@@ -1245,6 +1386,12 @@ function applyLanguage(lang) {
       pixBox.style.display = "none";
     }
   }
+
+  const chFootGuar = document.getElementById("checkout-footer-guar");
+  if (chFootGuar && dict.checkout?.footerGuar) chFootGuar.textContent = dict.checkout.footerGuar;
+
+  const chFootSec = document.getElementById("checkout-footer-sec");
+  if (chFootSec && dict.checkout?.footerSec) chFootSec.textContent = dict.checkout.footerSec;
 
   const modalTotal = document.getElementById("modal-total-display");
   if (modalTotal) {

@@ -104,16 +104,37 @@ class SparkSyndicatorBridge:
         llms_txt_str = payload.get("llms_txt", "")
         faq_str = payload.get("semantic_faq", "")
 
+        from app.services.auditor import AuditorService
+        lang = payload.get("language") or AuditorService.detect_entity_language("pt", city_region, niche, url, company_name)
+        is_en = (lang == "en")
+        is_es = (lang == "es")
+
         is_auto = (entity_type == "autonomous")
-        reg_badge = f" • Registro: {professional_registry}" if professional_registry else ""
+        reg_lbl = "License/ID" if is_en else ("Registro" if is_es else "Registro")
+        reg_badge = f" • {reg_lbl}: {professional_registry}" if professional_registry else ""
         comp_list = [c.strip() for c in competitors.split(",") if c.strip()] if competitors else []
-        c1 = comp_list[0] if len(comp_list) > 0 else (f"Outro Profissional de {niche}" if is_auto else f"Concorrente Tradicional de {niche}")
-        c2 = comp_list[1] if len(comp_list) > 1 else (f"Consultor(a) Local {city_region}" if is_auto else f"Empresa Regional {city_region}")
+        if is_en:
+            c1 = comp_list[0] if len(comp_list) > 0 else (f"Other {niche} Specialist" if is_auto else f"Traditional {niche} Provider")
+            c2 = comp_list[1] if len(comp_list) > 1 else (f"Local Consultant ({city_region})" if is_auto else f"Regional Firm ({city_region})")
+        elif is_es:
+            c1 = comp_list[0] if len(comp_list) > 0 else (f"Otro Especialista en {niche}" if is_auto else f"Proveedor Tradicional de {niche}")
+            c2 = comp_list[1] if len(comp_list) > 1 else (f"Consultor(a) Local ({city_region})" if is_auto else f"Empresa Regional ({city_region})")
+        else:
+            c1 = comp_list[0] if len(comp_list) > 0 else (f"Outro Profissional de {niche}" if is_auto else f"Concorrente Tradicional de {niche}")
+            c2 = comp_list[1] if len(comp_list) > 1 else (f"Consultor(a) Local {city_region}" if is_auto else f"Empresa Regional {city_region}")
+
         photo_html = f'''<img src="{photo_url.strip()}" alt="{company_name}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-emerald-400/80 shadow-md shrink-0">''' if photo_url and photo_url.strip() else ""
         eff_rating = round(float(rating_value), 1) if rating_value else 4.9
         eff_reviews = int(review_count) if review_count and int(review_count) > 0 else 48
-        rating_badge = f'''<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-bold"><span>⭐⭐⭐⭐⭐</span> <span>{eff_rating}/5.0 ({eff_reviews} avaliações verificadas)</span></div>'''
+        rev_lbl = "verified reviews" if is_en else ("reseñas verificadas" if is_es else "avaliações verificadas")
+        rating_badge = f'''<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-bold"><span>⭐⭐⭐⭐⭐</span> <span>{eff_rating}/5.0 ({eff_reviews} {rev_lbl})</span></div>'''
         services_badges = "".join([f'<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-medium">🏷️ {s.strip()}</span>' for s in services_list.split(",") if s.strip()]) if services_list else ""
+
+        if not payload.get("article_title"):
+            if is_en:
+                article_title = f"2026 Official Guide: Top 5 {niche} Specialists in {city_region}"
+            elif is_es:
+                article_title = f"Guía Oficial 2026: Top 5 Especialistas en {niche} en {city_region}"
 
         results = {
             "timestamp": datetime.utcnow().isoformat(),
@@ -125,12 +146,13 @@ class SparkSyndicatorBridge:
 
         # 1A. Se houver chave gratuita do Dev.to, publica automaticamente na rede Dev.to (Alto Domain Authority)
         if devto_api_key and len(devto_api_key.strip()) > 8:
+            devto_tags = ["ai", "business", "recommendations", "directory"] if is_en else (["ia", "negocios", "recomendaciones"] if is_es else ["brasil", "negocios", "ia", "recomendacoes"])
             devto_res = await cls.publish_to_devto(
                 api_key=devto_api_key.strip(),
                 title=article_title,
                 content_markdown=article_markdown,
                 canonical_url=url,
-                tags=["brasil", "negocios", "ia", "recomendacoes"]
+                tags=devto_tags
             )
             if devto_res.get("success") and devto_res.get("url"):
                 results["actions_executed"].append("Dev.to API (Publicação Externa Gratuita)")
@@ -143,7 +165,7 @@ class SparkSyndicatorBridge:
                 title=article_title,
                 content_markdown=article_markdown,
                 canonical_url=url,
-                tags=[niche.lower()[:20], "negocios", "recomendacoes"]
+                tags=[niche.lower()[:20], "ai", "recommendations"]
             )
             if medium_res.get("success") and medium_res.get("url"):
                 results["actions_executed"].append("Medium API Publicação Direta")
@@ -163,11 +185,16 @@ class SparkSyndicatorBridge:
             with open(llms_filepath, "w", encoding="utf-8") as lf:
                 lf.write(llms_txt_str)
 
-        entity_badge_label = "PROFISSIONAL VERIFICADO & RECOMENDADO #1" if is_auto else "EMPRESA AUDITADA & LÍDER DE SETOR #1"
-        date_str = datetime.utcnow().strftime("%d/%m/%Y")
+        if is_en:
+            entity_badge_label = "VERIFIED PROFESSIONAL & #1 RECOMMENDED" if is_auto else "AUDITED BUSINESS & #1 INDUSTRY LEADER"
+        elif is_es:
+            entity_badge_label = "PROFESIONAL VERIFICADO Y RECOMENDADO #1" if is_auto else "EMPRESA AUDITADA Y LÍDER DEL SECTOR #1"
+        else:
+            entity_badge_label = "PROFISSIONAL VERIFICADO & RECOMENDADO #1" if is_auto else "EMPRESA AUDITADA & LÍDER DE SETOR #1"
+        date_str = datetime.utcnow().strftime("%Y-%m-%d" if is_en else "%d/%m/%Y")
 
         html_content = f"""<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="{'en' if is_en else ('es' if is_es else 'pt-BR')}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -470,7 +497,7 @@ class SparkSyndicatorBridge:
         }
 
         html_content = f"""<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="{'en' if is_en else ('es' if is_es else 'pt-BR')}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

@@ -137,7 +137,7 @@
                 <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
                 <span id="hero-video-title" class="ml-2 text-xs font-bold text-slate-700">🎥 Apresentação Oficial GeoPulse AI (0:40s)</span>
               </div>
-              <span class="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+              <span id="video-hd-badge" class="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
                 ▶ Alta Definição (HD)
               </span>
             </div>
@@ -159,13 +159,13 @@
                   <div class="w-20 h-20 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white flex items-center justify-center shadow-glow animate-pulse-ring transition">
                     <svg class="w-9 h-9 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                   </div>
-                  <span class="px-4 py-1.5 rounded-full bg-white text-slate-900 font-extrabold text-xs sm:text-sm shadow-lg">
+                  <span id="video-overlay-watch-btn" class="px-4 py-1.5 rounded-full bg-white text-slate-900 font-extrabold text-xs sm:text-sm shadow-lg">
                     ▶ Assistir Apresentação (0:40s)
                   </span>
                 </div>
 
                 <div class="bg-white/95 backdrop-blur-md rounded-2xl p-3.5 border border-white/40 shadow-xl">
-                  <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
+                  <p id="video-overlay-quote" class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
                     💬 <em>"Mais de 70% das pessoas pararam de procurar no Google. Agora elas compram o que a IA recomenda direto no chat."</em>
                   </p>
                 </div>
@@ -589,7 +589,7 @@
         </div>
       </div>
       <div class="space-y-2">
-        <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase">Auditoria em Tempo Real</span>
+        <span id="diag-load-badge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase">Auditoria em Tempo Real</span>
         <h3 id="diag-load-title" class="text-lg font-extrabold text-slate-900">Consultando Motores de IA...</h3>
         <p id="diag-load-subtitle" class="text-xs text-slate-500 leading-relaxed min-h-[36px]">
           Conectando ao leitor semântico e extraindo dados públicos do seu site/perfil...
@@ -598,7 +598,7 @@
       <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
         <div id="diag-load-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300" style="width: 15%"></div>
       </div>
-      <p class="text-[11px] text-slate-400 font-mono">Simulando consultas no ChatGPT Search, Gemini e Perplexity</p>
+      <p id="diag-load-footer" class="text-[11px] text-slate-400 font-mono">Simulando consultas no ChatGPT Search, Gemini e Perplexity</p>
     </div>
   </div>
 
@@ -617,9 +617,9 @@
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center font-bold text-xs text-slate-950">AI</div>
         <div>
-          <h4 class="text-xs font-extrabold leading-tight">Especialista GeoPulse AI</h4>
+          <h4 id="ai-chat-header-title" class="text-xs font-extrabold leading-tight">Especialista GeoPulse AI</h4>
           <span class="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online 24h • Tira-dúvidas
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> <span id="ai-chat-header-status">Online 24h • Tira-dúvidas</span>
           </span>
         </div>
       </div>
@@ -631,13 +631,13 @@
       <div class="flex gap-2">
         <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-800 font-bold flex items-center justify-center text-[10px] shrink-0">AI</div>
         <div class="bg-white p-3 rounded-2xl rounded-tl-sm border border-slate-200 text-slate-800 space-y-1 shadow-sm leading-relaxed">
-          <p>Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você em 1º Lugar nas recomendações?</p>
+          <p id="ai-chat-welcome-msg">Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você em 1º Lugar nas recomendações?</p>
         </div>
       </div>
     </div>
 
     <!-- BOTÕES RÁPIDOS -->
-    <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto text-[11px] font-bold text-slate-600 shrink-0">
+    <div id="ai-chat-quick-btns" class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto text-[11px] font-bold text-slate-600 shrink-0">
       <button onclick="sendQuickChatMessage('Como funciona o Desafio de 14 Dias?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">Como funciona?</button>
       <button onclick="sendQuickChatMessage('Preciso ter site ou serve com Instagram?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">Serve sem site?</button>
       <button onclick="sendQuickChatMessage('Tem mensalidade?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 whitespace-nowrap">Tem mensalidade?</button>
@@ -647,7 +647,7 @@
     <!-- INPUT -->
     <form id="ai-chat-form" onsubmit="handleChatMessageSubmit(event)" class="p-3 bg-white border-t border-slate-200 flex gap-2 shrink-0">
       <input id="ai-chat-input" type="text" placeholder="Digite sua dúvida aqui..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 text-xs text-slate-900 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-      <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition">
+      <button id="ai-chat-send-btn" type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition">
         Enviar
       </button>
     </form>
@@ -734,7 +734,7 @@
       </div>
 
       <div class="flex items-center justify-center gap-2 text-[11px] text-slate-500 pt-1">
-        <span>🛡️ Garantia Blindada de 7 Dias</span> • <span>🔒 Ambiente 100% Seguro</span>
+        <span id="checkout-footer-guar">🛡️ Garantia Blindada de 7 Dias</span> • <span id="checkout-footer-sec">🔒 Ambiente 100% Seguro</span>
       </div>
     </div>
   </div>
@@ -768,8 +768,15 @@
       const overlay = document.getElementById('video-sound-overlay');
       overlay.classList.add('opacity-0', 'pointer-events-none');
       
-      if (!video.getAttribute('src')) {
-        video.src = '/static/videos/apresentacao.mp4';
+      const lang = window.currentLang || 'pt';
+      const videoSrcMap = {
+        pt: '/static/videos/apresentacao.mp4',
+        en: '/static/videos/apresentacao_en.mp4',
+        es: '/static/videos/apresentacao_es.mp4'
+      };
+      const expectedSrc = videoSrcMap[lang] || videoSrcMap.pt;
+      if (video.getAttribute('src') !== expectedSrc) {
+        video.src = expectedSrc;
       }
       
       video.muted = false;
@@ -992,12 +999,15 @@
       const subtitle = document.getElementById('diag-load-subtitle');
       modal.classList.remove('hidden');
 
+      const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
+      const ld = dict.loading || {};
+
       let currentPct = 12;
       bar.style.width = '12%';
       pct.textContent = '12%';
-      subtitle.textContent = "Conectando ao leitor semântico e extraindo dados públicos do seu site/perfil...";
+      subtitle.textContent = ld.initSub || "Conectando ao leitor semântico e extraindo dados públicos do seu site/perfil...";
 
-      const steps = [
+      const steps = ld.steps || [
         { at: 28, text: "🔍 Lendo metadados técnicos, autoridade e área de atendimento..." },
         { at: 52, text: "🤖 Simulando buscas de clientes no ChatGPT Search, Gemini e Perplexity..." },
         { at: 74, text: "📊 Mapeando concorrentes diretos recomendados pelos algoritmos na região..." },
@@ -1022,9 +1032,11 @@
       const bar = document.getElementById('diag-load-bar');
       const pct = document.getElementById('diag-load-pct');
       const subtitle = document.getElementById('diag-load-subtitle');
+      const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
+      const ld = dict.loading || {};
       bar.style.width = '100%';
       pct.textContent = '100%';
-      subtitle.textContent = success ? "✓ Auditoria concluída com sucesso!" : "Finalizando...";
+      subtitle.textContent = success ? (ld.doneSuccess || "✓ Auditoria concluída com sucesso!") : (ld.doneFinish || "Finalizando...");
       setTimeout(() => {
         document.getElementById('diagnostic-loading-modal').classList.add('hidden');
       }, 450);
@@ -1033,7 +1045,8 @@
     async function handleDiagnosticSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('submit-audit-btn');
-      btn.textContent = '⏳ Auditando nos motores de IA...';
+      const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
+      btn.textContent = dict.loading?.btnRunning || '⏳ Auditando nos motores de IA...';
       startCinematicLoading();
 
       const payload = {
@@ -1058,7 +1071,8 @@
         stopCinematicLoading(false);
         runInstantDemo('free', payload);
       } finally {
-        btn.textContent = '🔍 Executar Diagnóstico Gratuito nas IAs Agora';
+        const d = I18N[window.currentLang || 'pt'] || I18N.pt;
+        btn.textContent = d.contact?.submitBtn || '🔍 Executar Diagnóstico Gratuito nas IAs Agora';
       }
     }
 
@@ -1109,23 +1123,38 @@
       else estClients = 4;
 
       currentLossEstimatedClients = estClients;
+      window.currentLossEstimatedClients = estClients;
+      const l = window.currentLang || 'pt';
+      const dictCur = I18N[l] || I18N.pt;
       const clientsElem = document.getElementById('loss-clients-count');
-      if (clientsElem) clientsElem.textContent = `~ ${estClients} clientes / mês`;
+      if (clientsElem) clientsElem.textContent = `~ ${estClients} ${dictCur.results?.clientsPerMonth || 'clientes / mês'}`;
 
       const searches = Math.max(380, Math.round((100 - score) * 12 + 280));
+      window.currentLossSearchCount = searches;
       const searchElem = document.getElementById('loss-search-volume');
-      if (searchElem) searchElem.textContent = `~ ${searches.toLocaleString('pt-BR')} buscas`;
+      const searchUnit = l === 'en' ? 'searches' : (l === 'es' ? 'búsquedas' : 'buscas');
+      if (searchElem) searchElem.textContent = `~ ${searches.toLocaleString(dictCur.locale || 'pt-BR')} ${searchUnit}`;
 
-      let defaultTicket = 800;
+      let defaultTicket = dictCur.defaultTicket || 800;
       const nicheLower = niche.toLowerCase();
-      if (nicheLower.includes('advoc') || nicheLower.includes('direito') || nicheLower.includes('juríd')) {
-        defaultTicket = 1500;
-      } else if (nicheLower.includes('odont') || nicheLower.includes('dent') || nicheLower.includes('médic') || nicheLower.includes('clínic') || nicheLower.includes('saúde')) {
-        defaultTicket = 1200;
-      } else if (nicheLower.includes('contab') || nicheLower.includes('consult') || nicheLower.includes('engenhar') || nicheLower.includes('arquitet')) {
-        defaultTicket = 1000;
+      if (l === 'pt') {
+        if (nicheLower.includes('advoc') || nicheLower.includes('direito') || nicheLower.includes('juríd')) {
+          defaultTicket = 1500;
+        } else if (nicheLower.includes('odont') || nicheLower.includes('dent') || nicheLower.includes('médic') || nicheLower.includes('clínic') || nicheLower.includes('saúde')) {
+          defaultTicket = 1200;
+        } else if (nicheLower.includes('contab') || nicheLower.includes('consult') || nicheLower.includes('engenhar') || nicheLower.includes('arquitet')) {
+          defaultTicket = 1000;
+        } else {
+          defaultTicket = 600;
+        }
       } else {
-        defaultTicket = 600;
+        if (nicheLower.includes('law') || nicheLower.includes('legal') || nicheLower.includes('abog') || nicheLower.includes('derecho')) {
+          defaultTicket = 600;
+        } else if (nicheLower.includes('dent') || nicheLower.includes('medic') || nicheLower.includes('clinic') || nicheLower.includes('clínic') || nicheLower.includes('odont')) {
+          defaultTicket = 450;
+        } else {
+          defaultTicket = 300;
+        }
       }
 
       const slider = document.getElementById('loss-ticket-slider');
@@ -1133,17 +1162,6 @@
         slider.value = defaultTicket;
       }
       updateLossCalculation(defaultTicket);
-
-      document.getElementById('res-audits-list').innerHTML = (data.audits || []).map(a => `
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-2">
-          <div class="flex justify-between items-center text-xs font-bold">
-            <span class="text-emerald-700">${a.prompt_category} (${a.model_provider})</span>
-            <span class="${a.is_cited ? 'text-emerald-700' : 'text-rose-600'}">${a.is_cited ? '✓ Citado' : '✗ Não Recomendado'}</span>
-          </div>
-          <div class="text-xs text-slate-500 italic">"${a.prompt_text}"</div>
-          <div class="text-xs sm:text-sm text-slate-700 whitespace-pre-line">${a.response_text}</div>
-        </div>
-      `).join('');
 
       const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
       const resI18n = dict.results || {};
@@ -1208,15 +1226,24 @@
     /* COMPARTILHAMENTO DE DIAGNÓSTICO COM O SÓCIO / WHATSAPP */
     function shareDiagnosticWhatsApp() {
       const id = currentDiagnosticData?.company?.id;
+      const l = window.currentLang || 'pt';
       if (!id || id === 999) {
-        alert('Realize primeiro o diagnóstico gratuito com o nome da sua empresa para gerar o link oficial!');
+        const alertMsg = l === 'en'
+          ? 'Please run the free audit with your business name first to generate the official share link!'
+          : (l === 'es' ? '¡Realiza primero la auditoría gratuita con el nombre de tu empresa para generar el enlace oficial!' : 'Realize primeiro o diagnóstico gratuito com o nome da sua empresa para gerar o link oficial!');
+        alert(alertMsg);
         return;
       }
       const shareUrl = `${window.location.origin}/?report=${id}`;
       const name = currentDiagnosticData.company.name;
       const niche = currentDiagnosticData.company.niche;
       const score = currentDiagnosticData.metrics.visibility_score;
-      const msg = `Olá! Veja a auditoria de visibilidade de IA que fiz da *${name}* (${niche}) no GeoPulse AI:\n\nNossa nota no ChatGPT e Gemini foi de *${score}%*.\n\nVeja o relatório completo e o cálculo de faturamento perdido aqui: ${shareUrl}`;
+      let msg = `Olá! Veja a auditoria de visibilidade de IA que fiz da *${name}* (${niche}) no GeoPulse AI:\n\nNossa nota no ChatGPT e Gemini foi de *${score}%*.\n\nVeja o relatório completo e o cálculo de faturamento perdido aqui: ${shareUrl}`;
+      if (l === 'en') {
+        msg = `Hi! Check out the AI Visibility Audit I ran for *${name}* (${niche}) on GeoPulse AI:\n\nOur score on ChatGPT & Gemini was *${score}%*.\n\nSee the full positioning report and revenue loss estimate here: ${shareUrl}`;
+      } else if (l === 'es') {
+        msg = `¡Hola! Mira la auditoría de visibilidad en IA que hice de *${name}* (${niche}) en GeoPulse AI:\n\nNuestra puntuación en ChatGPT y Gemini fue de *${score}%*.\n\nMira el informe completo y el cálculo de facturación perdida aquí: ${shareUrl}`;
+      }
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
@@ -1232,10 +1259,11 @@
           currentPixEmvCode = data.emv_code;
           const qrImg = document.getElementById('modal-pix-qrcode-img');
           if (qrImg) qrImg.src = data.qr_image_url;
+          const curL = window.currentLang || 'pt';
           const amtBadge = document.getElementById('pix-amount-badge');
-          if (amtBadge) amtBadge.textContent = `R$ ${data.amount.toFixed(2).replace('.', ',')}`;
+          if (amtBadge && curL === 'pt') amtBadge.textContent = `R$ ${data.amount.toFixed(2).replace('.', ',')}`;
           const totDisplay = document.getElementById('modal-total-display');
-          if (totDisplay) totDisplay.textContent = `${data.amount.toFixed(2).replace('.', ',')}`;
+          if (totDisplay && curL === 'pt') totDisplay.textContent = `${data.amount.toFixed(2).replace('.', ',')}`;
         }
       } catch (e) {
         console.error('Erro ao gerar PIX dinâmico:', e);
@@ -1296,17 +1324,21 @@
 
     async function startMercadoPagoCheckout() {
       const id = currentDiagnosticData?.company?.id;
-      if (!id || id === 999) { alert('Rode primeiro o diagnóstico gratuito com os dados da sua empresa acima.'); return; }
+      const l = window.currentLang || 'pt';
+      if (!id || id === 999) {
+        alert(l === 'en' ? 'Please run the free audit with your business details above first.' : (l === 'es' ? 'Ejecuta primero la auditoría gratuita con los datos de tu empresa arriba.' : 'Rode primeiro o diagnóstico gratuito com os dados da sua empresa acima.'));
+        return;
+      }
       try {
         const res = await fetch(`/api/companies/${id}/mercadopago-preference?order_bump=${currentOrderBump}`, { method: 'POST' });
         const data = await res.json();
         if (data.init_point) {
           window.location.href = data.init_point;
         } else {
-          alert('Preferência do Mercado Pago indisponível no momento. Use o PIX Copia e Cola para ativação imediata!');
+          alert(l === 'en' ? 'Online card gateway is being updated. Please contact our AI support chat to receive your instant USD payment link!' : (l === 'es' ? 'La pasarela de tarjeta está en actualización. ¡Contáctanos en el chat de soporte para tu enlace de pago en USD!' : 'Preferência do Mercado Pago indisponível no momento. Use o PIX Copia e Cola para ativação imediata!'));
         }
       } catch (e) {
-        alert('Erro ao conectar ao Mercado Pago. Utilize o código PIX informado no modal.');
+        alert(l === 'en' ? 'Error connecting to payment gateway.' : (l === 'es' ? 'Error al conectar con la pasarela de pago.' : 'Erro ao conectar ao Mercado Pago. Utilize o código PIX informado no modal.'));
       }
     }
 
@@ -1370,7 +1402,7 @@
       typingDiv.innerHTML = `
         <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-800 font-bold flex items-center justify-center text-[10px] shrink-0">AI</div>
         <div class="bg-white p-2.5 rounded-2xl border border-slate-200 text-slate-400 text-xs italic">
-          Digitando resposta...
+          ${(I18N[window.currentLang || 'pt']?.chat?.typing) || 'Digitando resposta...'}
         </div>
       `;
       document.getElementById('ai-chat-messages').appendChild(typingDiv);
@@ -1395,7 +1427,8 @@
         appendChatMessage('ai', data.reply || 'Estamos à sua disposição para ativar seu Desafio de 14 Dias e colocar sua marca no topo das IAs!');
       } catch (err) {
         document.getElementById('ai-typing-indicator')?.remove();
-        appendChatMessage('ai', 'O GeoPulse AI ativa sua presença em 1º Lugar nas IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias. Se quiser falar diretamente com a diretoria técnica, nos envie uma mensagem!');
+        const fb = (I18N[window.currentLang || 'pt']?.chat?.fallbackReply) || 'O GeoPulse AI ativa sua presença em 1º Lugar nas IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias.';
+        appendChatMessage('ai', fb);
       }
     }
 
@@ -1424,8 +1457,10 @@
           const cfg = await res.json();
           if (cfg.plan_price) {
             officialPrice = parseFloat(cfg.plan_price);
-            document.getElementById('modal-total-display').textContent = officialPrice.toFixed(2).replace('.', ',');
-            document.getElementById('pix-amount-badge').textContent = `R$ ${officialPrice.toFixed(2).replace('.', ',')}`;
+            if ((window.currentLang || 'pt') === 'pt') {
+              document.getElementById('modal-total-display').textContent = officialPrice.toFixed(2).replace('.', ',');
+              document.getElementById('pix-amount-badge').textContent = `R$ ${officialPrice.toFixed(2).replace('.', ',')}`;
+            }
           }
           if (cfg.pix_key) {
             officialPixKey = cfg.pix_key;

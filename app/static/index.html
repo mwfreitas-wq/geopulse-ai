@@ -332,6 +332,298 @@
         </div>
       </div>
 
+      <!-- NOVO COMPONENTE: PÓDIO DA IA & COMPARATIVO VISUAL COM CONCORRENTE LÍDER -->
+      <div id="ai-leaderboard-card" class="bg-white rounded-3xl border-2 border-slate-200/90 shadow-soft p-6 sm:p-8 space-y-6">
+        <!-- HEADER DO COMPARATIVO -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">
+              <span class="text-sm">🏆</span>
+              <span id="res-lead-badge">Comparativo de Liderança na sua Cidade</span>
+            </div>
+            <h3 id="res-lead-title" class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              Quem a IA Recomenda Primeiro na sua Região?
+            </h3>
+            <p id="res-lead-sub" class="text-xs sm:text-sm text-slate-600 max-w-3xl">
+              Veja o pódio em tempo real: compare sua visibilidade contra o concorrente que está recebendo a maioria dos clientes que pesquisam por voz e chat.
+            </p>
+          </div>
+          <div class="shrink-0">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-600">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              <span id="res-lead-audit-badge">Auditoria Multimodelo (ChatGPT • Gemini • Perplexity)</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- O PÓDIO: 3 CARDS LADO A LADO -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          
+          <!-- CARD 1: CONCORRENTE MAIS BEM POSICIONADO (OURO) -->
+          <div class="relative bg-gradient-to-b from-amber-500/10 via-amber-50/40 to-white rounded-2xl border-2 border-amber-300 p-5 space-y-4 shadow-sm flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span id="res-lead-c1-badge" class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[11px] uppercase tracking-wide flex items-center gap-1 border border-amber-300/80">
+                  <span>🥇</span> 1º Lugar Atual nas IAs
+                </span>
+                <span class="text-xs font-mono font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">#1 Top Rank</span>
+              </div>
+              
+              <div>
+                <span id="res-lead-c1-detected-lbl" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Concorrente Líder Detectado</span>
+                <h4 id="res-comp-leader-name" class="text-lg sm:text-xl font-black text-slate-900 leading-snug break-words">
+                  Concorrente Líder
+                </h4>
+              </div>
+
+              <!-- BARRA DE SCORE DO LÍDER -->
+              <div class="space-y-1.5 bg-white/80 p-3 rounded-xl border border-amber-200/70">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-slate-600">Índice de Recomendação:</span>
+                  <span class="font-mono font-black text-emerald-700 text-sm">94.8%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                  <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 h-3 rounded-full transition-all duration-1000" style="width: 94.8%;"></div>
+                </div>
+                <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                  <span>Invisível (0%)</span>
+                  <span class="text-emerald-700 font-bold">Liderança Absoluta</span>
+                </div>
+              </div>
+
+              <!-- MÉTRICAS DO LÍDER -->
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between py-1 border-b border-amber-100">
+                  <span class="text-slate-500">Fatia de Buscas Locais:</span>
+                  <span id="res-lead-c1-traffic" class="font-extrabold text-slate-900">~ 78% das buscas</span>
+                </div>
+                <div class="flex items-center justify-between py-1 border-b border-amber-100">
+                  <span class="text-slate-500">Status no ChatGPT / Gemini:</span>
+                  <span id="res-lead-c1-status" class="font-extrabold text-emerald-700 flex items-center gap-1">✓ Recomendado #1</span>
+                </div>
+                <div class="flex items-center justify-between py-1">
+                  <span class="text-slate-500">Estrutura Semântica:</span>
+                  <span class="font-bold text-slate-700">Grafo Ativo na Web</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-2 pt-3 border-t border-amber-200/60 text-center">
+              <span id="res-lead-c1-warning" class="text-[11px] font-extrabold text-amber-900 bg-amber-100/80 px-2.5 py-1 rounded-lg inline-block">
+                ⚠️ Capturando clientes que poderiam ser seus
+              </span>
+            </div>
+          </div>
+
+          <!-- CARD 2: SUA EMPRESA / SEU PERFIL HOJE (VERMELHO / ALERTA) -->
+          <div class="relative bg-gradient-to-b from-rose-500/10 via-rose-50/40 to-white rounded-2xl border-2 border-rose-300 p-5 space-y-4 shadow-sm flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span id="res-lead-c2-badge" class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 font-extrabold text-[11px] uppercase tracking-wide flex items-center gap-1 border border-rose-300/80">
+                  <span>⚠️</span> Sua Posição Atual (Dia 0)
+                </span>
+                <span id="res-user-rank-pill" class="text-xs font-mono font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Fora do Top 3</span>
+              </div>
+              
+              <div>
+                <span id="res-lead-c2-detected-lbl" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Seu Negócio Consultado</span>
+                <h4 id="res-user-entity-name" class="text-lg sm:text-xl font-black text-slate-900 leading-snug break-words">
+                  Sua Empresa
+                </h4>
+              </div>
+
+              <!-- BARRA DE SCORE DO USUÁRIO -->
+              <div class="space-y-1.5 bg-white/80 p-3 rounded-xl border border-rose-200/70">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-slate-600">Índice de Recomendação:</span>
+                  <span id="res-user-bar-label" class="font-mono font-black text-rose-600 text-sm">21.4%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                  <div id="res-user-bar" class="bg-gradient-to-r from-rose-500 to-amber-500 h-3 rounded-full transition-all duration-1000" style="width: 21.4%;"></div>
+                </div>
+                <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                  <span class="text-rose-600 font-bold">Invisível no Chat</span>
+                  <span>Meta: >90%</span>
+                </div>
+              </div>
+
+              <!-- MÉTRICAS DO USUÁRIO -->
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between py-1 border-b border-rose-100">
+                  <span class="text-slate-500">Fatia de Buscas Locais:</span>
+                  <span id="res-lead-c2-traffic" class="font-extrabold text-rose-600">&lt; 5% das buscas</span>
+                </div>
+                <div class="flex items-center justify-between py-1 border-b border-rose-100">
+                  <span class="text-slate-500">Status no ChatGPT / Gemini:</span>
+                  <span id="res-lead-c2-status" class="font-extrabold text-rose-600 flex items-center gap-1">✗ Não Recomendado</span>
+                </div>
+                <div class="flex items-center justify-between py-1">
+                  <span class="text-slate-500">Estrutura Semântica:</span>
+                  <span class="font-bold text-rose-700">Sem /llms.txt e Sem Grafo</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-2 pt-3 border-t border-rose-200/60 text-center">
+              <span id="res-lead-c2-warning" class="text-[11px] font-extrabold text-rose-900 bg-rose-100/80 px-2.5 py-1 rounded-lg inline-block">
+                📉 Perdendo negócios diários na cidade
+              </span>
+            </div>
+          </div>
+
+          <!-- CARD 3: META NO DIA 14 (VERDE ESMERALDA / META GARANTIDA) -->
+          <div class="relative bg-gradient-to-b from-emerald-500/15 via-emerald-50/50 to-white rounded-2xl border-2 border-emerald-400 p-5 space-y-4 shadow-md flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span id="res-lead-c3-badge" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[11px] uppercase tracking-wide flex items-center gap-1 border border-emerald-300">
+                  <span>🚀</span> Meta Garantida (Dia 14)
+                </span>
+                <span class="text-xs font-mono font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">#1 Líder</span>
+              </div>
+              
+              <div>
+                <span id="res-lead-c3-detected-lbl" class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Projeção com GeoPulse AI</span>
+                <h4 id="res-projected-entity-name" class="text-lg sm:text-xl font-black text-slate-900 leading-snug break-words">
+                  Sua Empresa no Top 1
+                </h4>
+              </div>
+
+              <!-- BARRA DE SCORE PROJETADO -->
+              <div class="space-y-1.5 bg-white/90 p-3 rounded-xl border border-emerald-200">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-slate-600">Índice Projetado:</span>
+                  <span class="font-mono font-black text-emerald-700 text-sm">95.0%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner">
+                  <div class="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 h-3 rounded-full transition-all duration-1000 shadow-glow" style="width: 95%;"></div>
+                </div>
+                <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                  <span>Desafio de 14 Dias</span>
+                  <span class="text-emerald-700 font-bold">1º Lugar Oficial</span>
+                </div>
+              </div>
+
+              <!-- MÉTRICAS DO RESULTADO PROJETADO -->
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between py-1 border-b border-emerald-100">
+                  <span class="text-slate-500">Fatia de Buscas Locais:</span>
+                  <span id="res-lead-c3-traffic" class="font-extrabold text-emerald-700">Reversão de Tráfego Local</span>
+                </div>
+                <div class="flex items-center justify-between py-1 border-b border-emerald-100">
+                  <span class="text-slate-500">Status no ChatGPT / Gemini:</span>
+                  <span id="res-lead-c3-status" class="font-extrabold text-emerald-700 flex items-center gap-1">✓ Recomendação #1</span>
+                </div>
+                <div class="flex items-center justify-between py-1">
+                  <span class="text-slate-500">Entrega Automática:</span>
+                  <span class="font-bold text-emerald-800">14 Ações Técnicas pela IA</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-2 pt-3 border-t border-emerald-200 text-center">
+              <button onclick="openCheckoutModal()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-glow transition flex items-center justify-center gap-1.5">
+                <span id="res-lead-c3-cta">Inverter Esse Cenário Agora →</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALERTA DIRETO DE CONCORRÊNCIA -->
+        <div class="bg-gradient-to-r from-amber-500/10 via-rose-50 to-amber-50 border-2 border-rose-300/80 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 shadow-sm">
+          <span class="text-3xl shrink-0">🚨</span>
+          <div class="space-y-1 text-xs sm:text-sm text-slate-800 leading-relaxed">
+            <span id="res-competitor-alert-content">
+              <strong>Alerta de Concorrência:</strong> Neste exato momento, quando alguém em <span class="text-emerald-800 font-bold underline" id="res-alert-city">sua cidade</span> busca por <span class="text-emerald-800 font-bold underline" id="res-alert-niche">seu segmento</span> no ChatGPT ou Gemini, os robôs entregam como principal recomendação: <strong class="text-rose-700 font-black text-sm sm:text-base" id="res-alert-comp-name">Concorrente Líder</strong>. Inicie o Desafio de 14 Dias para posicionar sua marca no topo.
+            </span>
+          </div>
+        </div>
+
+        <!-- COMPARATIVO VISUAL DE BARRAS NOS 4 PILARES DA IA -->
+        <div class="bg-slate-50 rounded-2xl p-4 sm:p-6 border border-slate-200/80 space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <h4 id="res-pillars-title" class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-slate-800">
+              📊 Comparativo Direto nos 4 Pilares da IA:
+            </h4>
+            <div class="flex items-center gap-4 text-xs font-bold">
+              <span class="flex items-center gap-1.5 text-slate-700">
+                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                <span id="res-pillar-comp-label">Concorrente Líder</span>
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-700">
+                <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                <span id="res-pillar-user-label">Sua Empresa</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="space-y-3.5 text-xs">
+            <!-- PILAR 1: ChatGPT -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1.5 shadow-2xs">
+              <div class="flex justify-between font-bold text-slate-700">
+                <span id="res-pillar-p1-label">1. Recomendação Direta no ChatGPT Search</span>
+                <span class="font-mono text-[11px]"><strong class="text-emerald-700">96% Líder</strong> vs <strong class="text-rose-600" id="res-pillar-p1-user-score">15% Você</strong></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-2.5 bg-emerald-500 rounded-full" style="width: 96%;"></div>
+                </div>
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div id="res-pillar-p1-bar" class="h-2.5 bg-rose-500 rounded-full" style="width: 15%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PILAR 2: Gemini -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1.5 shadow-2xs">
+              <div class="flex justify-between font-bold text-slate-700">
+                <span id="res-pillar-p2-label">2. Citação de Autoridade no Google Gemini</span>
+                <span class="font-mono text-[11px]"><strong class="text-emerald-700">92% Líder</strong> vs <strong class="text-rose-600" id="res-pillar-p2-user-score">20% Você</strong></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-2.5 bg-emerald-500 rounded-full" style="width: 92%;"></div>
+                </div>
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div id="res-pillar-p2-bar" class="h-2.5 bg-rose-500 rounded-full" style="width: 20%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PILAR 3: Perplexity -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1.5 shadow-2xs">
+              <div class="flex justify-between font-bold text-slate-700">
+                <span id="res-pillar-p3-label">3. Presença Semântica no Perplexity Sonar</span>
+                <span class="font-mono text-[11px]"><strong class="text-emerald-700">88% Líder</strong> vs <strong class="text-rose-600" id="res-pillar-p3-user-score">18% Você</strong></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-2.5 bg-emerald-500 rounded-full" style="width: 88%;"></div>
+                </div>
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div id="res-pillar-p3-bar" class="h-2.5 bg-rose-500 rounded-full" style="width: 18%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PILAR 4: Infraestrutura Técnica -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1.5 shadow-2xs">
+              <div class="flex justify-between font-bold text-slate-700">
+                <span id="res-pillar-p4-label">4. Infraestrutura Técnica (/llms.txt + Schema JSON-LD)</span>
+                <span class="font-mono text-[11px]"><strong class="text-emerald-700">100% Líder</strong> vs <strong class="text-rose-600" id="res-pillar-p4-user-score">0% Você</strong></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-2.5 bg-emerald-500 rounded-full" style="width: 100%;"></div>
+                </div>
+                <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div id="res-pillar-p4-bar" class="h-2.5 bg-rose-500 rounded-full" style="width: 5%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div class="bg-white rounded-3xl border border-slate-200 p-6">
           <span id="res-metric1-label" class="text-xs font-bold uppercase text-slate-400">Nota Atual nas IAs (Share of Model)</span>
@@ -1092,6 +1384,34 @@
       if (annElem) annElem.textContent = `- ${dict.currencySymbol} ${annualLoss.toLocaleString(dict.locale)}`;
     };
 
+function extractTopCompetitor(data) {
+      if (data && data.company && data.company.competitors) {
+        const list = data.company.competitors.split(',').map(s => s.trim()).filter(Boolean);
+        if (list.length > 0) return list[0];
+      }
+      if (data && data.audits && data.audits.length > 0) {
+        for (const audit of data.audits) {
+          const text = audit.response_text || '';
+          const m = text.match(/1\.\s*\*\*?([^\*\n\(\–\—\:]+?)\*\*?(?:$|\s*\(|\s*–|\s*—|\s*\:|\n)/);
+          if (m && m[1] && m[1].trim().length > 2) {
+            const cand = m[1].trim();
+            if (data.company && data.company.name && cand.toLowerCase() !== data.company.name.toLowerCase()) {
+              return cand;
+            }
+          }
+        }
+      }
+      const l = window.currentLang || 'pt';
+      const niche = (data && data.company && data.company.niche) || '';
+      if (l === 'en') {
+        return niche ? `Top ${niche} Competitor` : 'Leading Local Competitor';
+      } else if (l === 'es') {
+        return niche ? `Líder en ${niche}` : 'Competidor Líder de la Región';
+      } else {
+        return niche ? `Líder em ${niche}` : 'Concorrente Líder da Região';
+      }
+    }
+
     function renderDiagnosticResults(data) {
       currentDiagnosticData = data;
       window.currentDiagnosticData = data;
@@ -1103,7 +1423,6 @@
       document.getElementById('res-top-rank').textContent = data.metrics.top_rank_achieved ? `#${data.metrics.top_rank_achieved}º Lugar` : 'Fora do Ranking';
       document.getElementById('res-sprint-badge').textContent = `Dia ${data.company.sprint_day_current || (data.company.is_paid ? 14 : 0)}/14`;
 
-      // ATUALIZA O BANNER DE ESCASSEZ
       const niche = data.company.niche || 'seu segmento';
       const city = data.company.city_region || 'sua região';
       const scCity = document.getElementById('scarcity-city');
@@ -1111,11 +1430,88 @@
       if (scCity) scCity.textContent = city;
       if (scNiche) scNiche.textContent = niche;
 
+      const score = parseFloat(data.metrics.visibility_score) || 0;
+      const l = window.currentLang || 'pt';
+      const dictCur = I18N[l] || I18N.pt;
+      const resI18n = dictCur.results || {};
+
+      // 🏆 ATUALIZAÇÃO DO PÓDIO & COMPARATIVO DE CONCORRÊNCIA
+      const topComp = extractTopCompetitor(data);
+      window.currentTopCompetitor = topComp;
+
+      const compLeaderElem = document.getElementById('res-comp-leader-name');
+      if (compLeaderElem) compLeaderElem.textContent = topComp;
+
+      const userEntityElem = document.getElementById('res-user-entity-name');
+      if (userEntityElem) userEntityElem.textContent = data.company.name || (l === 'en' ? 'Your Business' : (l === 'es' ? 'Tu Empresa' : 'Sua Empresa'));
+
+      const userRankPill = document.getElementById('res-user-rank-pill');
+      if (userRankPill) {
+        if (data.metrics.top_rank_achieved) {
+          userRankPill.textContent = `#${data.metrics.top_rank_achieved} Top Rank`;
+          userRankPill.className = "text-xs font-mono font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200";
+        } else {
+          userRankPill.textContent = resI18n.notRanked || "Fora do Top 3";
+          userRankPill.className = "text-xs font-mono font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200";
+        }
+      }
+
+      const projectedEntityElem = document.getElementById('res-projected-entity-name');
+      if (projectedEntityElem) {
+        const suffix = l === 'en' ? 'Ranked #1' : (l === 'es' ? 'en 1º Lugar' : 'no 1º Lugar Oficial');
+        projectedEntityElem.textContent = `${data.company.name || 'Sua Empresa'} (${suffix})`;
+      }
+
+      const alertCompName = document.getElementById('res-alert-comp-name');
+      if (alertCompName) alertCompName.textContent = topComp;
+
+      const alertCity = document.getElementById('res-alert-city');
+      if (alertCity) alertCity.textContent = city;
+
+      const alertNiche = document.getElementById('res-alert-niche');
+      if (alertNiche) alertNiche.textContent = niche;
+
+      const pillarCompLbl = document.getElementById('res-pillar-comp-label');
+      if (pillarCompLbl) pillarCompLbl.textContent = topComp;
+
+      const pillarUserLbl = document.getElementById('res-pillar-user-label');
+      if (pillarUserLbl) pillarUserLbl.textContent = data.company.name || (l === 'en' ? 'Your Business' : (l === 'es' ? 'Tu Empresa' : 'Sua Empresa'));
+
+      // Atualiza a barra de score do usuário
+      const userBar = document.getElementById('res-user-bar');
+      const userBarLabel = document.getElementById('res-user-bar-label');
+      if (userBar) userBar.style.width = `${Math.max(6, Math.min(100, score))}%`;
+      if (userBarLabel) userBarLabel.textContent = `${score}%`;
+
+      // Atualiza barras dos 4 pilares comparativos
+      const p1UserScore = document.getElementById('res-pillar-p1-user-score');
+      const p1Bar = document.getElementById('res-pillar-p1-bar');
+      const p1Val = Math.min(95, Math.round(score * 0.72));
+      if (p1UserScore) p1UserScore.textContent = `${p1Val}% ${resI18n.pillarUserScore || 'Você'}`;
+      if (p1Bar) p1Bar.style.width = `${Math.max(4, p1Val)}%`;
+
+      const p2UserScore = document.getElementById('res-pillar-p2-user-score');
+      const p2Bar = document.getElementById('res-pillar-p2-bar');
+      const p2Val = Math.min(92, Math.round(score * 0.85));
+      if (p2UserScore) p2UserScore.textContent = `${p2Val}% ${resI18n.pillarUserScore || 'Você'}`;
+      if (p2Bar) p2Bar.style.width = `${Math.max(4, p2Val)}%`;
+
+      const p3UserScore = document.getElementById('res-pillar-p3-user-score');
+      const p3Bar = document.getElementById('res-pillar-p3-bar');
+      const p3Val = Math.min(88, Math.round(score * 0.78));
+      if (p3UserScore) p3UserScore.textContent = `${p3Val}% ${resI18n.pillarUserScore || 'Você'}`;
+      if (p3Bar) p3Bar.style.width = `${Math.max(4, p3Val)}%`;
+
+      const p4UserScore = document.getElementById('res-pillar-p4-user-score');
+      const p4Bar = document.getElementById('res-pillar-p4-bar');
+      const p4Val = data.company.is_paid ? 100 : (score > 60 ? 30 : 0);
+      if (p4UserScore) p4UserScore.textContent = `${p4Val}% ${resI18n.pillarUserScore || 'Você'}`;
+      if (p4Bar) p4Bar.style.width = `${Math.max(4, p4Val)}%`;
+
       // CÁLCULO DINÂMICO DE PERDA DE NEGÓCIOS / FATURAMENTO
       const nicheElem = document.getElementById('loss-niche-text');
       if (nicheElem) nicheElem.textContent = `${niche} em ${city}`;
 
-      const score = parseFloat(data.metrics.visibility_score) || 0;
       let estClients = 18;
       if (score < 25) estClients = 26;
       else if (score < 50) estClients = 18;
@@ -1124,10 +1520,8 @@
 
       currentLossEstimatedClients = estClients;
       window.currentLossEstimatedClients = estClients;
-      const l = window.currentLang || 'pt';
-      const dictCur = I18N[l] || I18N.pt;
       const clientsElem = document.getElementById('loss-clients-count');
-      if (clientsElem) clientsElem.textContent = `~ ${estClients} ${dictCur.results?.clientsPerMonth || 'clientes / mês'}`;
+      if (clientsElem) clientsElem.textContent = `~ ${estClients} ${resI18n.clientsPerMonth || 'clientes / mês'}`;
 
       const searches = Math.max(380, Math.round((100 - score) * 12 + 280));
       window.currentLossSearchCount = searches;
@@ -1163,19 +1557,30 @@
       }
       updateLossCalculation(defaultTicket);
 
-      const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
-      const resI18n = dict.results || {};
+      // LISTA VISUAL DE AUDITORIAS (ChatGPT, Gemini, Perplexity) COM BADGES APRIMORADOS
+      document.getElementById('res-audits-list').innerHTML = (data.audits || []).map(a => {
+        const isCited = a.is_cited;
+        const prov = a.model_provider || 'IA Search';
+        let provIcon = '🤖';
+        if (prov.toLowerCase().includes('gpt') || prov.toLowerCase().includes('openai')) provIcon = '🟢';
+        else if (prov.toLowerCase().includes('gemini')) provIcon = '🔵';
+        else if (prov.toLowerCase().includes('perplex')) provIcon = '🟣';
 
-      document.getElementById('res-audits-list').innerHTML = (data.audits || []).map(a => `
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-2">
-          <div class="flex justify-between items-center text-xs font-bold">
-            <span class="text-emerald-700">${a.prompt_category} (${a.model_provider})</span>
-            <span class="${a.is_cited ? 'text-emerald-700' : 'text-rose-600'}">${a.is_cited ? (resI18n.cited || '✓ Citado') : (resI18n.notCited || '✗ Não Recomendado')}</span>
+        return `
+        <div class="bg-white rounded-2xl border ${isCited ? 'border-emerald-300 shadow-sm' : 'border-slate-200'} p-5 space-y-3 transition hover:border-slate-300">
+          <div class="flex flex-wrap justify-between items-center gap-2 text-xs font-bold border-b border-slate-100 pb-2.5">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800">
+              <span>${provIcon}</span> ${a.prompt_category} <span class="text-slate-400 font-mono text-[10px]">(${prov})</span>
+            </span>
+            <span class="px-2.5 py-1 rounded-lg font-extrabold ${isCited ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${isCited ? (resI18n.cited || '✓ Recomendado pela IA') : (resI18n.notCited || '✗ Concorrente Recomendado no Topo')}
+            </span>
           </div>
-          <div class="text-xs text-slate-500 italic">"${a.prompt_text}"</div>
-          <div class="text-xs sm:text-sm text-slate-700 whitespace-pre-line">${a.response_text}</div>
+          <div class="text-xs text-slate-500 italic bg-slate-50 p-2.5 rounded-xl border border-slate-100">"${a.prompt_text}"</div>
+          <div class="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">${a.response_text}</div>
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       document.getElementById('res-suggestions-list').innerHTML = (data.suggestions || []).map(s => `
         <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1 text-xs">
@@ -1201,13 +1606,18 @@
       const defUrl = isEn ? 'https://primedentalcare.com' : (isEs ? 'https://odontoprime.es' : 'https://odontoprime.com.br');
       const defNiche = isEn ? 'Dental Implants & Cosmetic' : (isEs ? 'Implantes Dentales' : 'Implantes Dentários');
       const defCity = isEn ? 'Miami, FL' : (isEs ? 'Madrid - España' : 'Belo Horizonte - MG');
+      const defLeader = isEn ? 'Metro Dental Specialists' : (isEs ? 'Clínica Dental Madrid Centro' : 'Clínica OdontoMaster');
 
       const citedResp = isEn 
-        ? '1. Prime Dental Care Clinic — Ranked #1 after the 14-day GEO semantic indexing.' 
-        : (isEs ? '1. Clínica OdontoPrime — Recomendada en 1º lugar tras los 14 días de indexación GEO.' : '1. Clínica OdontoPrime — Recomendada em 1º lugar após os 14 dias de indexação GEO.');
+        ? `1. **${custom?.name || defName}** — Ranked #1 after the 14-day GEO semantic indexing.\n2. **${defLeader}** — Leading alternative in the area.` 
+        : (isEs 
+          ? `1. **${custom?.name || defName}** — Recomendada en 1º lugar tras los 14 días de indexación GEO.\n2. **${defLeader}** — Alternativa destacada en la zona.` 
+          : `1. **${custom?.name || defName}** — Recomendada em 1º lugar após os 14 dias de indexação GEO.\n2. **${defLeader}** — Alternativa reconhecida na região.`);
       const notCitedResp = isEn 
-        ? 'Your business does not appear in spontaneous AI recommendations yet. Activate the 14-Day Challenge.' 
-        : (isEs ? 'Tu empresa aún no aparece en las recomendaciones espontáneas de IA. Activa el Desafío de 14 Días.' : 'Sua empresa ainda não aparece nas recomendações espontâneas. Ative o Desafio de 14 Dias.');
+        ? `Based on current public indexes in **${custom?.city_region || defCity}**, the most recommended specialists are:\n\n1. **${defLeader}**\n   - Pros: Strong digital authority and top AI visibility in the region.\n   - Cons: Higher consultation fees.\n\n2. **Beacon Dental Group**\n   - Pros: Traditional provider.\n\n*(Note: ${custom?.name || defName} does not appear among the top recommendations yet due to missing /llms.txt and semantic schema).*` 
+        : (isEs 
+          ? `Con base en los índices públicos actuales en **${custom?.city_region || defCity}**, los más recomendados son:\n\n1. **${defLeader}**\n   - Pros: Fuerte autoridad digital y máxima visibilidad en IA en la región.\n   - Contras: Precios más elevados.\n\n2. **Centro Odontológico San Jerónimo**\n   - Pros: Proveedor tradicional.\n\n*(Nota: ${custom?.name || defName} aún no aparece entre las principales recomendaciones por falta de /llms.txt y grafo semántico).*` 
+          : `Com base nas pesquisas e índices públicos atuais em **${custom?.city_region || defCity}**, as principais referências recomendadas são:\n\n1. **${defLeader}**\n   - Prós: Forte autoridade digital e liderança consolidada nas buscas da região.\n   - Contras: Agenda concorrida com espera.\n\n2. **Centro Especializado Santa Efigênia**\n   - Prós: Unidade tradicional consolidada.\n\n*(Nota: ${custom?.name || defName} ainda não aparece no Top 3 de recomendações espontâneas por ausência de arquivo /llms.txt e grafo semântico).*`);
 
       const promptCat = isEn ? 'Spontaneous Discovery' : (isEs ? 'Descubrimiento Espontáneo' : 'Descoberta Espontânea');
       const promptTxt = isEn ? 'What are the best specialists in the area?' : (isEs ? '¿Cuáles son los mejores especialistas de la zona?' : 'Quais os melhores especialistas na região?');

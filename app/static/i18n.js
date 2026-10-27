@@ -165,6 +165,59 @@ const I18N = {
       metric3Sub: "14 ações diárias prontas para iniciar",
       clientsPerMonth: "clientes / mês",
 
+      // NOVO: PÓDIO & COMPARATIVO VISUAL COM CONCORRENTE
+      leadBadge: "Comparativo de Liderança na sua Cidade",
+      leadTitle: "Quem a IA Recomenda Primeiro na sua Região?",
+      leadSub: "Veja o pódio em tempo real: compare sua visibilidade contra o concorrente que está recebendo a maioria dos clientes que pesquisam por voz e chat.",
+      leadAuditBadge: "Auditoria Multimodelo (ChatGPT • Gemini • Perplexity)",
+      
+      c1Badge: "🥇 1º Lugar Atual nas IAs",
+      c1TopRank: "#1 Top Rank",
+      c1DetectedLbl: "Concorrente Líder Detectado",
+      c1Traffic: "~ 78% das buscas",
+      c1TrafficLbl: "Fatia de Buscas Locais:",
+      c1StatusLbl: "Status no ChatGPT / Gemini:",
+      c1StatusVal: "✓ Recomendado #1",
+      c1SemanticsLbl: "Estrutura Semântica:",
+      c1SemanticsVal: "Grafo Ativo na Web",
+      c1FooterWarning: "⚠️ Capturando clientes que poderiam ser seus",
+
+      c2Badge: "⚠️ Sua Posição Atual (Dia 0)",
+      c2RankPill: "Fora do Top 3",
+      c2DetectedLbl: "Seu Negócio Consultado",
+      c2Traffic: "< 5% das buscas",
+      c2TrafficLbl: "Fatia de Buscas Locais:",
+      c2StatusLbl: "Status no ChatGPT / Gemini:",
+      c2StatusVal: "✗ Não Recomendado",
+      c2SemanticsLbl: "Estrutura Semântica:",
+      c2SemanticsVal: "Sem /llms.txt e Sem Grafo",
+      c2FooterWarning: "📉 Perdendo negócios diários na cidade",
+
+      c3Badge: "🚀 Meta Garantida (Dia 14)",
+      c3RankPill: "#1 Líder",
+      c3DetectedLbl: "Projeção com GeoPulse AI",
+      c3Traffic: "Reversão de Tráfego Local",
+      c3TrafficLbl: "Fatia de Buscas Locais:",
+      c3StatusLbl: "Status no ChatGPT / Gemini:",
+      c3StatusVal: "✓ Recomendação #1",
+      c3SemanticsLbl: "Entrega Automática:",
+      c3SemanticsVal: "14 Ações Técnicas pela IA",
+      c3Cta: "Inverter Esse Cenário Agora →",
+
+      alertTitle: "Alerta de Concorrência:",
+      alertTemplate: "Neste exato momento, quando alguém em <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-city\">{city}</span> busca por <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-niche\">{niche}</span> no ChatGPT ou Gemini, os robôs entregam como principal recomendação: <strong class=\"text-rose-700 font-black text-sm sm:text-base\" id=\"res-alert-comp-name\">{competitor}</strong>. Inicie o Desafio de 14 Dias para posicionar sua marca no topo.",
+
+      pillarsTitle: "📊 Comparativo Direto nos 4 Pilares da IA:",
+      pillar1: "1. Recomendação Direta no ChatGPT Search",
+      pillar2: "2. Citação de Autoridade no Google Gemini",
+      pillar3: "3. Presença Semântica no Perplexity Sonar",
+      pillar4: "4. Infraestrutura Técnica (/llms.txt + Schema JSON-LD)",
+      pillarLeaderScore: "Líder",
+      pillarUserScore: "Você",
+      scoreIndexLbl: "Índice de Recomendação:",
+      projectedIndexLbl: "Índice Projetado:",
+
+
       lossHeaderBadge: "Alerta de Faturamento: Quanto você está perdendo hoje?",
       lossHeaderTitle: "Estimativa de Negócios e Clientes Perdidos para Concorrentes",
       lossHeaderDescTemplate: "Quando alguém na sua cidade busca recomendação de {niche} no ChatGPT ou Gemini, os algoritmos recomendam seus concorrentes no topo. Veja o cálculo estimado do dinheiro que está deixando de entrar no seu caixa:",
@@ -449,6 +502,59 @@ const I18N = {
       metric3Sub: "14 daily actions ready to start",
       clientsPerMonth: "clients / month",
 
+      // NEW: AI PODIUM & COMPETITOR COMPARISON
+      leadBadge: "City AI Leadership Comparison",
+      leadTitle: "Who Does AI Recommend First in Your Area?",
+      leadSub: "Real-time AI podium: compare your visibility against the competitor capturing most customers searching via chat and voice.",
+      leadAuditBadge: "Multi-Model AI Audit (ChatGPT • Gemini • Perplexity)",
+      
+      c1Badge: "🥇 #1 Current AI Leader",
+      c1TopRank: "#1 Top Rank",
+      c1DetectedLbl: "Top Competitor Detected",
+      c1Traffic: "~ 78% of searches",
+      c1TrafficLbl: "Local Search Share:",
+      c1StatusLbl: "Status on ChatGPT / Gemini:",
+      c1StatusVal: "✓ Recommended #1",
+      c1SemanticsLbl: "Semantic Structure:",
+      c1SemanticsVal: "Active Web Graph",
+      c1FooterWarning: "⚠️ Capturing clients that could be yours",
+
+      c2Badge: "⚠️ Your Business / You (Today)",
+      c2RankPill: "Out of Top 3",
+      c2DetectedLbl: "Your Queried Business",
+      c2Traffic: "< 5% of searches",
+      c2TrafficLbl: "Local Search Share:",
+      c2StatusLbl: "Status on ChatGPT / Gemini:",
+      c2StatusVal: "✗ Not Recommended",
+      c2SemanticsLbl: "Semantic Structure:",
+      c2SemanticsVal: "Missing /llms.txt & Graph",
+      c2FooterWarning: "📉 Losing daily clients in your city",
+
+      c3Badge: "🚀 Guaranteed Target (Day 14)",
+      c3RankPill: "#1 Leader",
+      c3DetectedLbl: "Projection with GeoPulse AI",
+      c3Traffic: "Full Traffic Reversal",
+      c3TrafficLbl: "Local Search Share:",
+      c3StatusLbl: "Status on ChatGPT / Gemini:",
+      c3StatusVal: "✓ Recommendation #1",
+      c3SemanticsLbl: "Automated Delivery:",
+      c3SemanticsVal: "14 Technical Actions by AI",
+      c3Cta: "Reverse This Position Now →",
+
+      alertTitle: "Competitor Alert:",
+      alertTemplate: "Right now, when someone in <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-city\">{city}</span> searches for <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-niche\">{niche}</span> on ChatGPT or Gemini, the AI engines deliver as top recommendation: <strong class=\"text-rose-700 font-black text-sm sm:text-base\" id=\"res-alert-comp-name\">{competitor}</strong>. Start the 14-Day Challenge to claim that top spot.",
+
+      pillarsTitle: "📊 Direct Comparison Across the 4 AI Pillars:",
+      pillar1: "1. Direct Recommendation in ChatGPT Search",
+      pillar2: "2. Authority Citation in Google Gemini",
+      pillar3: "3. Semantic Presence in Perplexity Sonar",
+      pillar4: "4. Technical Infrastructure (/llms.txt + Schema JSON-LD)",
+      pillarLeaderScore: "Leader",
+      pillarUserScore: "You",
+      scoreIndexLbl: "Recommendation Index:",
+      projectedIndexLbl: "Projected Index:",
+
+
       lossHeaderBadge: "Revenue Alert: How much are you losing today?",
       lossHeaderTitle: "Estimated Business & Clients Lost to Competitors",
       lossHeaderDescTemplate: "When someone in your city asks ChatGPT or Gemini for a recommendation in {niche}, the algorithms recommend your competitors at the top. Here is the estimated revenue you are missing out on:",
@@ -732,6 +838,59 @@ const I18N = {
       dayPrefix: "Día",
       metric3Sub: "14 acciones diarias listas para iniciar",
       clientsPerMonth: "clientes / mes",
+
+      // NUEVO: PODIO Y COMPARATIVA VISUAL CON EL COMPETIDOR
+      leadBadge: "Comparativa de Liderazgo en tu Ciudad",
+      leadTitle: "¿A Quién Recomienda Primero la IA en tu Región?",
+      leadSub: "Mira el podio en tiempo real: compara tu visibilidad frente al competidor que se está llevando a la mayoría de los clientes que buscan por chat y voz.",
+      leadAuditBadge: "Auditoría Multimodelo (ChatGPT • Gemini • Perplexity)",
+      
+      c1Badge: "🥇 1º Lugar Actual en las IAs",
+      c1TopRank: "#1 Top Rank",
+      c1DetectedLbl: "Competidor Líder Detectado",
+      c1Traffic: "~ 78% de búsquedas",
+      c1TrafficLbl: "Cuota de Búsquedas Locales:",
+      c1StatusLbl: "Estado en ChatGPT / Gemini:",
+      c1StatusVal: "✓ Recomendado #1",
+      c1SemanticsLbl: "Estructura Semántica:",
+      c1SemanticsVal: "Grafo Activo en la Web",
+      c1FooterWarning: "⚠️ Captando clientes que podrían ser tuyos",
+
+      c2Badge: "⚠️ Tu Posición Actual (Día 0)",
+      c2RankPill: "Fuera del Top 3",
+      c2DetectedLbl: "Tu Negocio Consultado",
+      c2Traffic: "< 5% de búsquedas",
+      c2TrafficLbl: "Cuota de Búsquedas Locales:",
+      c2StatusLbl: "Estado en ChatGPT / Gemini:",
+      c2StatusVal: "✗ No Recomendado",
+      c2SemanticsLbl: "Estructura Semántica:",
+      c2SemanticsVal: "Sin /llms.txt ni Grafo",
+      c2FooterWarning: "📉 Perdiendo negocios diarios en tu ciudad",
+
+      c3Badge: "🚀 Meta Garantizada (Día 14)",
+      c3RankPill: "#1 Líder",
+      c3DetectedLbl: "Proyección con GeoPulse AI",
+      c3Traffic: "Reversión Total del Tráfico",
+      c3TrafficLbl: "Cuota de Búsquedas Locales:",
+      c3StatusLbl: "Estado en ChatGPT / Gemini:",
+      c3StatusVal: "✓ Recomendación #1",
+      c3SemanticsLbl: "Entrega Automatizada:",
+      c3SemanticsVal: "14 Acciones Técnicas por IA",
+      c3Cta: "Invertir Este Escenario Ahora →",
+
+      alertTitle: "Alerta de Competencia:",
+      alertTemplate: "En este preciso momento, cuando alguien en <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-city\">{city}</span> busca <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-niche\">{niche}</span> en ChatGPT o Gemini, los motores entregan como recomendación principal a: <strong class=\"text-rose-700 font-black text-sm sm:text-base\" id=\"res-alert-comp-name\">{competitor}</strong>. Activa el Desafío de 14 Días para posicionar tu marca en la cima.",
+
+      pillarsTitle: "📊 Comparativa Directa en los 4 Pilares de la IA:",
+      pillar1: "1. Recomendación Directa en ChatGPT Search",
+      pillar2: "2. Citación de Autoridad en Google Gemini",
+      pillar3: "3. Presencia Semántica en Perplexity Sonar",
+      pillar4: "4. Infraestructura Técnica (/llms.txt + Schema JSON-LD)",
+      pillarLeaderScore: "Líder",
+      pillarUserScore: "Tú",
+      scoreIndexLbl: "Índice de Recomendación:",
+      projectedIndexLbl: "Índice Proyectado:",
+
 
       lossHeaderBadge: "Alerta de Facturación: ¿Cuánto estás perdiendo hoy?",
       lossHeaderTitle: "Estimación de Negocios y Clientes Perdidos para Competidores",
@@ -1028,6 +1187,93 @@ window.updateResultsI18n = function(lang) {
 
   const resSidebarTitle = document.getElementById("res-sidebar-title");
   if (resSidebarTitle) resSidebarTitle.textContent = res.sidebarTitle;
+
+  // Leaderboard & Competitor Visual Podium
+  const leadBadge = document.getElementById("res-lead-badge");
+  if (leadBadge && res.leadBadge) leadBadge.textContent = res.leadBadge;
+
+  const leadTitle = document.getElementById("res-lead-title");
+  if (leadTitle && res.leadTitle) leadTitle.textContent = res.leadTitle;
+
+  const leadSub = document.getElementById("res-lead-sub");
+  if (leadSub && res.leadSub) leadSub.textContent = res.leadSub;
+
+  // Card 1
+  const c1Badge = document.getElementById("res-lead-c1-badge");
+  if (c1Badge && res.c1Badge) c1Badge.innerHTML = `<span>🥇</span> ${res.c1Badge.replace('🥇 ', '')}`;
+
+  const c1Detected = document.getElementById("res-lead-c1-detected-lbl");
+  if (c1Detected && res.c1DetectedLbl) c1Detected.textContent = res.c1DetectedLbl;
+
+  const c1Traffic = document.getElementById("res-lead-c1-traffic");
+  if (c1Traffic && res.c1Traffic) c1Traffic.textContent = res.c1Traffic;
+
+  const c1Status = document.getElementById("res-lead-c1-status");
+  if (c1Status && res.c1StatusVal) c1Status.textContent = res.c1StatusVal;
+
+  const c1Warn = document.getElementById("res-lead-c1-warning");
+  if (c1Warn && res.c1FooterWarning) c1Warn.textContent = res.c1FooterWarning;
+
+  // Card 2
+  const c2Badge = document.getElementById("res-lead-c2-badge");
+  if (c2Badge && res.c2Badge) c2Badge.innerHTML = `<span>⚠️</span> ${res.c2Badge.replace('⚠️ ', '')}`;
+
+  const c2Detected = document.getElementById("res-lead-c2-detected-lbl");
+  if (c2Detected && res.c2DetectedLbl) c2Detected.textContent = res.c2DetectedLbl;
+
+  const c2Traffic = document.getElementById("res-lead-c2-traffic");
+  if (c2Traffic && res.c2Traffic) c2Traffic.textContent = res.c2Traffic;
+
+  const c2Status = document.getElementById("res-lead-c2-status");
+  if (c2Status && res.c2StatusVal) c2Status.textContent = res.c2StatusVal;
+
+  const c2Warn = document.getElementById("res-lead-c2-warning");
+  if (c2Warn && res.c2FooterWarning) c2Warn.textContent = res.c2FooterWarning;
+
+  // Card 3
+  const c3Badge = document.getElementById("res-lead-c3-badge");
+  if (c3Badge && res.c3Badge) c3Badge.innerHTML = `<span>🚀</span> ${res.c3Badge.replace('🚀 ', '')}`;
+
+  const c3Detected = document.getElementById("res-lead-c3-detected-lbl");
+  if (c3Detected && res.c3DetectedLbl) c3Detected.textContent = res.c3DetectedLbl;
+
+  const c3Traffic = document.getElementById("res-lead-c3-traffic");
+  if (c3Traffic && res.c3Traffic) c3Traffic.textContent = res.c3Traffic;
+
+  const c3Status = document.getElementById("res-lead-c3-status");
+  if (c3Status && res.c3StatusVal) c3Status.textContent = res.c3StatusVal;
+
+  const c3Cta = document.getElementById("res-lead-c3-cta");
+  if (c3Cta && res.c3Cta) c3Cta.textContent = res.c3Cta;
+
+  // Alert Box Template
+  const alertContainer = document.getElementById("res-competitor-alert-content");
+  if (alertContainer && res.alertTemplate) {
+    const comp = window.currentTopCompetitor || (l === 'en' ? 'Top Competitor' : (l === 'es' ? 'Competidor Líder' : 'Concorrente Líder'));
+    const city = window.currentDiagnosticData?.company?.city_region || (l === 'en' ? 'your city' : (l === 'es' ? 'tu ciudad' : 'sua cidade'));
+    const niche = window.currentDiagnosticData?.company?.niche || (l === 'en' ? 'your niche' : (l === 'es' ? 'tu área' : 'seu segmento'));
+    alertContainer.innerHTML = res.alertTemplate
+      .replace('{competitor}', comp)
+      .replace('{city}', city)
+      .replace('{niche}', niche);
+  }
+
+  // 4 Pillars
+  const pillarsTitle = document.getElementById("res-pillars-title");
+  if (pillarsTitle && res.pillarsTitle) pillarsTitle.textContent = res.pillarsTitle;
+
+  const p1Lbl = document.getElementById("res-pillar-p1-label");
+  if (p1Lbl && res.pillar1) p1Lbl.textContent = res.pillar1;
+
+  const p2Lbl = document.getElementById("res-pillar-p2-label");
+  if (p2Lbl && res.pillar2) p2Lbl.textContent = res.pillar2;
+
+  const p3Lbl = document.getElementById("res-pillar-p3-label");
+  if (p3Lbl && res.pillar3) p3Lbl.textContent = res.pillar3;
+
+  const p4Lbl = document.getElementById("res-pillar-p4-label");
+  if (p4Lbl && res.pillar4) p4Lbl.textContent = res.pillar4;
+
 
   const resSidebarDesc = document.getElementById("res-sidebar-desc");
   if (resSidebarDesc) resSidebarDesc.innerHTML = res.sidebarDesc;

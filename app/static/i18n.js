@@ -606,8 +606,22 @@ function applyLanguage(lang) {
   const videoElem = document.getElementById("hero-pitch-video");
   if (videoElem) {
     // 1. Se existir vídeo gravado no idioma, carrega ele, senão mantém o padrão
-    const specificVideoUrl = `/static/videos/apresentacao_${lang}.mp4`;
-    const defaultVideoUrl = `/static/videos/apresentacao.mp4`;
+    const targetVideoSrc = (lang === "en" || lang === "es") 
+      ? `/static/videos/apresentacao_${lang}.mp4` 
+      : `/static/videos/apresentacao.mp4`;
+
+    if (!videoElem.src.endsWith(targetVideoSrc)) {
+      const isPaused = videoElem.paused;
+      const curTime = videoElem.currentTime;
+      videoElem.src = targetVideoSrc;
+      const sourceMain = document.getElementById("video-source-main");
+      if (sourceMain) sourceMain.src = targetVideoSrc;
+      videoElem.load();
+      if (!isPaused && curTime > 0) {
+        videoElem.currentTime = curTime;
+        videoElem.play().catch(() => {});
+      }
+    }
 
     // 2. Ativa automaticamente a faixa de legendas correspondente ao idioma
     if (videoElem.textTracks && videoElem.textTracks.length > 0) {

@@ -59,8 +59,8 @@ const I18N = {
 
       day14Label: "Resultado no Dia 14 (Após 14 ações da IA):",
       day14Score: "Score: 94.5%",
-      day14Badge: "🚀 DIA 14: VOCÊ EM 1º LUGAR NAS IAs",
-      day14YourCompany: "🥇 1. SUA EMPRESA / SEU NOME — Recomendado #1",
+      day14Badge: "🚀 DIA 14: VOCÊ NO TOP 10 DAS IAs",
+      day14YourCompany: "🏆 SUA EMPRESA / SEU NOME — Destaque no Top 10",
 
       explainTitle: "💡 Pelo que você está pagando no Desafio (R$ 197 único):",
       explainDesc: "Durante <strong>14 dias seguidos</strong>, nossa IA executa 1 etapa técnica por dia (cria seus arquivos semânticos, publica artigos comparativos, envia pings aos robôs e reaudita sua nota) para colocar você no topo das pesquisas feitas por IA."
@@ -241,7 +241,7 @@ const I18N = {
 
       sidebarBadge: "🔥 Desafio Sprint de 14 Dias",
       sidebarTitle: "Contrate nossa IA para trabalhar 14 dias seguidos pela sua posição no ranking",
-      sidebarDesc: "Por uma <strong>taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você em 1º lugar.",
+      sidebarDesc: "Por uma <strong>taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você no Top 10 com máxima visibilidade.",
       sidebarCta: "Ativar Meu Desafio de 14 Dias Agora (R$ 197) →"
     },
 
@@ -314,11 +314,11 @@ const I18N = {
     chat: {
       title: "Especialista GeoPulse AI",
       online: "Online 24h • Tira-dúvidas",
-      welcome: "Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você em 1º Lugar nas recomendações?",
+      welcome: "Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você no Top 10 das recomendações de IA?",
       inputPlaceholder: "Digite sua dúvida aqui...",
       sendBtn: "Enviar",
       typing: "Digitando resposta...",
-      fallbackReply: "O GeoPulse AI ativa sua presença em 1º Lugar nas IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias. Se quiser falar diretamente com a diretoria técnica, nos envie uma mensagem!",
+      fallbackReply: "O GeoPulse AI ativa sua presença no Top 10 das IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias. Se quiser falar diretamente com a diretoria técnica, nos envie uma mensagem!",
       quickBtns: [
         { label: "Como funciona?", msg: "Como funciona o Desafio de 14 Dias?" },
         { label: "Serve sem site?", msg: "Preciso ter site ou serve com Instagram?" },
@@ -397,8 +397,8 @@ const I18N = {
 
       day14Label: "Result on Day 14 (After 14 AI actions):",
       day14Score: "Score: 94.5%",
-      day14Badge: "🚀 DAY 14: YOU IN #1 PLACE ON AIs",
-      day14YourCompany: "🥇 1. YOUR BUSINESS / YOUR NAME — Recommended #1",
+      day14Badge: "🚀 DAY 14: YOU IN THE TOP 10 ON AIs",
+      day14YourCompany: "🏆 YOUR BUSINESS / YOUR NAME — Featured in Top 10",
 
       explainTitle: "💡 What you are paying for in the Challenge ($47 USD one-time):",
       explainDesc: "For <strong>14 straight days</strong>, our AI executes 1 technical step each day (generating semantic files, publishing comparison articles, pinging search bots, and re-auditing your score) to position you at the top of AI search queries."
@@ -579,18 +579,18 @@ const I18N = {
 
       sidebarBadge: "🔥 14-Day Sprint Challenge",
       sidebarTitle: "Hire our AI to work 14 days straight for your ranking position",
-      sidebarDesc: "For a <strong>one-time fee of $47 USD (no subscriptions)</strong>, our AI executes 1 technical action per day for 14 days (JSON-LD, /llms.txt, City Official Top 5 Guide, Semantic FAQ, and IndexNow Pings) to place you #1.",
+      sidebarDesc: "For a <strong>one-time fee of $47 USD (no subscriptions)</strong>, our AI executes 1 technical action per day for 14 days (JSON-LD, /llms.txt, City Official Top 5 Guide, Semantic FAQ, and IndexNow Pings) to place you in the Top 10 with maximum visibility.",
       sidebarCta: "Activate My 14-Day Challenge Now ($47 USD) →"
     },
 
     scarcity: {
-      statusBadge: "Regional Exclusivity Status",
-      ruleLabel: "AI Golden Rule:",
-      vagaText: "Official #1 Spot in",
+      statusBadge: "Limited Spots per City",
+      ruleLabel: "Challenge Goal:",
+      vagaText: "Secure your spot in the Top 10 searches in",
       paraText: "for",
       availBadge: "AVAILABLE NOW",
-      desc: "AI algorithms only recommend <strong>1 single professional or business at the #1 top of the Official Guide</strong>. By activating the 14-Day Challenge, you secure exclusivity before a local competitor takes the canonical referral.",
-      ctaBtn: "Secure #1 Exclusivity Now →"
+      desc: "Boost your visibility and secure a higher percentage of AI recommendations to place your brand among the top 10 in your area on ChatGPT and Gemini.",
+      ctaBtn: "Secure your spot in the Top 10 searches now! →"
     },
 
     lossBadge: "Direct Commercial Impact",
@@ -652,11 +652,11 @@ const I18N = {
     chat: {
       title: "GeoPulse AI Specialist",
       online: "Online 24/7 • Instant Q&A",
-      welcome: "Hello! I am GeoPulse's AI Specialist. Do you have any questions about how the 14-Day Challenge works, pricing ($47 USD), or how we rank you #1 on AI recommendations?",
+      welcome: "Hello! I am GeoPulse's AI Specialist. Do you have any questions about how the 14-Day Challenge works, pricing ($47 USD), or how we rank you in the Top 10 on AI recommendations?",
       inputPlaceholder: "Type your question here...",
       sendBtn: "Send",
       typing: "Typing reply...",
-      fallbackReply: "GeoPulse AI activates your #1 ranking across AI search engines for a one-time $47 USD fee with a 7-Day Ironclad Guarantee!",
+      fallbackReply: "GeoPulse AI activates your Top 10 visibility across AI search engines for a one-time $47 USD fee with a 7-Day Ironclad Guarantee!",
       quickBtns: [
         { label: "How it works?", msg: "How does the 14-Day Challenge work?" },
         { label: "No website needed?", msg: "Do I need a website or does Instagram work?" },
@@ -735,8 +735,8 @@ const I18N = {
 
       day14Label: "Resultado en el Día 14 (Tras 14 acciones de la IA):",
       day14Score: "Score: 94.5%",
-      day14Badge: "🚀 DÍA 14: TÚ EN 1º LUGAR EN LAS IAs",
-      day14YourCompany: "🥇 1. TU EMPRESA / TU NOMBRE — Recomendado #1",
+      day14Badge: "🚀 DÍA 14: TÚ EN EL TOP 10 DE LAS IAs",
+      day14YourCompany: "🏆 TU EMPRESA / TU NOMBRE — Destacado en el Top 10",
 
       explainTitle: "💡 Por qué estás pagando en el Desafío ($47 USD único):",
       explainDesc: "Durante <strong>14 días seguidos</strong>, nuestra IA ejecuta 1 etapa técnica por día (crea tus archivos semánticos, publica artículos comparativos, envía pings a los rastreadores y reaudita tu nota) para posicionarte en el #1 de las búsquedas de IA."
@@ -917,18 +917,18 @@ const I18N = {
 
       sidebarBadge: "🔥 Desafío Sprint de 14 Días",
       sidebarTitle: "Contrata a nuestra IA para trabajar 14 días seguidos por tu posición en el ranking",
-      sidebarDesc: "Por una <strong>tarifa única de $47 USD (sin mensualidades)</strong>, nuestra IA ejecuta 1 acción técnica por día durante 14 días (JSON-LD, /llms.txt, Guía Oficial Top 5 de la Ciudad, FAQ Semántico y Pings IndexNow) para colocarte en 1º lugar.",
+      sidebarDesc: "Por una <strong>tarifa única de $47 USD (sin mensualidades)</strong>, nuestra IA ejecuta 1 acción técnica por día durante 14 días (JSON-LD, /llms.txt, Guía Oficial Top 5 de la Ciudad, FAQ Semántico y Pings IndexNow) para colocarte en el Top 10 con máxima visibilidad.",
       sidebarCta: "Activar Mi Desafío de 14 Días Ahora ($47 USD) →"
     },
 
     scarcity: {
-      statusBadge: "Estado de Exclusividad Regional",
-      ruleLabel: "Regla de Oro de la IA:",
-      vagaText: "Plaza #1 Oficial en",
+      statusBadge: "Cupos Limitados por Ciudad",
+      ruleLabel: "Meta del Desafío:",
+      vagaText: "Asegura tu cupo en el Top 10 de búsquedas en",
       paraText: "para",
       availBadge: "DISPONIBLE AHORA",
-      desc: "Los algoritmos de IA solo recomiendan a <strong>1 único profesional o empresa en el top #1 de la Guía Oficial</strong>. Al activar el Desafío de 14 Días, aseguras la exclusividad antes de que un competidor local tome la recomendación canónica.",
-      ctaBtn: "Asegurar Exclusividad de la Plaza #1 →"
+      desc: "Aumenta tu visibilidad y garantiza un mayor porcentaje de recomendaciones en ChatGPT y Gemini para colocar tu marca entre las 10 mejores de tu región.",
+      ctaBtn: "¡Asegura tu cupo para el Top 10 de búsquedas ahora! →"
     },
 
     lossBadge: "Impacto Comercial Directo",
@@ -990,11 +990,11 @@ const I18N = {
     chat: {
       title: "Especialista GeoPulse AI",
       online: "En línea 24h • Consultas",
-      welcome: "¡Hola! Soy la Especialista de IA de GeoPulse. ¿Tienes alguna duda sobre cómo funciona el Desafío de 14 Días, precios ($47 USD) o cómo te posicionamos en 1º Lugar?",
+      welcome: "¡Hola! Soy la Especialista de IA de GeoPulse. ¿Tienes alguna duda sobre cómo funciona el Desafío de 14 Días, precios ($47 USD) o cómo te posicionamos en el Top 10 de las IAs?",
       inputPlaceholder: "Escribe tu duda aquí...",
       sendBtn: "Enviar",
       typing: "Escribiendo respuesta...",
-      fallbackReply: "GeoPulse AI activa tu presencia en 1º Lugar en las IAs por $47 USD tarifa única con Garantía Blindada de 7 Días.",
+      fallbackReply: "GeoPulse AI activa tu presencia en el Top 10 de las IAs por $47 USD tarifa única con Garantía Blindada de 7 Días.",
       quickBtns: [
         { label: "¿Cómo funciona?", msg: "¿Cómo funciona el Desafío de 14 Días?" },
         { label: "¿Sirve sin web?", msg: "¿Necesito tener sitio web o sirve con Instagram?" },
@@ -1332,11 +1332,11 @@ function applyLanguage(lang) {
   const dict = I18N[lang] || I18N.pt;
 
   if (lang === "en") {
-    document.title = "GeoPulse AI — 14-Day Challenge: Our AI Working Daily to Rank You #1 on ChatGPT & Gemini";
+    document.title = "GeoPulse AI — 14-Day Challenge: Our AI Working Daily to Rank You in the Top 10 on ChatGPT & Gemini";
   } else if (lang === "es") {
-    document.title = "GeoPulse AI — Desafío de 14 Días: Nuestra IA Trabajando para Colocarte en 1º Lugar en ChatGPT y Gemini";
+    document.title = "GeoPulse AI — Desafío de 14 Días: Nuestra IA Trabajando para Colocarte en el Top 10 de ChatGPT y Gemini";
   } else {
-    document.title = "GeoPulse AI — Desafio de 14 Dias: Nossa IA Trabalhando para Colocar Você em 1º Lugar no ChatGPT e Gemini";
+    document.title = "GeoPulse AI — Desafio de 14 Dias: Nossa IA Trabalhando para Colocar Você no Top 10 do ChatGPT e Gemini";
   }
 
   // Marquee superior

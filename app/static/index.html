@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GeoPulse AI — Desafio de 14 Dias: Nossa IA Trabalhando para Colocar Você em 1º Lugar no ChatGPT e Gemini</title>
+  <title>GeoPulse AI — Desafio de 14 Dias: Nossa IA Trabalhando para Colocar Você no Top 10 do ChatGPT e Gemini</title>
   <meta name="description" content="Descubra gratuitamente sua nota em 10 segundos e ative o Desafio de 14 Dias: nossa Inteligência Artificial trabalhando diariamente para melhorar sua posição no ChatGPT, Gemini e Perplexity." />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -755,7 +755,7 @@
           <div class="bg-white rounded-3xl border-2 border-emerald-500 p-6 space-y-4 shadow-soft">
             <span id="res-sidebar-badge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🔥 Desafio Sprint de 14 Dias</span>
             <h4 id="res-sidebar-title" class="text-xl font-extrabold text-slate-900">Contrate nossa IA para trabalhar 14 dias seguidos pela sua posição no ranking</h4>
-            <p id="res-sidebar-desc" class="text-xs sm:text-sm text-slate-600">Por uma <strong id="res-sidebar-price-text">taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você em 1º lugar.</p>
+            <p id="res-sidebar-desc" class="text-xs sm:text-sm text-slate-600">Por uma <strong id="res-sidebar-price-text">taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você no Top 10 com máxima visibilidade.</p>
             <button id="res-sidebar-cta-btn" onclick="openCheckoutModal()" class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-glow">
               Ativar Meu Desafio de 14 Dias Agora (R$ 197) →
             </button>
@@ -923,7 +923,7 @@
       <div class="flex gap-2">
         <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-800 font-bold flex items-center justify-center text-[10px] shrink-0">AI</div>
         <div class="bg-white p-3 rounded-2xl rounded-tl-sm border border-slate-200 text-slate-800 space-y-1 shadow-sm leading-relaxed">
-          <p id="ai-chat-welcome-msg">Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você em 1º Lugar nas recomendações?</p>
+          <p id="ai-chat-welcome-msg">Olá! Sou a Especialista de IA do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias ou como colocamos você no Top 10 das recomendações de IA?</p>
         </div>
       </div>
     </div>
@@ -1623,7 +1623,7 @@ function extractTopCompetitor(data) {
       const promptTxt = isEn ? 'What are the best specialists in the area?' : (isEs ? '¿Cuáles son los mejores especialistas de la zona?' : 'Quais os melhores especialistas na região?');
       const sugTitle = isEn ? 'Days 1 to 14: Full GEO & AIO Infrastructure' : (isEs ? 'Días 1 a 14: Infraestructura Completa GEO y AIO' : 'Dias 1 a 14: Infraestrutura Completa GEO & AIO');
       const sugProb = isEn ? 'Missing /llms.txt protocol and Top 5 Guide.' : (isEs ? 'Ausencia de protocolo /llms.txt y Guía Top 5.' : 'Ausência de protocolo /llms.txt e Guia Top 5.');
-      const sugSol = isEn ? 'Our AI executes 14 daily actions to rank you #1.' : (isEs ? 'Nuestra IA ejecuta 14 acciones diarias para posicionarte en el #1.' : 'Nossa IA executa 14 ações diárias para posicionar você em #1.');
+      const sugSol = isEn ? 'Our AI executes 14 daily actions to rank you in the Top 10.' : (isEs ? 'Nuestra IA ejecuta 14 acciones diarias para posicionarte en el Top 10.' : 'Nossa IA executa 14 ações diárias para posicionar você no Top 10.');
 
       renderDiagnosticResults({
         company: { id: 999, name: custom?.name || defName, url: custom?.url || defUrl, niche: custom?.niche || defNiche, city_region: custom?.city_region || defCity, is_paid: isPaid, sprint_day_current: isPaid ? 14 : 0 },
@@ -1855,7 +1855,7 @@ function extractTopCompetitor(data) {
         appendChatMessage('ai', data.reply || 'Estamos à sua disposição para ativar seu Desafio de 14 Dias e colocar sua marca no topo das IAs!');
       } catch (err) {
         document.getElementById('ai-typing-indicator')?.remove();
-        const fb = (I18N[window.currentLang || 'pt']?.chat?.fallbackReply) || 'O GeoPulse AI ativa sua presença em 1º Lugar nas IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias.';
+        const fb = (I18N[window.currentLang || 'pt']?.chat?.fallbackReply) || 'O GeoPulse AI ativa sua presença no Top 10 das IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias.';
         appendChatMessage('ai', fb);
       }
     }

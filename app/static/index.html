@@ -324,7 +324,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
           <button type="button" onclick="shareDiagnosticWhatsApp()" class="w-full sm:w-auto px-4 py-4 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 border border-slate-300 font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-            <span>📲</span> Enviar para o Sócio (WhatsApp)
+            <span>📲</span> <span id="res-share-btn-text">Enviar para o Sócio (WhatsApp)</span>
           </button>
           <button id="res-top-cta-btn" onclick="openCheckoutModal()" class="w-full sm:w-auto px-6 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-glow">
             🚀 Iniciar Desafio de 14 Dias (IA Trabalhando por Você — R$ 197)
@@ -334,19 +334,19 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div class="bg-white rounded-3xl border border-slate-200 p-6">
-          <span class="text-xs font-bold uppercase text-slate-400">Nota Atual nas IAs (Share of Model)</span>
+          <span id="res-metric1-label" class="text-xs font-bold uppercase text-slate-400">Nota Atual nas IAs (Share of Model)</span>
           <div id="res-score-number" class="text-3xl font-extrabold text-slate-900 my-2">0%</div>
-          <p class="text-xs text-emerald-700 font-bold">Meta após os 14 dias: >90%</p>
+          <p id="res-metric1-goal" class="text-xs text-emerald-700 font-bold">Meta após os 14 dias: >90%</p>
         </div>
         <div class="bg-white rounded-3xl border border-slate-200 p-6">
-          <span class="text-xs font-bold uppercase text-slate-400">Posição Atual no Ranking</span>
+          <span id="res-metric2-label" class="text-xs font-bold uppercase text-slate-400">Posição Atual no Ranking</span>
           <div id="res-top-rank" class="text-3xl font-extrabold text-rose-600 my-2">Fora do Top 3</div>
-          <p class="text-xs text-slate-500">Ranking espontâneo na sua cidade</p>
+          <p id="res-metric2-sub" class="text-xs text-slate-500">Ranking espontâneo na sua cidade</p>
         </div>
         <div class="bg-white rounded-3xl border border-slate-200 p-6">
-          <span class="text-xs font-bold uppercase text-slate-400">Status do Desafio de 14 Dias</span>
+          <span id="res-metric3-label" class="text-xs font-bold uppercase text-slate-400">Status do Desafio de 14 Dias</span>
           <div id="res-sprint-badge" class="text-3xl font-extrabold text-amber-600 my-2">Dia 0/14</div>
-          <p class="text-xs text-slate-500">14 ações diárias prontas para iniciar</p>
+          <p id="res-metric3-sub" class="text-xs text-slate-500">14 ações diárias prontas para iniciar</p>
         </div>
       </div>
 
@@ -356,18 +356,18 @@
           <span class="text-3xl shrink-0">⚡</span>
           <div class="space-y-1">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px] font-extrabold uppercase tracking-wide">Status de Exclusividade Regional</span>
-              <span class="text-xs font-bold text-slate-600">Regra de Ouro da IA:</span>
+              <span id="scarcity-status-badge" class="px-2.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px] font-extrabold uppercase tracking-wide">Status de Exclusividade Regional</span>
+              <span id="scarcity-rule-label" class="text-xs font-bold text-slate-600">Regra de Ouro da IA:</span>
             </div>
-            <h4 class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
-              Vaga #1 Oficial em <span id="scarcity-city" class="text-emerald-700 font-black underline">sua cidade</span> para <span id="scarcity-niche" class="text-emerald-700 font-black underline">seu segmento</span>: <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-mono font-black text-xs sm:text-sm">DISPONÍVEL AGORA</span>
+            <h4 id="scarcity-headline-container" class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
+              <span id="scarcity-vaga-text">Vaga #1 Oficial em</span> <span id="scarcity-city" class="text-emerald-700 font-black underline">sua cidade</span> <span id="scarcity-para-text">para</span> <span id="scarcity-niche" class="text-emerald-700 font-black underline">seu segmento</span>: <span id="scarcity-avail-badge" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-mono font-black text-xs sm:text-sm">DISPONÍVEL AGORA</span>
             </h4>
-            <p class="text-xs text-slate-600 max-w-2xl">
+            <p id="scarcity-desc" class="text-xs text-slate-600 max-w-2xl">
               Os algoritmos de IA só recomendam <strong>1 único profissional ou empresa no topo #1 do Guia Oficial</strong>. Ao ativar o Desafio de 14 Dias, você assegura a primazia antes que um concorrente local ocupe a indicação canônica.
             </p>
           </div>
         </div>
-        <button onclick="openCheckoutModal()" class="w-full md:w-auto shrink-0 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition">
+        <button id="scarcity-cta-btn" onclick="openCheckoutModal()" class="w-full md:w-auto shrink-0 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition">
           Garantir Exclusividade da Vaga #1 →
         </button>
       </div>
@@ -378,12 +378,12 @@
           <div class="space-y-1">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-extrabold uppercase">
               <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
-              Alerta de Faturamento: Quanto você está perdendo hoje?
+              <span id="loss-header-badge">Alerta de Faturamento: Quanto você está perdendo hoje?</span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+            <h3 id="loss-header-title" class="text-xl sm:text-2xl font-extrabold text-slate-900">
               Estimativa de Negócios e Clientes Perdidos para Concorrentes
             </h3>
-            <p class="text-xs sm:text-sm text-slate-600 max-w-3xl">
+            <p id="loss-header-desc" class="text-xs sm:text-sm text-slate-600 max-w-3xl">
               Quando alguém na sua cidade busca recomendação de <strong id="loss-niche-text" class="text-slate-900">sua área</strong> no ChatGPT ou Gemini, os algoritmos recomendam seus concorrentes no topo. Veja o cálculo estimado do dinheiro que está deixando de entrar no seu caixa:
             </p>
           </div>
@@ -397,19 +397,19 @@
         <!-- GRADE DAS 3 MÉTRICAS DE IMPACTO -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
-            <span class="text-xs font-bold uppercase text-slate-500">Buscas Locais na IA / Mês</span>
+            <span id="loss-metric-searches-lbl" class="text-xs font-bold uppercase text-slate-500">Buscas Locais na IA / Mês</span>
             <div id="loss-search-volume" class="text-2xl font-extrabold text-slate-900 font-mono">~ 680 buscas</div>
-            <p class="text-[11px] text-slate-500">Pessoas pesquisando no ChatGPT e Gemini com alta intenção de contratação na sua cidade.</p>
+            <p id="loss-metric-searches-sub" class="text-[11px] text-slate-500">Pessoas pesquisando no ChatGPT e Gemini com alta intenção de contratação na sua cidade.</p>
           </div>
           <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
-            <span class="text-xs font-bold uppercase text-slate-500">Clientes Perdidos / Mês</span>
+            <span id="loss-metric-clients-lbl" class="text-xs font-bold uppercase text-slate-500">Clientes Perdidos / Mês</span>
             <div id="loss-clients-count" class="text-2xl font-extrabold text-rose-600 font-mono">~ 18 clientes</div>
-            <p class="text-[11px] text-slate-500">Clientes que fecham com o concorrente indicado em 1º lugar pela IA.</p>
+            <p id="loss-metric-clients-sub" class="text-[11px] text-slate-500">Clientes que fecham com o concorrente indicado em 1º lugar pela IA.</p>
           </div>
           <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
-            <span class="text-xs font-bold uppercase text-slate-500">Prejuízo Anual Projetado</span>
+            <span id="loss-metric-annual-lbl" class="text-xs font-bold uppercase text-slate-500">Prejuízo Anual Projetado</span>
             <div id="loss-annual-money" class="text-2xl font-extrabold text-rose-700 font-mono">- R$ 172.800</div>
-            <p class="text-[11px] text-slate-500">Estimativa anual acumulada indo para seus concorrentes diretos.</p>
+            <p id="loss-metric-annual-sub" class="text-[11px] text-slate-500">Estimativa anual acumulada indo para seus concorrentes diretos.</p>
           </div>
         </div>
 
@@ -428,7 +428,7 @@
           
           <div class="space-y-1">
             <input id="loss-ticket-slider" type="range" min="100" max="5000" step="50" value="800" oninput="updateLossCalculation(this.value)" class="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg">
-            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+            <div id="loss-ticket-scale" class="flex justify-between text-[10px] font-mono text-slate-400">
               <span>R$ 100</span>
               <span>R$ 1.500</span>
               <span>R$ 3.000</span>
@@ -441,14 +441,14 @@
         <div class="bg-emerald-600 rounded-2xl p-4 sm:p-5 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-glow">
           <div class="space-y-1">
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wide">Cálculo de Retorno</span>
-              <span class="text-xs font-bold text-emerald-100">O GeoPulse AI custa apenas <strong>R$ 197 taxa única</strong></span>
+              <span id="loss-roi-badge" class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wide">Cálculo de Retorno</span>
+              <span id="loss-roi-title" class="text-xs font-bold text-emerald-100">O GeoPulse AI custa apenas <strong id="loss-roi-price-text">R$ 197 taxa única</strong></span>
             </div>
-            <p class="text-xs sm:text-sm text-emerald-50 max-w-2xl">
+            <p id="loss-roi-desc" class="text-xs sm:text-sm text-emerald-50 max-w-2xl">
               Com <strong>apenas 1 único cliente recuperado</strong> através do ChatGPT ou Gemini, você já recupera com sobras todo o valor do Desafio de 14 Dias e consolida sua liderança na sua região.
             </p>
           </div>
-          <button onclick="openCheckoutModal()" class="w-full md:w-auto px-6 py-3.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-lg transition">
+          <button id="loss-roi-cta-btn" onclick="openCheckoutModal()" class="w-full md:w-auto px-6 py-3.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-lg transition">
             🛡️ Parar de Perder Clientes e Ativar (R$ 197) →
           </button>
         </div>
@@ -456,15 +456,15 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div class="lg:col-span-7 space-y-4">
-          <h3 class="text-lg font-extrabold text-slate-900">🤖 O que o ChatGPT, Gemini e Perplexity responderam:</h3>
+          <h3 id="res-audits-heading" class="text-lg font-extrabold text-slate-900">🤖 O que o ChatGPT, Gemini e Perplexity responderam:</h3>
           <div id="res-audits-list" class="space-y-4"></div>
         </div>
         <div class="lg:col-span-5 space-y-5">
           <div class="bg-white rounded-3xl border-2 border-emerald-500 p-6 space-y-4 shadow-soft">
-            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🔥 Desafio Sprint de 14 Dias</span>
-            <h4 class="text-xl font-extrabold text-slate-900">Contrate nossa IA para trabalhar 14 dias seguidos pela sua posição no ranking</h4>
-            <p class="text-xs sm:text-sm text-slate-600">Por uma <strong>taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você em 1º lugar.</p>
-            <button onclick="openCheckoutModal()" class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-glow">
+            <span id="res-sidebar-badge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🔥 Desafio Sprint de 14 Dias</span>
+            <h4 id="res-sidebar-title" class="text-xl font-extrabold text-slate-900">Contrate nossa IA para trabalhar 14 dias seguidos pela sua posição no ranking</h4>
+            <p id="res-sidebar-desc" class="text-xs sm:text-sm text-slate-600">Por uma <strong id="res-sidebar-price-text">taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você em 1º lugar.</p>
+            <button id="res-sidebar-cta-btn" onclick="openCheckoutModal()" class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-glow">
               Ativar Meu Desafio de 14 Dias Agora (R$ 197) →
             </button>
           </div>
@@ -478,9 +478,9 @@
   <section id="desafio-14-dias" class="py-16 sm:py-24 bg-slate-50 border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div class="text-center max-w-3xl mx-auto space-y-3">
-        <span class="px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">Transparência Total: Pelo que você está pagando?</span>
-        <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900">Veja o que nossa IA faz por você durante os 14 Dias</h2>
-        <p class="text-sm sm:text-base text-slate-600">Você paga uma única vez (R$ 197) e nosso motor executa automaticamente as 14 etapas abaixo para construir sua liderança nas pesquisas feitas por IA:</p>
+        <span id="sprint-section-badge" class="px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">Transparência Total: Pelo que você está pagando?</span>
+        <h2 id="sprint-section-title" class="text-2xl sm:text-4xl font-extrabold text-slate-900">Veja o que nossa IA faz por você durante os 14 Dias</h2>
+        <p id="sprint-section-subtitle" class="text-sm sm:text-base text-slate-600">Você paga uma única vez (R$ 197) e nosso motor executa automaticamente as 14 etapas abaixo para construir sua liderança nas pesquisas feitas por IA:</p>
       </div>
       <div id="public-sprint-days-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
     </div>
@@ -606,7 +606,7 @@
   <div class="fixed bottom-5 right-5 z-40">
     <button id="ai-chat-toggle-btn" onclick="toggleAiChat()" class="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-slate-900 text-white font-extrabold text-xs shadow-2xl hover:bg-slate-800 transition border border-slate-700">
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-      <span>💬 Dúvidas sobre o Desafio? Fale com a IA</span>
+      <span id="floating-chat-btn-text">💬 Dúvidas sobre o Desafio? Fale com a IA</span>
     </button>
   </div>
 
@@ -978,6 +978,7 @@
 
     function renderDiagnosticResults(data) {
       currentDiagnosticData = data;
+      window.currentDiagnosticData = data;
       const sec = document.getElementById('diagnostic-results-section');
       sec.classList.remove('hidden');
       document.getElementById('res-company-title').textContent = data.company.name;
@@ -1042,13 +1043,31 @@
         </div>
       `).join('');
 
+      const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
+      const resI18n = dict.results || {};
+
+      document.getElementById('res-audits-list').innerHTML = (data.audits || []).map(a => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-2">
+          <div class="flex justify-between items-center text-xs font-bold">
+            <span class="text-emerald-700">${a.prompt_category} (${a.model_provider})</span>
+            <span class="${a.is_cited ? 'text-emerald-700' : 'text-rose-600'}">${a.is_cited ? (resI18n.cited || '✓ Citado') : (resI18n.notCited || '✗ Não Recomendado')}</span>
+          </div>
+          <div class="text-xs text-slate-500 italic">"${a.prompt_text}"</div>
+          <div class="text-xs sm:text-sm text-slate-700 whitespace-pre-line">${a.response_text}</div>
+        </div>
+      `).join('');
+
       document.getElementById('res-suggestions-list').innerHTML = (data.suggestions || []).map(s => `
         <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1 text-xs">
           <div class="font-extrabold text-slate-900">${s.title}</div>
           <p class="text-slate-600">${s.problem}</p>
-          <p class="text-emerald-700 font-bold">✓ Ação nos 14 Dias: ${s.solution_preview}</p>
+          <p class="text-emerald-700 font-bold">${resI18n.action14 || '✓ Ação nos 14 Dias:'} ${s.solution_preview}</p>
         </div>
       `).join('');
+
+      if (typeof window.updateResultsI18n === 'function') {
+        window.updateResultsI18n(window.currentLang || 'pt');
+      }
       sec.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -1101,14 +1120,30 @@
 
     function toggleOrderBump(checked) {
       currentOrderBump = checked;
-      const total = officialPrice + (checked ? 50.0 : 0.0);
-      document.getElementById('modal-total-display').textContent = total.toFixed(2).replace('.', ',');
-      document.getElementById('pix-amount-badge').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      window.currentOrderBump = checked;
+      const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
+      const total = dict.planPrice + (checked ? dict.bumpPrice : 0.0);
+      if (dict.currencyCode === 'BRL') {
+        document.getElementById('modal-total-display').textContent = total.toFixed(2).replace('.', ',');
+        document.getElementById('pix-amount-badge').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      } else {
+        document.getElementById('modal-total-display').textContent = total.toFixed(2);
+        document.getElementById('pix-amount-badge').textContent = `$ ${total.toFixed(2)} USD`;
+      }
       refreshPixCode();
     }
 
     function openCheckoutModal() {
       document.getElementById('checkout-modal').classList.remove('hidden');
+      const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
+      const total = dict.planPrice + (currentOrderBump ? dict.bumpPrice : 0.0);
+      if (dict.currencyCode === 'BRL') {
+        document.getElementById('modal-total-display').textContent = total.toFixed(2).replace('.', ',');
+        document.getElementById('pix-amount-badge').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      } else {
+        document.getElementById('modal-total-display').textContent = total.toFixed(2);
+        document.getElementById('pix-amount-badge').textContent = `$ ${total.toFixed(2)} USD`;
+      }
       refreshPixCode();
     }
     function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
@@ -1121,7 +1156,8 @@
       navigator.clipboard.writeText(currentPixEmvCode);
       const msg = document.getElementById('checkout-feedback-msg');
       msg.classList.remove('hidden');
-      msg.textContent = '✓ Código PIX Copia e Cola copiado! Abra o app do seu banco e cole na opção PIX.';
+      const l = window.currentLang || 'pt';
+      msg.textContent = l === 'pt' ? '✓ Código PIX Copia e Cola copiado! Abra o app do seu banco e cole na opção PIX.' : (l === 'es' ? '✓ ¡Código PIX copiado!' : '✓ PIX Code copied!');
       setTimeout(() => { msg.classList.add('hidden'); }, 5000);
     }
 
@@ -1242,15 +1278,19 @@
     /* INICIALIZAÇÃO DA PÁGINA (CARREGA DADOS DO BACKEND & RETORNO DO CHECKOUT) */
     window.addEventListener('DOMContentLoaded', async () => {
       // 1. Preenche a grade explicativa dos 14 dias
-      const grid = document.getElementById('public-sprint-days-grid');
-      if (grid) {
-        grid.innerHTML = SCHEDULE_14.map(d => `
-          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-1">
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">Dia ${d.day} de 14</span>
-            <h4 class="text-sm font-extrabold text-slate-900 pt-1">${d.title}</h4>
-            <p class="text-[11px] text-slate-500">Executado automaticamente pela IA</p>
-          </div>
-        `).join('');
+      if (typeof window.render14DaySchedule === 'function') {
+        window.render14DaySchedule(window.currentLang || 'pt');
+      } else {
+        const grid = document.getElementById('public-sprint-days-grid');
+        if (grid) {
+          grid.innerHTML = SCHEDULE_14.map(d => `
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-1">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">Dia ${d.day} de 14</span>
+              <h4 class="text-sm font-extrabold text-slate-900 pt-1">${d.title}</h4>
+              <p class="text-[11px] text-slate-500">Executado automaticamente pela IA</p>
+            </div>
+          `).join('');
+        }
       }
 
       // 2. Busca configurações oficiais de checkout (Chave PIX e Preço Real)

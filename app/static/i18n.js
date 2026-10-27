@@ -48,49 +48,99 @@ const I18N = {
 
     step1Badge: "👇 Passo 1 (Gratuito): Descubra sua Nota Atual em 10 Segundos",
     formMainTitle: "Auditoria Gratuita de Visibilidade em IA",
-    btnPresetAdv: "⚖️ Exemplo Advogado",
-    btnPresetClinica: "🦷 Exemplo Clínica",
-    btnDemoSim: "⚡ Simular Diagnóstico Agora",
+    formSubTitle: "Veja exatamente como sua empresa aparece (ou se é ignorada) no ChatGPT, Gemini e Perplexity quando um cliente busca seu serviço.",
+    labelEntity: "Tipo de Perfil a Auditar:",
+    entityCompany: "🏢 Empresa / Clínica / Comércio",
+    entityPersonal: "👤 Profissional Liberal / Especialista",
+    labelName: "Nome da Empresa ou Profissional *",
+    namePlaceholder: "Ex: OdontoPrime Implantes ou Dra. Camila Mendes",
+    labelUrl: "Site, Instagram ou Google Maps *",
+    labelNiche: "Seu Nicho / Especialidade *",
+    labelCity: "Cidade e Estado de Atuação *",
+    labelCouncil: "Registro de Classe (OAB, CRM, CRO, CRC...)",
+    labelCompetitors: "Principais Concorrentes na Região (opcional)",
+    labelWhatsapp: "WhatsApp para Receber o Relatório Oficial *",
+    labelEmail: "E-mail Profissional (opcional)",
+    privacyNote: "🔒 Seus dados são 100% confidenciais. Usamos apenas para conectar os robôs de busca e emitir o diagnóstico.",
+    submitBtn: "⚡ Executar Diagnóstico Gratuito nas IAs Agora",
 
-    btnTypeCompany: "🏢 Sou Empresa / Clínica / Escritório",
-    btnTypeAuto: "👨‍⚕️ Sou Profissional Liberal / Autônomo",
-
-    formCompany: {
-      nameLabel: "🏢 Nome da Empresa, Clínica ou Marca *",
-      namePlaceholder: "Ex: Clínica OdontoPrime ou Silva & Associados",
-      urlLabel: "🌐 Site Oficial ou Instagram da Empresa *",
-      urlPlaceholder: "Ex: www.suaempresa.com.br ou @suaempresa",
-      nicheLabel: "🎯 Especialidade ou Ramo de Atuação da Empresa *",
-      nichePlaceholder: "Ex: Implantes Dentários, Advocacia Empresarial, Contabilidade",
-      cityLabel: "📍 Cidade e Estado da Empresa *",
-      cityPlaceholder: "Ex: São Paulo - SP, Belo Horizonte - MG",
-      registryLabel: "🏛️ CNPJ ou Registro Oficial da Empresa (Opcional)",
-      registryPlaceholder: "Ex: 00.000.000/0001-00 ou Registro em Conselho",
-      registryHint: "Ajuda os robôs de IA a confirmarem a legitimidade da sua empresa.",
-      competitorsLabel: "⚔️ Concorrentes Diretos na Região (Opcional)",
-      competitorsPlaceholder: "Ex: Concorrente 1, Concorrente 2",
-      competitorsHint: "A IA compara sua empresa contra eles nas recomendações de busca."
+    sprintSection: {
+      badge: "Transparência Total: Pelo que você está pagando?",
+      title: "Veja o que nossa IA faz por você durante os 14 Dias",
+      subtitle: "Você paga uma única vez (R$ 197) e nosso motor executa automaticamente as 14 etapas abaixo para construir sua liderança nas pesquisas feitas por IA:"
     },
 
-    formAuto: {
-      nameLabel: "👨‍⚕️ Seu Nome Profissional Completo *",
-      namePlaceholder: "Ex: Dr. Roberto Guimarães ou Dra. Camila Mendes",
-      urlLabel: "🌐 Seu Perfil no Instagram, Site ou LinkedIn *",
-      urlPlaceholder: "Ex: instagram.com/dr.roberto ou www.drroberto.com.br",
-      nicheLabel: "🎯 Sua Especialidade ou Área de Atuação *",
-      nichePlaceholder: "Ex: Advogado Trabalhista, Médico Cirurgião, Dentista, Psicóloga",
-      cityLabel: "📍 Cidade e Estado onde você Atende *",
-      cityPlaceholder: "Ex: São Paulo - SP, Rio de Janeiro - RJ",
-      registryLabel: "📜 Seu Registro Profissional (OAB, CRM, CRO, CREA, CRP, CRC, etc.) *",
-      registryPlaceholder: "Ex: OAB/SP 123.456, CRM 98.765, CRO 12.345",
-      registryHint: "Essencial para o ChatGPT e Gemini recomendarem seu nome com autoridade e credibilidade máxima.",
-      competitorsLabel: "⚔️ Outros Profissionais Concorrentes na Região (Opcional)",
-      competitorsPlaceholder: "Ex: Dr. Concorrente X, Dra. Concorrente Y",
-      competitorsHint: "A IA compara você diretamente com outros profissionais da mesma cidade."
+    scheduleDayPrefix: "Dia",
+    scheduleDayOf: "de",
+    scheduleSub: "Executado automaticamente pela IA",
+    schedule14: [
+      { day: 1, title: "Protocolo de Entidade & JSON-LD + /llms.txt" },
+      { day: 2, title: "Publicação do Guia Oficial Top 5 da Cidade" },
+      { day: 3, title: "Arquitetura de FAQ Semântico Zero-Click" },
+      { day: 4, title: "Ancoragem de Entidade no ChatGPT & Perplexity" },
+      { day: 5, title: "Artigo Educativo de Aprofundamento do Nicho" },
+      { day: 6, title: "Enriquecimento de Dados Estruturados Schema.org" },
+      { day: 7, title: "Reauditoria Intermediária & Ajuste de Densidade" },
+      { day: 8, title: "Construção de Página Semântica de Comparativo" },
+      { day: 9, title: "Matriz de Prova Social & Casos de Sucesso" },
+      { day: 10, title: "Pings IndexNow nos Rastreadores de IA" },
+      { day: 11, title: "Artigo de Tendências e Inovações do Setor" },
+      { day: 12, title: "Auditoria de Citações e Menções de Terceiros" },
+      { day: 13, title: "Consolidação da Base de Conhecimento Local" },
+      { day: 14, title: "Relatório Final de Autoridade & Entrega Oficial" }
+    ],
+
+    results: {
+      statusBadge: "Diagnóstico Concluído (Dia 0)",
+      reportTitle: "Relatório de Posicionamento IA",
+      shareBtn: "Enviar para o Sócio (WhatsApp)",
+      topCta: "🚀 Iniciar Desafio de 14 Dias (IA Trabalhando por Você — R$ 197)",
+      metric1Label: "Nota Atual nas IAs (Share of Model)",
+      metric1Goal: "Meta após os 14 dias: >90%",
+      metric2Label: "Posição Atual no Ranking",
+      notRanked: "Fora do Ranking",
+      rankSuffix: "º Lugar",
+      metric2Sub: "Ranking espontâneo na sua cidade",
+      metric3Label: "Status do Desafio de 14 Dias",
+      dayPrefix: "Dia",
+      metric3Sub: "14 ações diárias prontas para iniciar",
+      clientsPerMonth: "clientes / mês",
+
+      lossHeaderBadge: "Alerta de Faturamento: Quanto você está perdendo hoje?",
+      lossHeaderTitle: "Estimativa de Negócios e Clientes Perdidos para Concorrentes",
+      lossHeaderDescTemplate: "Quando alguém na sua cidade busca recomendação de {niche} no ChatGPT ou Gemini, os algoritmos recomendam seus concorrentes no topo. Veja o cálculo estimado do dinheiro que está deixando de entrar no seu caixa:",
+      searchesLabel: "Buscas Locais na IA / Mês",
+      searchesSub: "Pessoas pesquisando no ChatGPT e Gemini com alta intenção de contratação na sua cidade.",
+      clientsLabel: "Clientes Perdidos / Mês",
+      clientsSub: "Clientes que fecham com o concorrente indicado em 1º lugar pela IA.",
+      annualLabel: "Prejuízo Anual Projetado",
+      annualSub: "Estimativa anual acumulada indo para seus concorrentes diretos.",
+
+      roiBadge: "Cálculo de Retorno",
+      roiTitle: "O GeoPulse AI custa apenas <strong>R$ 197 taxa única</strong>",
+      roiDesc: "Com <strong>apenas 1 único cliente recuperado</strong> através do ChatGPT ou Gemini, você já recupera com sobras todo o valor do Desafio de 14 Dias e consolida sua liderança na sua região.",
+      roiCta: "🛡️ Parar de Perder Clientes e Ativar (R$ 197) →",
+
+      auditsHeading: "🤖 O que o ChatGPT, Gemini e Perplexity responderam:",
+      cited: "✓ Citado",
+      notCited: "✗ Não Recomendado",
+      action14: "✓ Ação nos 14 Dias:",
+
+      sidebarBadge: "🔥 Desafio Sprint de 14 Dias",
+      sidebarTitle: "Contrate nossa IA para trabalhar 14 dias seguidos pela sua posição no ranking",
+      sidebarDesc: "Por uma <strong>taxa única de R$ 197 (sem mensalidade)</strong>, nossa IA executa 1 ação técnica por dia durante 14 dias (JSON-LD, /llms.txt, Guia Oficial Top 5 da Cidade, FAQ Semântico e Pings IndexNow) para colocar você em 1º lugar.",
+      sidebarCta: "Ativar Meu Desafio de 14 Dias Agora (R$ 197) →"
     },
 
-    submitBtn: "🚀 Executar Diagnóstico Gratuito nas IAs Agora",
-    submitBtnLoading: "⏳ Auditando nos motores de IA...",
+    scarcity: {
+      statusBadge: "Status de Exclusividade Regional",
+      ruleLabel: "Regra de Ouro da IA:",
+      vagaText: "Vaga #1 Oficial em",
+      paraText: "para",
+      availBadge: "DISPONÍVEL AGORA",
+      desc: "Os algoritmos de IA só recomendam <strong>1 único profissional ou empresa no topo #1 do Guia Oficial</strong>. Ao ativar o Desafio de 14 Dias, você assegura a primazia antes que um concorrente local ocupe a indicação canônica.",
+      ctaBtn: "Garantir Exclusividade da Vaga #1 →"
+    },
 
     lossBadge: "Impacto Comercial Direto",
     lossMonthlyLbl: "Perda Mensal Estimada",
@@ -103,32 +153,40 @@ const I18N = {
     guarTitle: "Garantia Incondicional de 7 Dias: Devolução de 100%",
     guarDesc: "Confiamos tanto na eficácia da nossa tecnologia de engenharia semântica que assumimos todo o risco: se em até <strong>7 dias</strong> após a contratação sua estrutura GEO, seu arquivo <code>/llms.txt</code> e seu Guia Oficial Top 5 não forem publicados e entregues no servidor, basta nos enviar uma única mensagem e <strong>devolvemos 100% do seu valor via PIX na mesma hora</strong>, sem perguntas e sem letras miúdas.",
 
-    faqBadge: "Tire suas Dúvidas",
+    faqBadge: "Tire Suas Dúvidas",
     faqTitle: "Perguntas Frequentes sobre o Desafio",
-    faqSub: "Tudo o que você precisa saber antes de ativar a autoridade da sua marca na IA.",
-
+    faqSub: "Tudo o que você precisa saber antes de iniciar os 14 dias da IA:",
     faqs: [
       {
-        q: "📱 Não tenho site oficial, uso apenas o Instagram ou WhatsApp. Funciona para mim?",
-        a: "<strong>Sim, 100%!</strong> O GeoPulse AI gera e hospeda externamente sua página oficial de autoridade (com dados estruturados Schema.org JSON-LD e o arquivo canônico <code>/llms.txt</code>) dentro do domínio indexado <code>geopulseai.store</code>. O seu perfil do Instagram, WhatsApp ou LinkedIn é cadastrado como o canal oficial de contato para onde a IA direcionará os clientes recomendados."
-      },
-      {
-        q: "💻 Preciso entender de programação ou contratar um programador?",
-        a: "<strong>Absolutamente nada!</strong> O trabalho técnico complexo (geração de grafos semânticos, redação dos artigos Top 5, pings para robôs via IndexNow e auditorias nos modelos generativos) é executado de forma 100% autônoma pelo nosso motor no servidor. Você só acompanha o diário de bordo."
-      },
-      {
-        q: "💳 O valor de R$ 197 é uma taxa única ou existe mensalidade escondida?",
+        q: "💰 O valor de R$ 197 é uma taxa única ou existe mensalidade escondida?",
         a: "<strong>Taxa única promocional de R$ 197,00.</strong> Não existe nenhuma mensalidade, assinatura ou taxa recorrente surpresa. O valor cobre os 14 dias de execuções ativas do motor de IA e garante a permanência vitalícia dos seus ativos gerados no nosso diretório público indexado."
       },
       {
-        q: "🤖 Quanto tempo leva para os robôs do ChatGPT, Gemini e Google lerem minha página?",
-        a: "No momento da ativação, nosso sistema emite o ping oficial do protocolo <strong>IndexNow</strong> (validado pelo Bing, Yandex e pelo mecanismo de busca em tempo real do ChatGPT). Enquanto os métodos tradicionais de SEO demoram até 6 meses, a indexação de autoridade em IA costuma ser rastreada entre algumas horas e poucos dias."
+        q: "⚡ Eu preciso fazer alguma coisa técnica ou a IA faz tudo sozinha?",
+        a: "<strong>Você não precisa fazer nada técnico.</strong> O GeoPulse foi construído justamente para donos de empresas e profissionais que não entendem de programação nem de SEO avançado. Nossa IA gera o código, constrói os textos semânticos, publica no nosso subdomínio otimizado e dispara os protocolos para o ChatGPT, Perplexity e Gemini."
       },
       {
-        q: "🛡️ O que acontece se eu não gostar dos resultados?",
-        a: "Você está 100% seguro pela nossa <strong>Garantia Blindada de 7 Dias</strong>. Se por qualquer motivo você não ficar plenamente satisfeito com a entrega técnica da sua autoridade, devolvemos 100% do valor pago via PIX imediatamente."
+        q: "🕒 Quanto tempo leva para ver os primeiros resultados no ChatGPT e Gemini?",
+        a: "Como o Google, ChatGPT Search e Perplexity atualizam seus índices em ritmos diferentes, a maioria dos clientes começa a ver as primeiras citações e recomendações entre o <strong>7º e o 14º dia</strong> de execução contínua."
+      },
+      {
+        q: "🎯 Por que existe a regra de exclusividade de 1 empresa por nicho/cidade?",
+        a: "Porque uma IA generativa só indica <strong>1 resposta de autoridade máxima em primeiro lugar</strong>. Se aceitássemos dois concorrentes diretos no mesmo bairro, estaríamos gerando conflito canônico."
+      },
+      {
+        q: "🛡️ Como funciona a garantia de 7 dias de devolução total?",
+        a: "Simples e transparente: se você ativar o desafio e por qualquer motivo não ficar satisfeito com os ativos gerados ou com o progresso técnico da IA, basta nos avisar pelo WhatsApp ou e-mail de suporte dentro de 7 dias."
       }
     ],
+
+    floatingChatPill: "💬 Dúvidas sobre o Desafio? Fale com a IA",
+
+    chat: {
+      title: "GeoPulse AI — Assistente de Suporte",
+      online: "Online agora • Tire suas dúvidas sobre o Desafio de 14 Dias",
+      welcome: "Olá! Sou a IA de suporte do GeoPulse. Tem alguma dúvida sobre como funciona o Desafio de 14 Dias, preços, garantias ou regras de exclusividade na sua cidade?",
+      inputPlaceholder: "Digite sua dúvida sobre o Desafio de 14 Dias..."
+    },
 
     checkout: {
       badge: "🚀 Desafio Sprint de 14 Dias IA",
@@ -139,24 +197,7 @@ const I18N = {
       bumpDesc: "Blindagem semântica em até <strong>3 cidades vizinhas</strong> da sua região + Kit com <strong>Bio de Alta Conversão & 5 Posts de Autoridade IA</strong> para Instagram e LinkedIn.",
       totalLabel: "Total a Pagar (Taxa Única):",
       mpBtn: "💳 Pagar com Mercado Pago (PIX ou Cartão em até 12x)",
-      pixTitle: "PIX Instantâneo Oficial (Banco Central):",
-      pixScanPill: "Escaneie no App do Banco",
-      pixScanDesc: "Abra o app do seu banco, escolha <strong>PIX</strong> e aponte a câmera para pagar com o valor exato já preenchido.",
-      pixCopyBtn: "📋 Copiar PIX Copia e Cola",
-      pixKeyDetails: "Ou prefere transferir pela Chave Aleatória simples? Clique aqui",
-      pixPaidBtn: "✅ Já fiz o PIX — Iniciar Meu Desafio de 14 Dias"
-    },
-
-    chat: {
-      header: "Especialista GeoPulse — Online",
-      sub: "Tire dúvidas sobre o Desafio 14 Dias",
-      inputPlaceholder: "Digite sua dúvida aqui...",
-      sendBtn: "Enviar",
-      typing: "Digitando resposta...",
-      quickHow: "Como funciona o Desafio?",
-      quickPrice: "Qual o valor e formas de pagamento?",
-      quickSite: "Preciso de site ou programador?",
-      quickGuar: "Existe garantia se eu não gostar?"
+      pixBtn: "✅ Já fiz o PIX — Iniciar Meu Desafio de 14 Dias"
     }
   },
 
@@ -166,87 +207,137 @@ const I18N = {
     locale: "en-US",
     planPrice: 47.0,
     bumpPrice: 15.0,
-    defaultTicket: 250,
+    defaultTicket: 300,
     ticketMin: 50,
-    ticketMax: 2000,
+    ticketMax: 3000,
     ticketStep: 25,
-    ticketScale: ["$50", "$500", "$1,000", "$2,000+"],
+    ticketScale: ["$ 50", "$ 500", "$ 1,500", "$ 3,000+"],
 
-    liveBarTitle: "Live 14-Day AI Engine:",
+    liveBarTitle: "Live 14-Day Engine:",
     marquee: [
-      "⚙️ <strong>Day 14/14 Completed:</strong> Dr. Henry Vance (NY) climbed from 24% to 94.5% (#1 Rank on ChatGPT Search)",
-      "🚀 <strong>Day 2/14 Executed:</strong> Prime Dental Clinic (Austin) got its official Top 5 Guide published automatically by AI",
-      "📡 <strong>Day 10/14 Executed:</strong> Atlas Accounting Firm (London) received real-time IndexNow Ping on Bing & Perplexity bots",
-      "📈 <strong>Day 7/14 Executed:</strong> Dr. Emily Stone (Miami) reached 78.4% in the Mid-Challenge AI Re-Audit"
+      "⚙️ <strong>Day 14/14 Completed:</strong> Dr. Henry Vance rose from 24% to 94.5% (#1 Rank on ChatGPT Search)",
+      "🚀 <strong>Day 2/14 Executed:</strong> Prime Dental Clinic had its Official Top 5 Guide published automatically by AI",
+      "📡 <strong>Day 10/14 Executed:</strong> Apex Accounting received IndexNow Ping on Bing and Perplexity crawlers",
+      "📈 <strong>Day 7/14 Executed:</strong> Dr. Camila Morales reached 78.4% in Mid-Challenge Re-Audit"
     ],
 
     navBadge: "14-Day AI Challenge",
-    navSub: "The AI that works 14 consecutive days for you to rank your brand at the very top",
+    navSub: "The AI that works 14 straight days for you to rank your brand at #1",
     navLinkVideo: "🎥 Video (40s)",
     navLinkChallenge: "🔥 The 14-Day Challenge",
-    navLinkHow: "How It Works",
+    navLinkHow: "How it Works",
     navLinkDir: "Official Directory",
     navDemoBtn: "📊 View 14-Day Evolution",
-    navCtaBtn: "Free Test (10s) ↓",
+    navCtaBtn: "Free Audit (10s) ↓",
 
     heroBadgePill: "Guided 14-Day Challenge",
-    heroBadgeDesc: "Our AI works 14 consecutive days for you to put your name at the top of AI search rankings",
-    heroHeadline: 'If a customer opens <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT right now</span> in your city, who does the AI recommend?',
-    heroParagraph: "Discover your visibility score for free in <strong>10 seconds</strong>. And if you are invisible, activate our <strong>14-Day Challenge</strong>: our Artificial Intelligence takes over the heavy lifting and executes <strong>14 daily technical actions</strong> to elevate your brand to the top of ChatGPT, Gemini, and Perplexity.",
+    heroBadgeDesc: "Our AI works 14 consecutive days for you to put your name at the top of AI search queries",
+    heroHeadline: 'If a client opens <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT right now</span> in your city, who does the AI recommend?',
+    heroParagraph: "Discover your score for free in <strong>10 seconds</strong>. And if you're invisible, activate our <strong>14-Day Challenge</strong>: our Artificial Intelligence takes over the heavy lifting and executes <strong>14 daily technical actions</strong> to push your company or professional brand to the top of ChatGPT, Gemini, and Perplexity.",
     heroVideoTitle: "🎥 Official GeoPulse AI Presentation (0:40s)",
     videoBadge: "Quick Overview (40s)",
     videoListen: "🔊 Click to listen",
 
     simBtnDay0: "Day 0 (Today)",
     simBtnDay14: "Day 14 (Post-AI)",
-    simExplainTitle: "💡 What you get with the 14-Day Challenge ($47 one-time):",
-    simExplainDesc: "For <strong>14 consecutive days</strong>, our AI executes 1 technical action per day (creates semantic schema files, publishes comparative guides, pings search bots, and audits your rank) to place you #1.",
+    simExplainTitle: "💡 What you are paying for in the Challenge ($47 USD one-time):",
+    simExplainDesc: "For <strong>14 straight days</strong>, our AI executes 1 technical step each day (generating semantic files, publishing comparison articles, pinging search bots, and re-auditing your score) to position you at the top of AI search queries.",
 
-    step1Badge: "👇 Step 1 (Free): Discover Your AI Score in 10 Seconds",
-    formMainTitle: "Free AI Visibility & Share of Model Audit",
-    btnPresetAdv: "⚖️ Lawyer Example",
-    btnPresetClinica: "🦷 Clinic Example",
-    btnDemoSim: "⚡ Simulate Diagnostic Now",
+    step1Badge: "👇 Step 1 (Free): Discover your Current Score in 10 Seconds",
+    formMainTitle: "Free AI Visibility Audit",
+    formSubTitle: "See exactly how your business appears (or gets ignored) on ChatGPT, Gemini, and Perplexity when potential clients search for your services.",
+    labelEntity: "Profile Type to Audit:",
+    entityCompany: "🏢 Company / Clinic / Retail",
+    entityPersonal: "👤 Independent Specialist / Professional",
+    labelName: "Company or Professional Name *",
+    namePlaceholder: "E.g.: Prime Dental Care or Dr. Camila Mendes",
+    labelUrl: "Website, Instagram, or Google Maps *",
+    labelNiche: "Your Industry / Specialization *",
+    labelCity: "City and State / Region of Operation *",
+    labelCouncil: "Professional License ID (Bar, Medical, Board...)",
+    labelCompetitors: "Main Local Competitors (optional)",
+    labelWhatsapp: "WhatsApp/Phone to Receive Official Report *",
+    labelEmail: "Business Email (optional)",
+    privacyNote: "🔒 Your information is 100% confidential. Used solely to run the AI search audit and deliver your diagnostic.",
+    submitBtn: "⚡ Run Free AI Visibility Audit Now",
 
-    btnTypeCompany: "🏢 Company / Clinic / Agency",
-    btnTypeAuto: "👨‍⚕️ Solo Professional / Specialist",
-
-    formCompany: {
-      nameLabel: "🏢 Company, Clinic, or Brand Name *",
-      namePlaceholder: "Ex: Prime Dental Clinic or Apex Law Partners",
-      urlLabel: "🌐 Official Website or Social Profile *",
-      urlPlaceholder: "Ex: www.yourcompany.com or @yourcompany",
-      nicheLabel: "🎯 Business Specialty or Industry *",
-      nichePlaceholder: "Ex: Cosmetic Dentistry, Corporate Law, Cloud Accounting",
-      cityLabel: "📍 City and State / Region *",
-      cityPlaceholder: "Ex: New York - NY, London - UK, Miami - FL",
-      registryLabel: "🏛️ Official Registration or Company Tax ID (Optional)",
-      registryPlaceholder: "Ex: State License, Chamber of Commerce ID",
-      registryHint: "Helps AI models verify the authenticity and legitimacy of your business.",
-      competitorsLabel: "⚔️ Direct Competitors in your Area (Optional)",
-      competitorsPlaceholder: "Ex: Competitor 1, Competitor 2",
-      competitorsHint: "AI models compare your business directly against them in recommendation prompts."
+    sprintSection: {
+      badge: "Total Transparency: What are you paying for?",
+      title: "See what our AI does for you during the 14 Days",
+      subtitle: "You pay only once ($47 USD) and our engine automatically executes the 14 steps below to build your leadership in AI searches:"
     },
 
-    formAuto: {
-      nameLabel: "👨‍⚕️ Your Full Professional Name *",
-      namePlaceholder: "Ex: Dr. Robert Vance or Dr. Emily Stone",
-      urlLabel: "🌐 Your Website, LinkedIn, or Profile URL *",
-      urlPlaceholder: "Ex: linkedin.com/in/drrobert or www.drrobert.com",
-      nicheLabel: "🎯 Your Specialty or Field of Practice *",
-      nichePlaceholder: "Ex: Employment Attorney, Orthopedic Surgeon, Psychologist",
-      cityLabel: "📍 City and Region where you practice *",
-      cityPlaceholder: "Ex: New York - NY, Los Angeles - CA, London",
-      registryLabel: "📜 Professional Board License (Bar, Medical Board, etc.) *",
-      registryPlaceholder: "Ex: State Bar #123456, Medical License #98765",
-      registryHint: "Crucial for ChatGPT and Gemini to cite your name with maximum authority and trustworthiness.",
-      competitorsLabel: "⚔️ Other Competing Specialists in your Area (Optional)",
-      competitorsPlaceholder: "Ex: Dr. Competitor X, Dr. Competitor Y",
-      competitorsHint: "The AI compares you directly with other local practitioners."
+    scheduleDayPrefix: "Day",
+    scheduleDayOf: "of",
+    scheduleSub: "Executed automatically by AI",
+    schedule14: [
+      { day: 1, title: "Entity Protocol & JSON-LD + /llms.txt" },
+      { day: 2, title: "Official City Top 5 Guide Publication" },
+      { day: 3, title: "Zero-Click Semantic FAQ Architecture" },
+      { day: 4, title: "Entity Anchoring in ChatGPT & Perplexity" },
+      { day: 5, title: "Educational Niche In-Depth Article" },
+      { day: 6, title: "Schema.org Structured Data Enrichment" },
+      { day: 7, title: "Mid-Sprint Re-Audit & Density Adjustment" },
+      { day: 8, title: "Semantic Comparison Page Construction" },
+      { day: 9, title: "Social Proof Matrix & Success Cases" },
+      { day: 10, title: "IndexNow Pings to AI Crawlers" },
+      { day: 11, title: "Industry Trends & Innovation Article" },
+      { day: 12, title: "Third-Party Citations & Mentions Audit" },
+      { day: 13, title: "Local Knowledge Base Consolidation" },
+      { day: 14, title: "Final Authority Report & Official Delivery" }
+    ],
+
+    results: {
+      statusBadge: "Diagnostic Completed (Day 0)",
+      reportTitle: "AI Positioning Report",
+      shareBtn: "Send to Partner (WhatsApp)",
+      topCta: "🚀 Start 14-Day Challenge (AI Working for You — $47 USD)",
+      metric1Label: "Current AI Score (Share of Model)",
+      metric1Goal: "Goal after 14 days: >90%",
+      metric2Label: "Current Ranking Position",
+      notRanked: "Out of Ranking",
+      rankSuffix: "Rank",
+      metric2Sub: "Spontaneous ranking in your city",
+      metric3Label: "14-Day Challenge Status",
+      dayPrefix: "Day",
+      metric3Sub: "14 daily actions ready to start",
+      clientsPerMonth: "clients / month",
+
+      lossHeaderBadge: "Revenue Alert: How much are you losing today?",
+      lossHeaderTitle: "Estimated Business & Clients Lost to Competitors",
+      lossHeaderDescTemplate: "When someone in your city asks ChatGPT or Gemini for a recommendation in {niche}, the algorithms recommend your competitors at the top. Here is the estimated revenue you are missing out on:",
+      searchesLabel: "Local AI Searches / Mo",
+      searchesSub: "People searching on ChatGPT and Gemini with high purchasing intent in your city.",
+      clientsLabel: "Lost Clients / Mo",
+      clientsSub: "Clients who buy from the competitor ranked #1 by AI.",
+      annualLabel: "Projected Annual Loss",
+      annualSub: "Cumulative annual revenue going straight to your direct competitors.",
+
+      roiBadge: "ROI Calculation",
+      roiTitle: "GeoPulse AI costs only <strong>$47 USD one-time fee</strong>",
+      roiDesc: "With <strong>just 1 single client recovered</strong> via ChatGPT or Gemini, you already recover the entire cost of the 14-Day Challenge with profit and secure your local leadership.",
+      roiCta: "🛡️ Stop Losing Clients & Activate ($47 USD) →",
+
+      auditsHeading: "🤖 What ChatGPT, Gemini, and Perplexity responded:",
+      cited: "✓ Cited",
+      notCited: "✗ Not Recommended",
+      action14: "✓ 14-Day Action:",
+
+      sidebarBadge: "🔥 14-Day Sprint Challenge",
+      sidebarTitle: "Hire our AI to work 14 days straight for your ranking position",
+      sidebarDesc: "For a <strong>one-time fee of $47 USD (no subscriptions)</strong>, our AI executes 1 technical action per day for 14 days (JSON-LD, /llms.txt, City Official Top 5 Guide, Semantic FAQ, and IndexNow Pings) to place you #1.",
+      sidebarCta: "Activate My 14-Day Challenge Now ($47 USD) →"
     },
 
-    submitBtn: "🚀 Run Free AI Diagnostic Now",
-    submitBtnLoading: "⏳ Auditing across AI engines...",
+    scarcity: {
+      statusBadge: "Regional Exclusivity Status",
+      ruleLabel: "AI Golden Rule:",
+      vagaText: "Official #1 Spot in",
+      paraText: "for",
+      availBadge: "AVAILABLE NOW",
+      desc: "AI algorithms only recommend <strong>1 single professional or business at the #1 top of the Official Guide</strong>. By activating the 14-Day Challenge, you secure exclusivity before a local competitor takes the canonical referral.",
+      ctaBtn: "Secure #1 Exclusivity Now →"
+    },
 
     lossBadge: "Direct Commercial Impact",
     lossMonthlyLbl: "Estimated Monthly Loss",
@@ -255,64 +346,55 @@ const I18N = {
     lossTicketSimSub: "Drag to adjust how much an average customer spends with you:",
     lossTicketSimBadge: "Selected Ticket:",
 
-    guarBadge: "Absolute Zero Risk • 100% Protection",
+    guarBadge: "Absolute Zero Risk • Consumer Protection",
     guarTitle: "7-Day Unconditional Guarantee: 100% Refund",
-    guarDesc: "We are so confident in our semantic engineering technology that we take all the risk: if within <strong>7 days</strong> of activation your GEO structure, your <code>/llms.txt</code> file, and your official Top 5 Authority Guide are not published and live on the web, simply send us a message and <strong>we will refund 100% of your money immediately</strong>, no questions asked.",
+    guarDesc: "We are so confident in our semantic engineering technology that we assume all the risk: if within <strong>7 days</strong> of purchase your GEO structure, your <code>/llms.txt</code> file, and your Official Top 5 Guide are not published and delivered on the server, just send us a single message and <strong>we will refund 100% of your payment immediately</strong>, no questions asked and no fine print.",
 
-    faqBadge: "Got Questions?",
+    faqBadge: "Clear Your Doubts",
     faqTitle: "Frequently Asked Questions about the Challenge",
-    faqSub: "Everything you need to know before putting your brand on top of AI search engines.",
-
+    faqSub: "Everything you need to know before starting the AI's 14 days:",
     faqs: [
       {
-        q: "📱 I don't have a formal website, only LinkedIn or Instagram. Does it work for me?",
-        a: "<strong>Yes, 100%!</strong> GeoPulse AI generates and hosts your official authority page (with Schema.org JSON-LD data and the canonical <code>/llms.txt</code> file) on our indexed domain <code>geopulseai.store</code>. Your LinkedIn, Instagram, or booking link is registered as the official destination where AI models send new clients."
+        q: "💰 Is the $47 USD fee one-time or are there hidden subscriptions?",
+        a: "<strong>One-time promotional fee of $47.00 USD.</strong> There is no monthly fee, subscription, or surprise recurring cost. The price covers 14 days of active AI engine executions and guarantees lifetime hosting of your assets in our indexed public directory."
       },
       {
-        q: "💻 Do I need coding skills or need to hire a developer?",
-        a: "<strong>Not at all!</strong> The complex technical work (semantic entity graphs, Top 5 authority articles, IndexNow robot pings, and LLM probes) is executed 100% autonomously by our cloud engine. You simply monitor the 14-day progress log."
+        q: "⚡ Do I need to do anything technical, or does AI handle everything?",
+        a: "<strong>You don't need to do anything technical.</strong> GeoPulse was built specifically for business owners and professionals who don't know coding or complex SEO. Our AI generates the code, writes semantic copy, publishes on our high-speed directory, and triggers crawler protocols for ChatGPT, Perplexity, and Gemini."
       },
       {
-        q: "💳 Is the $47 fee a one-time payment or are there hidden monthly subscriptions?",
-        a: "<strong>One-time promotional fee of $47.00 USD.</strong> There are zero recurring subscriptions, monthly fees, or hidden costs. It covers all 14 days of automated AI engine actions and guarantees lifetime placement in our public indexed directory."
+        q: "🕒 How long does it take to see the first results on ChatGPT and Gemini?",
+        a: "Because search engines and LLM crawlers refresh at different rates, most clients start seeing spontaneous mentions and citations between the <strong>7th and 14th day</strong> of continuous execution."
       },
       {
-        q: "🤖 How long does it take for ChatGPT, Gemini, and search bots to read my page?",
-        a: "Upon activation, our system triggers the official <strong>IndexNow protocol</strong> (used by Bing, Yandex, and real-time ChatGPT Search crawlers). While traditional SEO takes 6+ months, AI authority indexing is typically crawled within hours to a few days."
+        q: "🎯 Why is there a 1-business-per-niche/city exclusivity rule?",
+        a: "Because generative AI only delivers <strong>1 top canonical authority answer</strong>. If we accepted two competing businesses in the same city, we would create a canonical conflict."
       },
       {
-        q: "🛡️ What happens if I am not satisfied with the results?",
-        a: "You are fully protected by our <strong>7-Day Ironclad Guarantee</strong>. If for any reason you are not completely satisfied with your technical delivery, we issue a 100% instant refund without hassle."
+        q: "🛡️ How does the 7-day 100% money-back guarantee work?",
+        a: "Simple and transparent: if you activate the challenge and for any reason are not thrilled with the technical progress or generated assets, just message our support within 7 days for a full immediate refund."
       }
     ],
 
-    checkout: {
-      badge: "🚀 14-Day AI Sprint Challenge",
-      title: "Activate 14 Days of Autonomous AI Work",
-      desc: "One-time investment (no subscriptions). Includes 14 days of semantic engineering + 7 vital authority assets + live publication of your official Top 5 Guide.",
-      bumpTitle: "YES! Add Regional Expansion Package",
-      bumpBadge: "+ $15.00 USD",
-      bumpDesc: "Semantic shielding across up to <strong>3 neighboring cities</strong> in your region + High-Conversion <strong>Bio & 5 Authority AI Posts Kit</strong> for LinkedIn and Instagram.",
-      totalLabel: "Total Amount (One-Time Fee):",
-      mpBtn: "💳 Pay with Credit or Debit Card ($47.00 USD)",
-      pixTitle: "International / Alternative Payment:",
-      pixScanPill: "Secure Global Checkout",
-      pixScanDesc: "Instant automated delivery upon completion. Encrypted 256-bit SSL transaction.",
-      pixCopyBtn: "📋 Copy Checkout Reference",
-      pixKeyDetails: "Are you from Brazil and prefer Central Bank PIX? Click here",
-      pixPaidBtn: "✅ Payment Completed — Start My 14-Day Challenge"
-    },
+    floatingChatPill: "💬 Questions about the Challenge? Chat with AI",
 
     chat: {
-      header: "GeoPulse Specialist — Online",
-      sub: "Ask any question about the 14-Day AI Sprint",
-      inputPlaceholder: "Type your question here...",
-      sendBtn: "Send",
-      typing: "Typing response...",
-      quickHow: "How does the Challenge work?",
-      quickPrice: "What is the price and payment options?",
-      quickSite: "Do I need a website or developer?",
-      quickGuar: "Is there a money-back guarantee?"
+      title: "GeoPulse AI — Support Assistant",
+      online: "Online now • Ask any question about the 14-Day Challenge",
+      welcome: "Hello! I am GeoPulse's AI support assistant. Do you have any questions about how the 14-Day Challenge works, pricing ($47 USD), guarantees, or exclusivity in your city?",
+      inputPlaceholder: "Ask anything about the 14-Day Challenge..."
+    },
+
+    checkout: {
+      badge: "🚀 14-Day AI Sprint Challenge",
+      title: "Activate 14 Days of AI Work",
+      desc: "Investment in a <strong>one-time fee</strong> (no monthly subscriptions). Includes 14 days of semantic engineering + 7 vital assets + Official Top 5 Guide publication.",
+      bumpTitle: "YES! Add Regional Expansion Package",
+      bumpBadge: "+ $15.00 USD",
+      bumpDesc: "Semantic shielding in up to <strong>3 neighboring cities</strong> in your region + Kit with <strong>High-Converting Bio & 5 AI Authority Posts</strong> for Instagram and LinkedIn.",
+      totalLabel: "Total to Pay (One-Time Fee):",
+      mpBtn: "💳 Pay with Credit Card / PayPal (USD)",
+      pixBtn: "✅ I have sent the payment — Start My 14-Day Challenge"
     }
   },
 
@@ -322,22 +404,22 @@ const I18N = {
     locale: "es-ES",
     planPrice: 47.0,
     bumpPrice: 15.0,
-    defaultTicket: 250,
+    defaultTicket: 300,
     ticketMin: 50,
-    ticketMax: 2000,
+    ticketMax: 3000,
     ticketStep: 25,
-    ticketScale: ["$50", "$500", "$1.000", "$2.000+"],
+    ticketScale: ["$ 50", "$ 500", "$ 1,500", "$ 3,000+"],
 
-    liveBarTitle: "Motor 14 Días en Vivo:",
+    liveBarTitle: "Motor de 14 Días en Vivo:",
     marquee: [
-      "⚙️ <strong>Día 14/14 Concluido:</strong> Dr. Enrique Vasconcelos (Madrid) subió del 24% al 94.5% (1º Lugar en ChatGPT Search)",
-      "🚀 <strong>Día 2/14 Ejecutado:</strong> Clínica OdontoPrime (Bogotá) tuvo su Guía Oficial Top 5 publicada automáticamente por la IA",
-      "📡 <strong>Día 10/14 Ejecutado:</strong> Estudio Contable Atlas (Buenos Aires) recibió Ping IndexNow en Bing y Perplexity",
-      "📈 <strong>Día 7/14 Ejecutado:</strong> Dra. Camila Méndez (CDMX) alcanzó el 78.4% en la Reauditoría Intermedia del Desafío"
+      "⚙️ <strong>Día 14/14 Completado:</strong> Dr. Henry Vance subió de 24% a 94.5% (1º Puesto en ChatGPT Search)",
+      "🚀 <strong>Día 2/14 Ejecutado:</strong> Clínica OdontoPrime publicó su Guía Oficial Top 5 automáticamente por IA",
+      "📡 <strong>Día 10/14 Ejecutado:</strong> Estudio Contable Atlas recibió Ping IndexNow en Bing y Perplexity",
+      "📈 <strong>Día 7/14 Ejecutado:</strong> Dra. Camila Morales alcanzó 78.4% en la Reauditoría Intermedia del Desafío"
     ],
 
-    navBadge: "Desafío 14 Días IA",
-    navSub: "La IA que trabaja 14 días consecutivos por ti para posicionar tu marca en la cima",
+    navBadge: "Desafío de 14 Días IA",
+    navSub: "La IA que trabaja 14 días seguidos por ti para posicionar tu marca en el #1",
     navLinkVideo: "🎥 Video (40s)",
     navLinkChallenge: "🔥 El Desafío de 14 Días",
     navLinkHow: "Cómo Funciona",
@@ -346,63 +428,113 @@ const I18N = {
     navCtaBtn: "Prueba Gratis (10s) ↓",
 
     heroBadgePill: "Desafío Guiado de 14 Días",
-    heroBadgeDesc: "Nuestra IA trabaja 14 días consecutivos por ti para colocar tu nombre en la cima de las búsquedas con IA",
+    heroBadgeDesc: "Nuestra IA trabaja 14 días consecutivos por ti para colocar tu nombre en la cima de las búsquedas de IA",
     heroHeadline: 'Si un cliente abre <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT ahora</span> en tu ciudad, ¿a quién recomienda la IA?',
-    heroParagraph: "Descubre tu puntuación de visibilidad gratis en <strong>10 segundos</strong>. Y si eres invisible, activa nuestro <strong>Desafío de 14 Días</strong>: nuestra Inteligencia Artificial asume el trabajo pesado y ejecuta <strong>14 acciones técnicas diarias</strong> para elevar tu marca a la cima de ChatGPT, Gemini y Perplexity.",
+    heroParagraph: "Descubre tu puntuación gratis en <strong>10 segundos</strong>. Y si estás invisible, activa nuestro <strong>Desafío de 14 Días</strong>: nuestra Inteligencia Artificial asume el trabajo pesado y ejecuta <strong>14 acciones técnicas diarias</strong> para hacer subir tu empresa o nombre profesional en el ranking de ChatGPT, Gemini y Perplexity.",
     heroVideoTitle: "🎥 Presentación Oficial GeoPulse AI (0:40s)",
-    videoBadge: "Explicación Rápida (40s)",
-    videoListen: "🔊 Clic para escuchar",
+    videoBadge: "Resumen Rápido (40s)",
+    videoListen: "🔊 Haz clic para escuchar",
 
     simBtnDay0: "Día 0 (Hoy)",
-    simBtnDay14: "Día 14 (Con IA)",
-    simExplainTitle: "💡 Lo que obtienes con el Desafío ($47 tarifa única):",
-    simExplainDesc: "Durante <strong>14 días consecutivos</strong>, nuestra IA ejecuta 1 acción técnica por día (crea archivos semánticos, publica guías comparativas, envía pings a los robots y audita tu posición) para colocarte en el 1º lugar.",
+    simBtnDay14: "Día 14 (Post-IA)",
+    simExplainTitle: "💡 Por qué estás pagando en el Desafío ($47 USD único):",
+    simExplainDesc: "Durante <strong>14 días seguidos</strong>, nuestra IA ejecuta 1 etapa técnica por día (crea tus archivos semánticos, publica artículos comparativos, envía pings a los rastreadores y reaudita tu nota) para posicionarte en el #1 de las búsquedas de IA.",
 
-    step1Badge: "👇 Paso 1 (Gratis): Descubre tu Puntuación en 10 Segundos",
+    step1Badge: "👇 Paso 1 (Gratis): Descubre tu Puntuación Actual en 10 Segundos",
     formMainTitle: "Auditoría Gratuita de Visibilidad en IA",
-    btnPresetAdv: "⚖️ Ejemplo Abogado",
-    btnPresetClinica: "🦷 Ejemplo Clínica",
-    btnDemoSim: "⚡ Simular Diagnóstico Ahora",
+    formSubTitle: "Mira exactamente cómo aparece tu empresa (o si es ignorada) en ChatGPT, Gemini y Perplexity cuando un cliente busca tu servicio.",
+    labelEntity: "Tipo de Perfil a Auditar:",
+    entityCompany: "🏢 Empresa / Clínica / Comercio",
+    entityPersonal: "👤 Profesional Independiente / Especialista",
+    labelName: "Nombre de la Empresa o Profesional *",
+    namePlaceholder: "Ej.: Clínica OdontoPrime o Dra. Camila Morales",
+    labelUrl: "Sitio Web, Instagram o Google Maps *",
+    labelNiche: "Tu Nicho / Especialidad *",
+    labelCity: "Ciudad y Región de Actuación *",
+    labelCouncil: "Registro Profesional (Colegio Médico, Abogados...)",
+    labelCompetitors: "Principales Competidores en la Región (opcional)",
+    labelWhatsapp: "WhatsApp para Recibir el Informe Oficial *",
+    labelEmail: "Correo Electrónico Profesional (opcional)",
+    privacyNote: "🔒 Tus datos son 100% confidenciales. Solo los usamos para conectar los motores de búsqueda y emitir el diagnóstico.",
+    submitBtn: "⚡ Ejecutar Auditoría Gratuita en las IAs Ahora",
 
-    btnTypeCompany: "🏢 Empresa / Clínica / Negocio",
-    btnTypeAuto: "👨‍⚕️ Profesional Independiente",
-
-    formCompany: {
-      nameLabel: "🏢 Nombre de la Empresa, Clínica o Marca *",
-      namePlaceholder: "Ej: Clínica OdontoPrime o Bufete Gómez & Asociados",
-      urlLabel: "🌐 Sitio Web Oficial o Perfil de Redes *",
-      urlPlaceholder: "Ej: www.tuempresa.com o @tuempresa",
-      nicheLabel: "🎯 Especialidad o Sector de Actividad *",
-      nichePlaceholder: "Ej: Implantes Dentales, Abogados Laborales, Contabilidad",
-      cityLabel: "📍 Ciudad y Región de la Empresa *",
-      cityPlaceholder: "Ej: Madrid, Ciudad de México, Bogotá, Buenos Aires",
-      registryLabel: "🏛️ Registro Fiscal o Licencia Oficial (Opcional)",
-      registryPlaceholder: "Ej: NIF, CIF, RFC o Registro Comercial",
-      registryHint: "Ayuda a los motores de IA a verificar la legitimidad oficial de tu negocio.",
-      competitorsLabel: "⚔️ Competidores Directos en tu Zona (Opcional)",
-      competitorsPlaceholder: "Ej: Competidor 1, Competidor 2",
-      competitorsHint: "La IA compara tu empresa directamente frente a ellos en sus recomendaciones."
+    sprintSection: {
+      badge: "Transparencia Total: ¿Por qué estás pagando?",
+      title: "Mira lo que nuestra IA hace por ti durante los 14 Días",
+      subtitle: "Pagas una sola vez ($47 USD) y nuestro motor ejecuta automáticamente las 14 etapas a continuación para construir tu liderazgo en búsquedas de IA:"
     },
 
-    formAuto: {
-      nameLabel: "👨‍⚕️ Tu Nombre Profesional Completo *",
-      namePlaceholder: "Ej: Dr. Roberto Guimarães o Dra. Camila Méndez",
-      urlLabel: "🌐 Tu Sitio Web, LinkedIn o Instagram Profesional *",
-      urlPlaceholder: "Ej: linkedin.com/in/drroberto o www.drroberto.com",
-      nicheLabel: "🎯 Tu Especialidad o Campo Profesional *",
-      nichePlaceholder: "Ej: Abogado Laboral, Cirujano, Odontólogo, Psicóloga",
-      cityLabel: "📍 Ciudad y Región donde atiendes *",
-      cityPlaceholder: "Ej: Madrid, Ciudad de México, Bogotá, Santiago",
-      registryLabel: "📜 Número de Colegiatura o Registro Profesional *",
-      registryPlaceholder: "Ej: Colegiado #12345, Cédula Profesional #98765",
-      registryHint: "Fundamental para que ChatGPT y Gemini recomienden tu nombre con máxima autoridad y credibilidad.",
-      competitorsLabel: "⚔️ Otros Profesionales Colegas en la Región (Opcional)",
-      competitorsPlaceholder: "Ej: Dr. Competidor X, Dra. Competidor Y",
-      competitorsHint: "La IA te compara directamente con otros profesionales de tu misma ciudad."
+    scheduleDayPrefix: "Día",
+    scheduleDayOf: "de",
+    scheduleSub: "Ejecutado automáticamente por la IA",
+    schedule14: [
+      { day: 1, title: "Protocolo de Entidad y JSON-LD + /llms.txt" },
+      { day: 2, title: "Publicación de la Guía Oficial Top 5 de la Ciudad" },
+      { day: 3, title: "Arquitectura de FAQ Semántico Zero-Click" },
+      { day: 4, title: "Anclaje de Entidad en ChatGPT y Perplexity" },
+      { day: 5, title: "Artículo Educativo de Profundización del Nicho" },
+      { day: 6, title: "Enriquecimiento de Datos Estructurados Schema.org" },
+      { day: 7, title: "Reauditoría Intermedia y Ajuste de Densidad" },
+      { day: 8, title: "Construcción de Página Semántica Comparativa" },
+      { day: 9, title: "Matriz de Prueba Social y Casos de Éxito" },
+      { day: 10, title: "Pings IndexNow a los Rastreadores de IA" },
+      { day: 11, title: "Artículo de Tendencias e Innovaciones del Sector" },
+      { day: 12, title: "Auditoría de Citas y Menciones de Terceros" },
+      { day: 13, title: "Consolidación de la Base de Conocimiento Local" },
+      { day: 14, title: "Informe Final de Autoridad y Entrega Oficial" }
+    ],
+
+    results: {
+      statusBadge: "Diagnóstico Completado (Día 0)",
+      reportTitle: "Informe de Posicionamiento IA",
+      shareBtn: "Enviar al Socio (WhatsApp)",
+      topCta: "🚀 Iniciar Desafío de 14 Días (IA Trabajando por Ti — $47 USD)",
+      metric1Label: "Puntuación Actual en IAs (Share of Model)",
+      metric1Goal: "Meta tras los 14 días: >90%",
+      metric2Label: "Posición Actual en el Ranking",
+      notRanked: "Fuera del Ranking",
+      rankSuffix: "º Lugar",
+      metric2Sub: "Ranking espontáneo en tu ciudad",
+      metric3Label: "Estado del Desafío de 14 Días",
+      dayPrefix: "Día",
+      metric3Sub: "14 acciones diarias listas para iniciar",
+      clientsPerMonth: "clientes / mes",
+
+      lossHeaderBadge: "Alerta de Facturación: ¿Cuánto estás perdiendo hoy?",
+      lossHeaderTitle: "Estimación de Negocios y Clientes Perdidos para Competidores",
+      lossHeaderDescTemplate: "Cuando alguien en tu ciudad busca recomendaciones de {niche} en ChatGPT o Gemini, los algoritmos recomiendan a tus competidores. Mira el cálculo estimado del dinero que estás perdiendo:",
+      searchesLabel: "Búsquedas Locales en IA / Mes",
+      searchesSub: "Personas buscando en ChatGPT y Gemini con alta intención de contratación en tu ciudad.",
+      clientsLabel: "Clientes Perdidos / Mes",
+      clientsSub: "Clientes que compran al competidor indicado en 1º lugar por la IA.",
+      annualLabel: "Pérdida Anual Proyectada",
+      annualSub: "Estimación anual acumulada yendo a tus competidores directos.",
+
+      roiBadge: "Cálculo de Retorno",
+      roiTitle: "GeoPulse AI cuesta solo <strong>$47 USD tarifa única</strong>",
+      roiDesc: "Con <strong>solo 1 único cliente recuperado</strong> a través de ChatGPT o Gemini, ya recuperas con creces todo el valor del Desafío de 14 Días y consolidas tu liderazgo local.",
+      roiCta: "🛡️ Dejar de Perder Clientes y Activar ($47 USD) →",
+
+      auditsHeading: "🤖 Qué respondieron ChatGPT, Gemini y Perplexity:",
+      cited: "✓ Citado",
+      notCited: "✗ No Recomendado",
+      action14: "✓ Acción en los 14 Días:",
+
+      sidebarBadge: "🔥 Desafío Sprint de 14 Días",
+      sidebarTitle: "Contrata a nuestra IA para trabajar 14 días seguidos por tu posición en el ranking",
+      sidebarDesc: "Por una <strong>tarifa única de $47 USD (sin mensualidades)</strong>, nuestra IA ejecuta 1 acción técnica por día durante 14 días (JSON-LD, /llms.txt, Guía Oficial Top 5 de la Ciudad, FAQ Semántico y Pings IndexNow) para colocarte en 1º lugar.",
+      sidebarCta: "Activar Mi Desafío de 14 Días Ahora ($47 USD) →"
     },
 
-    submitBtn: "🚀 Ejecutar Diagnóstico Gratuito en IAs Ahora",
-    submitBtnLoading: "⏳ Auditando en motores de IA...",
+    scarcity: {
+      statusBadge: "Estado de Exclusividad Regional",
+      ruleLabel: "Regla de Oro de la IA:",
+      vagaText: "Plaza #1 Oficial en",
+      paraText: "para",
+      availBadge: "DISPONIBLE AHORA",
+      desc: "Los algoritmos de IA solo recomiendan a <strong>1 único profesional o empresa en el top #1 de la Guía Oficial</strong>. Al activar el Desafío de 14 Días, aseguras la exclusividad antes de que un competidor local tome la recomendación canónica.",
+      ctaBtn: "Asegurar Exclusividad de la Plaza #1 →"
+    },
 
     lossBadge: "Impacto Comercial Directo",
     lossMonthlyLbl: "Pérdida Mensual Estimada",
@@ -411,133 +543,272 @@ const I18N = {
     lossTicketSimSub: "Desliza para ajustar cuánto gasta en promedio un cliente contigo:",
     lossTicketSimBadge: "Ticket Seleccionado:",
 
-    guarBadge: "Riesgo Cero Absoluto • Protección Total",
+    guarBadge: "Riesgo Cero Absoluto • Protección al Consumidor",
     guarTitle: "Garantía Incondicional de 7 Días: Devolución del 100%",
-    guarDesc: "Confiamos tanto en la eficacia de nuestra tecnología semántica que asumimos todo el riesgo: si dentro de los <strong>7 días</strong> posteriores a la contratación tu estructura GEO, tu archivo <code>/llms.txt</code> y tu Guía Oficial Top 5 no están publicados en la web, solo envíanos un mensaje y <strong>te reembolsamos el 100% de inmediato</strong>, sin preguntas ni letra pequeña.",
+    guarDesc: "Confiamos tanto en la eficacia de nuestra tecnología semántica que asumimos todo el riesgo: si dentro de los <strong>7 días</strong> posteriores a la contratación tu estructura GEO, tu archivo <code>/llms.txt</code> y tu Guía Oficial Top 5 no están publicados y entregados en el servidor, solo envíanos un mensaje y <strong>te devolveremos el 100% de tu dinero inmediatamente</strong>, sin preguntas ni letra chica.",
 
-    faqBadge: "Resuelve tus Dudas",
+    faqBadge: "Resuelve Tus Dudas",
     faqTitle: "Preguntas Frecuentes sobre el Desafío",
-    faqSub: "Todo lo que necesitas saber antes de activar la autoridad de tu marca en IA.",
-
+    faqSub: "Todo lo que necesitas saber antes de iniciar los 14 días de la IA:",
     faqs: [
       {
-        q: "📱 No tengo sitio web oficial, solo uso Instagram o WhatsApp. ¿Funciona para mí?",
-        a: "<strong>¡Sí, al 100%!</strong> GeoPulse AI genera y aloja externamente tu página oficial de autoridad (con Schema.org JSON-LD y el archivo canónico <code>/llms.txt</code>) en nuestro dominio indexado <code>geopulseai.store</code>. Tu perfil de Instagram, WhatsApp o LinkedIn se registra como el canal de contacto al que la IA enviará a los clientes."
+        q: "💰 ¿La tarifa de $47 USD es un pago único o hay mensualidades ocultas?",
+        a: "<strong>Tarifa única promocional de $47.00 USD.</strong> No existe ninguna mensualidad, suscripción ni cobro recurrente sorpresa. El precio cubre los 14 días de ejecuciones activas del motor de IA y garantiza la permanencia de por vida de tus activos generados en nuestro directorio público indexado."
       },
       {
-        q: "💻 ¿Necesito conocimientos de programación o contratar a un programador?",
-        a: "<strong>¡Absolutamente nada!</strong> El trabajo técnico complejo (grafos de entidad, redacción de artículos Top 5, pings a robots con IndexNow y auditorías generativas) se ejecuta de forma 100% autónoma en nuestro servidor. Tú solo sigues el diario de a bordo."
+        q: "⚡ ¿Necesito hacer algo técnico o la IA lo hace todo sola?",
+        a: "<strong>No necesitas hacer nada técnico.</strong> GeoPulse fue creado justamente para dueños de empresas y profesionales que no entienden de programación ni de SEO avanzado. Nuestra IA genera el código, redacta los textos semánticos, publica en nuestro directorio de alta velocidad y envía los protocolos para ChatGPT, Perplexity y Gemini."
       },
       {
-        q: "💳 ¿El valor de $47 es un pago único o hay cuotas mensuales?",
-        a: "<strong>Tarifa única promocional de $47.00 USD.</strong> No existe ninguna suscripción ni cuotas mensuales recurrentes. Cubre los 14 días de ejecuciones de IA y garantiza la permanencia de por vida de tus activos generados en nuestro directorio indexado."
+        q: "🕒 ¿Cuánto tiempo toma ver los primeros resultados en ChatGPT y Gemini?",
+        a: "Como los motores de IA y buscadores actualizan sus índices a diferentes ritmos, la mayoría de los clientes comienza a notar sus primeras menciones y recomendaciones espontáneas entre el <strong>7º y el 14º día</strong> de ejecución continua."
       },
       {
-        q: "🤖 ¿Cuánto tardan los robots de ChatGPT, Gemini y Google en leer mi página?",
-        a: "Al momento de la activación, nuestro sistema emite el ping oficial del protocolo <strong>IndexNow</strong> (validado por Bing y el buscador en tiempo real de ChatGPT). Mientras que el SEO tradicional tarda hasta 6 meses, la indexación de IA suele completarse entre unas horas y pocos días."
+        q: "🎯 ¿Por qué existe la regla de exclusividad de 1 empresa por nicho y ciudad?",
+        a: "Porque la IA generativa solo entrega <strong>1 respuesta canónica en primer lugar</strong>. Si aceptáramos a dos competidores directos en la misma ciudad, generaríamos un conflicto canónico."
       },
       {
-        q: "🛡️ ¿Qué pasa si no estoy conforme con los resultados?",
-        a: "Estás 100% protegido por nuestra <strong>Garantía Blindada de 7 Días</strong>. Si por cualquier motivo no quedas totalmente satisfecho con la entrega técnica, te devolvemos el 100% de tu dinero de inmediato."
+        q: "🛡️ ¿Cómo funciona la garantía de 7 días de devolución total?",
+        a: "Simple y transparente: si activas el desafío y por cualquier motivo no quedas conforme con los activos generados o el progreso técnico de la IA, solo avísanos por soporte dentro de los primeros 7 días para un reembolso completo."
       }
     ],
 
-    checkout: {
-      badge: "🚀 Desafío Sprint de 14 Días IA",
-      title: "Activar 14 Días de Trabajo Autónomo de la IA",
-      desc: "Inversión en <strong>tarifa única</strong> (sin suscripciones). Incluye 14 días de ingeniería semántica + 7 activos vitales + publicación de tu Guía Oficial Top 5.",
-      bumpTitle: "¡SÍ! Agregar Paquete de Expansión Regional",
-      bumpBadge: "+ $15.00 USD",
-      bumpDesc: "Blindaje semántico en hasta <strong>3 ciudades vecinas</strong> de tu región + Kit con <strong>Bio de Alta Conversión y 5 Posts de Autoridad IA</strong> para redes sociales.",
-      totalLabel: "Total a Pagar (Tarifa Única):",
-      mpBtn: "💳 Pagar con Tarjeta de Crédito o Débito ($47.00 USD)",
-      pixTitle: "Pago Internacional Seguro:",
-      pixScanPill: "Pasarela Segura Global",
-      pixScanDesc: "Activación automática inmediata. Transacción cifrada con protocolo SSL de 256 bits.",
-      pixCopyBtn: "📋 Copiar Referencia de Pago",
-      pixKeyDetails: "¿Estás en Brasil y prefieres pagar con PIX? Haz clic aquí",
-      pixPaidBtn: "✅ Pago Realizado — Iniciar Mi Desafío de 14 Días"
-    },
+    floatingChatPill: "💬 ¿Dudas sobre el Desafío? Chatea con la IA",
 
     chat: {
-      header: "Especialista GeoPulse — En Línea",
-      sub: "Resuelve tus dudas sobre el Desafío de 14 Días",
-      inputPlaceholder: "Escribe tu consulta aquí...",
-      sendBtn: "Enviar",
-      typing: "Escribiendo respuesta...",
-      quickHow: "¿Cómo funciona el Desafío?",
-      quickPrice: "¿Cuál es el precio y formas de pago?",
-      quickSite: "¿Necesito sitio web o programador?",
-      quickGuar: "¿Tengo garantía si no me convence?"
+      title: "GeoPulse AI — Asistente de Soporte",
+      online: "En línea ahora • Resuelve tus dudas sobre el Desafío de 14 Días",
+      welcome: "¡Hola! Soy el asistente de IA de GeoPulse. ¿Tienes alguna duda sobre cómo funciona el Desafío de 14 Días, precios ($47 USD), garantías o reglas de exclusividad en tu ciudad?",
+      inputPlaceholder: "Escribe tu duda sobre el Desafío de 14 Días..."
+    },
+
+    checkout: {
+      badge: "🚀 Desafío Sprint de 14 Días IA",
+      title: "Activar 14 Días de Trabajo de la IA",
+      desc: "Inversión en <strong>tarifa única</strong> (sin mensualidades). Incluye los 14 días de ingeniería semántica + 7 activos vitales + publicación de la Guía Oficial Top 5.",
+      bumpTitle: "¡SÍ! Agregar Paquete de Expansión Regional",
+      bumpBadge: "+ $15.00 USD",
+      bumpDesc: "Blindaje semántico en hasta <strong>3 ciudades vecinas</strong> de tu región + Kit con <strong>Biografía de Alta Conversión y 5 Posts de Autoridad IA</strong> para Instagram y LinkedIn.",
+      totalLabel: "Total a Pagar (Tarifa Única):",
+      mpBtn: "💳 Pagar con Tarjeta / PayPal (USD)",
+      pixBtn: "✅ Ya realicé el pago — Iniciar Mi Desafío de 14 Días"
     }
   }
 };
 
 let currentLang = "pt";
 
-/**
- * Detecta automaticamente o idioma do visitante:
- * 1. Preferência salva no localStorage
- * 2. Idioma do navegador/sistema (navigator.languages / navigator.language)
- * 3. Fuso horário como heurística geográfica adicional
- * 4. Fallback padrão: 'en' para tráfego internacional geral
- */
 function detectLanguage() {
-  try {
-    const saved = localStorage.getItem("geopulse_lang");
-    if (saved && ["pt", "en", "es"].includes(saved)) {
-      return saved;
-    }
-
-    const browserLangs = navigator.languages || [navigator.language || navigator.userLanguage || ""];
-    for (const raw of browserLangs) {
-      const l = (raw || "").toLowerCase();
-      if (l.startsWith("pt")) return "pt";
-      if (l.startsWith("es")) return "es";
-      if (l.startsWith("en")) return "en";
-    }
-
-    const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || "").toLowerCase();
-    if (/sao_paulo|lisbon|fortaleza|recife|manaus|cuiaba|belem/i.test(tz)) return "pt";
-    if (/madrid|mexico|bogota|buenos_aires|santiago|lima|caracas|montevideo|asuncion|havana/i.test(tz)) return "es";
-  } catch (e) {
-    console.warn("Language detection fallback:", e);
+  const saved = localStorage.getItem("geopulse_lang");
+  if (saved && ["pt", "en", "es"].includes(saved)) {
+    return saved;
   }
-  return "en";
+  const browserLangs = navigator.languages || [navigator.language || "pt"];
+  for (const bl of browserLangs) {
+    const code = bl.toLowerCase().slice(0, 2);
+    if (code === "pt") return "pt";
+    if (code === "es") return "es";
+    if (code === "en") return "en";
+  }
+  return "pt";
 }
 
-/**
- * Altera o idioma da página e atualiza os elementos visuais
- */
 function setLanguage(lang) {
   if (!["pt", "en", "es"].includes(lang)) lang = "pt";
   currentLang = lang;
-  try {
-    localStorage.setItem("geopulse_lang", lang);
-  } catch (e) {}
+  window.currentLang = lang;
+  localStorage.setItem("geopulse_lang", lang);
 
-  // Atualiza visual dos botões do seletor
-  ["pt", "en", "es"].forEach((l) => {
-    const btn = document.getElementById(`lang-btn-${l}`);
+  const btnPt = document.getElementById("lang-btn-pt");
+  const btnEn = document.getElementById("lang-btn-en");
+  const btnEs = document.getElementById("lang-btn-es");
+
+  const activeClasses = "bg-white text-slate-900 shadow-sm border border-slate-200";
+  const inactiveClasses = "text-slate-500 hover:text-slate-900";
+
+  [btnPt, btnEn, btnEs].forEach((btn) => {
     if (btn) {
-      if (l === lang) {
-        btn.className = "px-2 py-1 rounded-lg text-xs font-extrabold transition flex items-center gap-1 bg-white shadow-sm text-slate-900";
-      } else {
-        btn.className = "px-2 py-1 rounded-lg text-xs font-extrabold transition flex items-center gap-1 text-slate-500 hover:text-slate-900";
-      }
+      btn.className = btn.className.replace(activeClasses, "").replace(inactiveClasses, "");
     }
   });
+
+  if (lang === "pt" && btnPt) btnPt.className += " " + activeClasses;
+  if (lang === "en" && btnEn) btnEn.className += " " + activeClasses;
+  if (lang === "es" && btnEs) btnEs.className += " " + activeClasses;
 
   applyLanguage(lang);
 }
 
-/**
- * Aplica os textos traduzidos a todos os elementos da página
- */
+window.render14DaySchedule = function(lang) {
+  const dict = I18N[lang] || I18N.pt;
+  const grid = document.getElementById("public-sprint-days-grid");
+  if (!grid || !dict.schedule14) return;
+
+  grid.innerHTML = dict.schedule14.map((d) => `
+    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-1">
+      <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">${dict.scheduleDayPrefix} ${d.day} ${dict.scheduleDayOf} 14</span>
+      <h4 class="text-sm font-extrabold text-slate-900 pt-1">${d.title}</h4>
+      <p class="text-[11px] text-slate-500">${dict.scheduleSub}</p>
+    </div>
+  `).join("");
+};
+
+window.updateResultsI18n = function(lang) {
+  const l = (lang && I18N[lang]) ? lang : (window.currentLang || "pt");
+  const dict = I18N[l] || I18N.pt;
+  const res = dict.results || {};
+  const sc = dict.scarcity || {};
+
+  // Diagnostic Results Top (Image 2)
+  const statusBadge = document.getElementById("res-status-badge");
+  if (statusBadge) statusBadge.textContent = res.statusBadge;
+
+  const repTitle = document.getElementById("res-company-title");
+  if (repTitle && !window.currentDiagnosticData) repTitle.textContent = res.reportTitle;
+
+  const shareBtnText = document.getElementById("res-share-btn-text");
+  if (shareBtnText) shareBtnText.textContent = res.shareBtn;
+
+  const topCta = document.getElementById("res-top-cta-btn");
+  if (topCta) topCta.textContent = res.topCta;
+
+  // Metric 1
+  const m1Lbl = document.getElementById("res-metric1-label");
+  if (m1Lbl) m1Lbl.textContent = res.metric1Label;
+  const m1Goal = document.getElementById("res-metric1-goal");
+  if (m1Goal) m1Goal.textContent = res.metric1Goal;
+
+  // Metric 2
+  const m2Lbl = document.getElementById("res-metric2-label");
+  if (m2Lbl) m2Lbl.textContent = res.metric2Label;
+  const m2Sub = document.getElementById("res-metric2-sub");
+  if (m2Sub) m2Sub.textContent = res.metric2Sub;
+
+  // Metric 3
+  const m3Lbl = document.getElementById("res-metric3-label");
+  if (m3Lbl) m3Lbl.textContent = res.metric3Label;
+  const m3Sub = document.getElementById("res-metric3-sub");
+  if (m3Sub) m3Sub.textContent = res.metric3Sub;
+
+  // Scarcity Banner (Image 2)
+  const scStatus = document.getElementById("scarcity-status-badge");
+  if (scStatus) scStatus.textContent = sc.statusBadge;
+
+  const scRule = document.getElementById("scarcity-rule-label");
+  if (scRule) scRule.textContent = sc.ruleLabel;
+
+  const scVaga = document.getElementById("scarcity-vaga-text");
+  if (scVaga) scVaga.textContent = sc.vagaText;
+
+  const scPara = document.getElementById("scarcity-para-text");
+  if (scPara) scPara.textContent = sc.paraText;
+
+  const scAvail = document.getElementById("scarcity-avail-badge");
+  if (scAvail) scAvail.textContent = sc.availBadge;
+
+  const scDesc = document.getElementById("scarcity-desc");
+  if (scDesc) scDesc.innerHTML = sc.desc;
+
+  const scCta = document.getElementById("scarcity-cta-btn");
+  if (scCta) scCta.textContent = sc.ctaBtn;
+
+  // Financial Loss Card Header & Metrics
+  const lossHeaderBadge = document.getElementById("loss-header-badge");
+  if (lossHeaderBadge) lossHeaderBadge.textContent = res.lossHeaderBadge;
+
+  const lossHeaderTitle = document.getElementById("loss-header-title");
+  if (lossHeaderTitle) lossHeaderTitle.textContent = res.lossHeaderTitle;
+
+  const lossHeaderDesc = document.getElementById("loss-header-desc");
+  if (lossHeaderDesc && window.currentDiagnosticData) {
+    const n = window.currentDiagnosticData.company?.niche || (l === "en" ? "your industry" : (l === "es" ? "tu rubro" : "sua área"));
+    lossHeaderDesc.innerHTML = res.lossHeaderDescTemplate.replace("{niche}", `<strong id="loss-niche-text" class="text-slate-900">${n}</strong>`);
+  }
+
+  const lossSearchesLbl = document.getElementById("loss-metric-searches-lbl");
+  if (lossSearchesLbl) lossSearchesLbl.textContent = res.searchesLabel;
+  const lossSearchesSub = document.getElementById("loss-metric-searches-sub");
+  if (lossSearchesSub) lossSearchesSub.textContent = res.searchesSub;
+
+  const lossClientsLbl = document.getElementById("loss-metric-clients-lbl");
+  if (lossClientsLbl) lossClientsLbl.textContent = res.clientsLabel;
+  const lossClientsSub = document.getElementById("loss-metric-clients-sub");
+  if (lossClientsSub) lossClientsSub.textContent = res.clientsSub;
+
+  const lossAnnualLbl = document.getElementById("loss-metric-annual-lbl");
+  if (lossAnnualLbl) lossAnnualLbl.textContent = res.annualLabel;
+  const lossAnnualSub = document.getElementById("loss-metric-annual-sub");
+  if (lossAnnualSub) lossAnnualSub.textContent = res.annualSub;
+
+  const lossScale = document.getElementById("loss-ticket-scale");
+  if (lossScale && dict.ticketScale) {
+    lossScale.innerHTML = dict.ticketScale.map((s) => `<span>${s}</span>`).join("");
+  }
+
+  // ROI Green Banner (Price dynamically converted)
+  const lossRoiBadge = document.getElementById("loss-roi-badge");
+  if (lossRoiBadge) lossRoiBadge.textContent = res.roiBadge;
+
+  const lossRoiTitle = document.getElementById("loss-roi-title");
+  if (lossRoiTitle) lossRoiTitle.innerHTML = res.roiTitle;
+
+  const lossRoiDesc = document.getElementById("loss-roi-desc");
+  if (lossRoiDesc) lossRoiDesc.innerHTML = res.roiDesc;
+
+  const lossRoiCta = document.getElementById("loss-roi-cta-btn");
+  if (lossRoiCta) lossRoiCta.textContent = res.roiCta;
+
+  // Audits and Sidebar (Price dynamically converted)
+  const auditsHeading = document.getElementById("res-audits-heading");
+  if (auditsHeading) auditsHeading.textContent = res.auditsHeading;
+
+  const resSidebarBadge = document.getElementById("res-sidebar-badge");
+  if (resSidebarBadge) resSidebarBadge.textContent = res.sidebarBadge;
+
+  const resSidebarTitle = document.getElementById("res-sidebar-title");
+  if (resSidebarTitle) resSidebarTitle.textContent = res.sidebarTitle;
+
+  const resSidebarDesc = document.getElementById("res-sidebar-desc");
+  if (resSidebarDesc) resSidebarDesc.innerHTML = res.sidebarDesc;
+
+  const resSidebarCta = document.getElementById("res-sidebar-cta-btn");
+  if (resSidebarCta) resSidebarCta.textContent = res.sidebarCta;
+
+  // If results data is already loaded in DOM, update dynamic values as well:
+  if (window.currentDiagnosticData) {
+    const data = window.currentDiagnosticData;
+    const topRank = data.metrics?.top_rank_achieved;
+    const topRankElem = document.getElementById("res-top-rank");
+    if (topRankElem) {
+      if (topRank) {
+        topRankElem.textContent = l === "en" ? `#${topRank} Rank` : `#${topRank}º Lugar`;
+      } else {
+        topRankElem.textContent = res.notRanked;
+      }
+    }
+
+    const sprintBadge = document.getElementById("res-sprint-badge");
+    if (sprintBadge) {
+      const day = data.company?.sprint_day_current || (data.company?.is_paid ? 14 : 0);
+      sprintBadge.textContent = `${res.dayPrefix} ${day}/14`;
+    }
+
+    const clientsElem = document.getElementById("loss-clients-count");
+    if (clientsElem && window.currentLossEstimatedClients) {
+      clientsElem.textContent = `~ ${window.currentLossEstimatedClients} ${res.clientsPerMonth}`;
+    }
+  }
+
+  // Also update loss calculation ticket display with right currency
+  const slider = document.getElementById("loss-ticket-slider");
+  if (slider && typeof window.updateLossCalculation === "function") {
+    window.updateLossCalculation(slider.value || dict.defaultTicket);
+  }
+};
+
 function applyLanguage(lang) {
   const dict = I18N[lang] || I18N.pt;
 
-  // Atualiza título da aba e meta description
   if (lang === "en") {
     document.title = "GeoPulse AI — 14-Day Challenge: Our AI Working Daily to Rank You #1 on ChatGPT & Gemini";
   } else if (lang === "es") {
@@ -552,7 +823,9 @@ function applyLanguage(lang) {
 
   const marqueeTrack = document.getElementById("live-marquee-track");
   if (marqueeTrack && dict.marquee) {
-    marqueeTrack.innerHTML = dict.marquee.map((m) => `<span>${m}</span>`).join("");
+    marqueeTrack.innerHTML = dict.marquee
+      .map((item) => `<span class="inline-flex items-center gap-1.5">${item}</span>`)
+      .join('<span class="text-emerald-500">•</span>');
   }
 
   // Navbar
@@ -562,17 +835,17 @@ function applyLanguage(lang) {
   const navSub = document.getElementById("nav-sub-text");
   if (navSub) navSub.textContent = dict.navSub;
 
-  const navVideo = document.getElementById("nav-link-video");
-  if (navVideo) navVideo.textContent = dict.navLinkVideo;
+  const linkVideo = document.getElementById("nav-link-video");
+  if (linkVideo) linkVideo.textContent = dict.navLinkVideo;
 
-  const navChallenge = document.getElementById("nav-link-challenge");
-  if (navChallenge) navChallenge.textContent = dict.navLinkChallenge;
+  const linkChallenge = document.getElementById("nav-link-challenge");
+  if (linkChallenge) linkChallenge.textContent = dict.navLinkChallenge;
 
-  const navHow = document.getElementById("nav-link-how");
-  if (navHow) navHow.textContent = dict.navLinkHow;
+  const linkHow = document.getElementById("nav-link-how");
+  if (linkHow) linkHow.textContent = dict.navLinkHow;
 
-  const navDir = document.getElementById("nav-link-dir");
-  if (navDir) navDir.textContent = dict.navLinkDir;
+  const linkDir = document.getElementById("nav-link-dir");
+  if (linkDir) linkDir.textContent = dict.navLinkDir;
 
   const navDemo = document.getElementById("nav-demo-btn");
   if (navDemo) navDemo.textContent = dict.navDemoBtn;
@@ -581,8 +854,8 @@ function applyLanguage(lang) {
   if (navCta) navCta.textContent = dict.navCtaBtn;
 
   // Hero Section
-  const heroBadgePill = document.getElementById("hero-badge-pill");
-  if (heroBadgePill) heroBadgePill.textContent = dict.heroBadgePill;
+  const heroBadge = document.getElementById("hero-badge-pill");
+  if (heroBadge) heroBadge.textContent = dict.heroBadgePill;
 
   const heroBadgeDesc = document.getElementById("hero-badge-desc");
   if (heroBadgeDesc) heroBadgeDesc.textContent = dict.heroBadgeDesc;
@@ -590,48 +863,40 @@ function applyLanguage(lang) {
   const heroHeadline = document.getElementById("hero-headline");
   if (heroHeadline) heroHeadline.innerHTML = dict.heroHeadline;
 
-  const heroParagraph = document.getElementById("hero-paragraph");
-  if (heroParagraph) heroParagraph.innerHTML = dict.heroParagraph;
+  const heroPara = document.getElementById("hero-paragraph");
+  if (heroPara) heroPara.innerHTML = dict.heroParagraph;
 
-  const heroVideoTitle = document.getElementById("hero-video-title");
-  if (heroVideoTitle) heroVideoTitle.textContent = dict.heroVideoTitle;
+  const heroVidTitle = document.getElementById("hero-video-title");
+  if (heroVidTitle) heroVidTitle.textContent = dict.heroVideoTitle;
 
-  const vidBadge = document.getElementById("video-overlay-badge");
-  if (vidBadge && dict.videoBadge) vidBadge.textContent = dict.videoBadge;
+  const vidBadge = document.getElementById("video-badge-text");
+  if (vidBadge) vidBadge.textContent = dict.videoBadge;
 
-  const vidListen = document.getElementById("video-overlay-listen");
-  if (vidListen && dict.videoListen) vidListen.textContent = dict.videoListen;
+  const vidListen = document.getElementById("video-listen-tip");
+  if (vidListen) vidListen.textContent = dict.videoListen;
 
-  // Gerenciamento de Vídeo Multilíngue e Legendas
-  const videoElem = document.getElementById("hero-pitch-video");
+  // Troca dinâmica do vídeo dublado para o idioma selecionado
+  const videoElem = document.getElementById("apresentacao-video");
   if (videoElem) {
-    // 1. Se existir vídeo gravado no idioma, carrega ele, senão mantém o padrão
-    const targetVideoSrc = (lang === "en" || lang === "es") 
-      ? `/static/videos/apresentacao_${lang}.mp4` 
-      : `/static/videos/apresentacao.mp4`;
-
-    if (!videoElem.src.endsWith(targetVideoSrc)) {
-      const isPaused = videoElem.paused;
-      const curTime = videoElem.currentTime;
-      videoElem.src = targetVideoSrc;
-      const sourceMain = document.getElementById("video-source-main");
-      if (sourceMain) sourceMain.src = targetVideoSrc;
+    const videoSrcMap = {
+      pt: "/static/videos/apresentacao.mp4",
+      en: "/static/videos/apresentacao_en.mp4",
+      es: "/static/videos/apresentacao_es.mp4"
+    };
+    const targetSrc = videoSrcMap[lang] || videoSrcMap.pt;
+    const currentSrc = videoElem.getAttribute("src");
+    if (currentSrc !== targetSrc) {
+      videoElem.src = targetSrc;
       videoElem.load();
-      if (!isPaused && curTime > 0) {
-        videoElem.currentTime = curTime;
-        videoElem.play().catch(() => {});
-      }
     }
-
-
   }
 
-  // Simulator
-  const simBtn0 = document.getElementById("hero-sim-before-btn");
-  if (simBtn0) simBtn0.textContent = dict.simBtnDay0;
+  // Simulador Dia 0 vs Dia 14
+  const simDay0 = document.getElementById("sim-btn-day0");
+  if (simDay0) simDay0.textContent = dict.simBtnDay0;
 
-  const simBtn14 = document.getElementById("hero-sim-after-btn");
-  if (simBtn14) simBtn14.textContent = dict.simBtnDay14;
+  const simDay14 = document.getElementById("sim-btn-day14");
+  if (simDay14) simDay14.textContent = dict.simBtnDay14;
 
   const simExpTitle = document.getElementById("sim-explain-title");
   if (simExpTitle) simExpTitle.innerHTML = dict.simExplainTitle;
@@ -639,38 +904,78 @@ function applyLanguage(lang) {
   const simExpDesc = document.getElementById("sim-explain-desc");
   if (simExpDesc) simExpDesc.innerHTML = dict.simExplainDesc;
 
-  // Formulário
-  const step1 = document.getElementById("step1-badge");
+  // Formulário de Auditoria
+  const step1 = document.getElementById("step1-badge-txt");
   if (step1) step1.textContent = dict.step1Badge;
 
   const formTitle = document.getElementById("form-main-title");
   if (formTitle) formTitle.textContent = dict.formMainTitle;
 
-  const btnAdv = document.getElementById("btn-preset-adv");
-  if (btnAdv) btnAdv.textContent = dict.btnPresetAdv;
+  const formSub = document.getElementById("form-sub-title");
+  if (formSub) formSub.textContent = dict.formSubTitle;
 
-  const btnClinica = document.getElementById("btn-preset-clinica");
-  if (btnClinica) btnClinica.textContent = dict.btnPresetClinica;
+  const lblEntity = document.getElementById("label-entity-type");
+  if (lblEntity) lblEntity.textContent = dict.labelEntity;
 
-  const btnSim = document.getElementById("btn-demo-sim");
-  if (btnSim) btnSim.textContent = dict.btnDemoSim;
+  const optComp = document.getElementById("opt-entity-company");
+  if (optComp) optComp.textContent = dict.entityCompany;
 
-  const btnComp = document.getElementById("btn-type-company");
-  if (btnComp) btnComp.innerHTML = `<span>🏢</span> ${dict.btnTypeCompany.replace("🏢 ", "")}`;
+  const optPers = document.getElementById("opt-entity-personal");
+  if (optPers) optPers.textContent = dict.entityPersonal;
 
-  const btnAuto = document.getElementById("btn-type-autonomous");
-  if (btnAuto) btnAuto.innerHTML = `<span>👨‍⚕️</span> ${dict.btnTypeAuto.replace("👨‍⚕️ ", "")}`;
+  const lblName = document.getElementById("lbl-name-text");
+  if (lblName) lblName.textContent = dict.labelName;
 
-  const submitBtn = document.getElementById("submit-audit-btn");
-  if (submitBtn) submitBtn.textContent = dict.submitBtn;
+  const inputName = document.getElementById("name");
+  if (inputName) inputName.placeholder = dict.namePlaceholder;
 
-  // Atualiza labels dos campos de acordo com a entidade atual
-  const currentEntity = document.getElementById("entity_type")?.value || "company";
-  if (typeof window.applyEntityLabelsI18n === "function") {
-    window.applyEntityLabelsI18n(currentEntity, dict);
+  const lblUrl = document.getElementById("lbl-url-text");
+  if (lblUrl) lblUrl.textContent = dict.labelUrl;
+
+  const lblNiche = document.getElementById("lbl-niche-text");
+  if (lblNiche) lblNiche.textContent = dict.labelNiche;
+
+  const lblCity = document.getElementById("lbl-city-text");
+  if (lblCity) lblCity.textContent = dict.labelCity;
+
+  const lblCouncil = document.getElementById("lbl-council-text");
+  if (lblCouncil) lblCouncil.textContent = dict.labelCouncil;
+
+  const lblComp = document.getElementById("lbl-competitors-text");
+  if (lblComp) lblComp.textContent = dict.labelCompetitors;
+
+  const lblWpp = document.getElementById("lbl-whatsapp-text");
+  if (lblWpp) lblWpp.textContent = dict.labelWhatsapp;
+
+  const lblEmail = document.getElementById("lbl-email-text");
+  if (lblEmail) lblEmail.textContent = dict.labelEmail;
+
+  const privNote = document.getElementById("privacy-note-txt");
+  if (privNote) privNote.textContent = dict.privacyNote;
+
+  const subBtn = document.getElementById("submit-diag-btn");
+  if (subBtn) subBtn.textContent = dict.submitBtn;
+
+  // 14-Day Section Header & Grid (Image 1)
+  const spBadge = document.getElementById("sprint-section-badge");
+  if (spBadge && dict.sprintSection) spBadge.textContent = dict.sprintSection.badge;
+
+  const spTitle = document.getElementById("sprint-section-title");
+  if (spTitle && dict.sprintSection) spTitle.textContent = dict.sprintSection.title;
+
+  const spSubtitle = document.getElementById("sprint-section-subtitle");
+  if (spSubtitle && dict.sprintSection) spSubtitle.textContent = dict.sprintSection.subtitle;
+
+  if (typeof window.render14DaySchedule === "function") {
+    window.render14DaySchedule(lang);
   }
 
-  // Calculadora de perda financeira e ticket
+  // Diagnostic Results (Image 2)
+  if (typeof window.updateResultsI18n === "function") {
+    window.updateResultsI18n(lang);
+  }
+
+  // Loss Calculator
   const lossMonthLbl = document.getElementById("loss-title-monthly-lbl");
   if (lossMonthLbl) lossMonthLbl.textContent = dict.lossMonthlyLbl;
 
@@ -686,7 +991,6 @@ function applyLanguage(lang) {
   const lossSimBadge = document.getElementById("loss-ticket-sim-badge");
   if (lossSimBadge) lossSimBadge.textContent = dict.lossTicketSimBadge;
 
-  // Atualiza slider da calculadora
   const slider = document.getElementById("loss-ticket-slider");
   if (slider) {
     slider.min = dict.ticketMin;
@@ -718,7 +1022,6 @@ function applyLanguage(lang) {
   const faqSub = document.getElementById("faq-sub-txt");
   if (faqSub) faqSub.textContent = dict.faqSub;
 
-  // Atualiza os itens do FAQ
   const faqDetails = document.querySelectorAll("#garantia-faq details");
   if (faqDetails && dict.faqs) {
     faqDetails.forEach((elem, idx) => {
@@ -730,6 +1033,10 @@ function applyLanguage(lang) {
       }
     });
   }
+
+  // Floating Chat Pill at bottom
+  const floatChatBtn = document.getElementById("floating-chat-btn-text");
+  if (floatChatBtn && dict.floatingChatPill) floatChatBtn.textContent = dict.floatingChatPill;
 
   // Chat Flutuante
   const chatInput = document.getElementById("ai-chat-input");
@@ -763,22 +1070,22 @@ function applyLanguage(lang) {
   const mpBtn = document.getElementById("checkout-mp-btn");
   if (mpBtn) mpBtn.innerHTML = `<span>💳</span> ${dict.checkout.mpBtn.replace("💳 ", "")}`;
 
-  // Se for visitante internacional (en ou es), esconde a obrigatoriedade do PIX brasileiro
   const pixBox = document.getElementById("pix-payment-box");
   if (pixBox) {
+    // Show PIX box for Brazilian users (pt); hide for foreign users (en/es) or display international notice
     if (lang === "pt") {
       pixBox.style.display = "block";
     } else {
-      // Para tráfego global, mantém como opção secundária recolhida
-      pixBox.style.display = "block";
+      pixBox.style.display = "none";
     }
   }
+
   const modalTotal = document.getElementById("modal-total-display");
   if (modalTotal) {
     const isBump = window.currentOrderBump || false;
     const price = dict.planPrice + (isBump ? dict.bumpPrice : 0);
-    modalTotal.textContent = dict.currencyCode === "BRL" 
-      ? price.toFixed(2).replace(".", ",") 
+    modalTotal.textContent = dict.currencyCode === "BRL"
+      ? price.toFixed(2).replace(".", ",")
       : `${price.toFixed(2)} ${dict.currencyCode}`;
   }
 }

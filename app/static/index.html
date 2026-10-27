@@ -143,11 +143,8 @@
             </div>
 
             <div class="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video shadow-inner group">
-              <video id="hero-pitch-video" src="/static/videos/apresentacao.mp4" class="w-full h-full object-cover" controls playsinline preload="auto" crossorigin="anonymous">
+              <video id="hero-pitch-video" src="/static/videos/apresentacao.mp4" class="w-full h-full object-cover" controls playsinline preload="auto">
                 <source id="video-source-main" src="/static/videos/apresentacao.mp4" type="video/mp4" />
-                <track id="video-track-pt" kind="subtitles" srclang="pt" label="Português" src="/static/videos/legendas_pt.vtt" default />
-                <track id="video-track-en" kind="subtitles" srclang="en" label="English" src="/static/videos/legendas_en.vtt" />
-                <track id="video-track-es" kind="subtitles" srclang="es" label="Español" src="/static/videos/legendas_es.vtt" />
               </video>
 
               <div id="video-sound-overlay" onclick="playHeroVideoWithSound()" class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/35 to-transparent flex flex-col justify-between p-5 sm:p-7 cursor-pointer transition-opacity duration-300">

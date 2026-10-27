@@ -623,17 +623,7 @@ function applyLanguage(lang) {
       }
     }
 
-    // 2. Ativa automaticamente a faixa de legendas correspondente ao idioma
-    if (videoElem.textTracks && videoElem.textTracks.length > 0) {
-      for (let i = 0; i < videoElem.textTracks.length; i++) {
-        const track = videoElem.textTracks[i];
-        if (track.language === lang) {
-          track.mode = "showing";
-        } else {
-          track.mode = "hidden";
-        }
-      }
-    }
+
   }
 
   // Simulator

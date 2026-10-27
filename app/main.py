@@ -2410,6 +2410,7 @@ async def admin_advance_sprint(company_id: int, db: AsyncSession = Depends(get_d
 # ==========================================
 from app.schemas import SalesBotChatRequest, SalesBotHuntRequest
 from app.services.sales_bot import SalesBotService
+from app.services.notifier import send_email
 
 
 @app.post("/api/sales-bot/chat")

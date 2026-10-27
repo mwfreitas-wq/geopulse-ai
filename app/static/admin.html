@@ -1530,7 +1530,13 @@
               },
               body: JSON.stringify(this.hunterForm)
             });
-            const data = await res.json();
+            let data = {};
+            try {
+              data = await res.json();
+            } catch (err) {
+              const rawTxt = await res.text();
+              throw new Error(rawTxt || 'Falha na resposta do servidor.');
+            }
             if (res.ok && data.leads) {
               this.huntedLeads = data.leads;
               this.toastMessage = `🎯 Robô finalizou com sucesso! ${data.leads.length} empresas prospectadas e auditadas.`;

@@ -14,6 +14,8 @@ class JinaScraperService:
     @staticmethod
     def normalize_url(url: str) -> str:
         url = url.strip()
+        if url.startswith("@"):
+            return f"https://www.instagram.com/{url[1:].strip('/')}"
         if not url.startswith("http://") and not url.startswith("https://"):
             url = f"https://{url}"
         return url
@@ -81,7 +83,7 @@ class JinaScraperService:
         lower_html = html_text.lower() if html_text else ""
 
         has_json_ld = "application/ld+json" in lower_html or "schema.org" in lower_html
-        has_faq_structure = ("faq" in lower_html or "perguntas frequentes" in lower_html or "duvidas" in lower_html)
+        has_faq_structure = any(k in lower_html for k in ["faq", "perguntas frequentes", "duvidas", "frequently asked", "preguntas frecuentes", "questions"])
         social_links_count = sum(
             1 for soc in ["linkedin.com", "instagram.com", "facebook.com", "youtube.com", "wa.me", "whatsapp.com"]
             if soc in lower_html

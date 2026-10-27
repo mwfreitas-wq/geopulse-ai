@@ -14,6 +14,41 @@ class AuditorService:
     """
 
     @staticmethod
+    def detect_entity_language(niche: str, city_region: str, url: str, language: str = "pt") -> str:
+        lang = (language or "pt").lower().strip()
+        if lang in ["en", "es"]:
+            return lang
+        combined = f" {niche} {city_region} ".lower()
+        u = url.lower().strip().rstrip("/")
+        domain = re.sub(r"https?://(www\.)?", "", u).split("/")[0]
+        if domain.endswith(".br"):
+            return "pt"
+        if domain.endswith((".es", ".mx", ".ar", ".cl", ".co", ".pe", ".uy")):
+            return "es"
+        if domain.endswith((".us", ".uk", ".ca", ".au")):
+            return "en"
+        es_words = [
+            "madrid", "barcelona", "méxico", "mexico", "buenos aires", "bogotá", "bogota",
+            "santiago", "lima", "españa", "spain", "abogado", "derecho", "implantes dentales",
+            "odontología", "consultoría", "clínica dental", "despacho", "bufete"
+        ]
+        if any(w in combined for w in es_words):
+            return "es"
+        en_words = [
+            "miami", "new york", "los angeles", "chicago", "houston", "dallas", "austin",
+            "atlanta", "boston", "san francisco", "seattle", "denver", "orlando", "tampa",
+            "london", "toronto", "vancouver", "sydney", "melbourne", "dublin",
+            "florida", "california", "texas", "united states", "usa", "uk", "canada",
+            "dental implants", "cosmetic dentistry", "attorney", "law firm", "lawyer",
+            "healthcare", "clinic", "consulting", "agency", "real estate", "accounting",
+            "chiropractor", "dermatology", "plastic surgery", "medical spa", "medspa",
+            "care", "specialist", "associates", "partners", "group", "studio"
+        ]
+        if any(w in combined for w in en_words):
+            return "en"
+        return "pt"
+
+    @staticmethod
     def generate_prompts(
         company_name: str,
         niche: str,
@@ -26,7 +61,7 @@ class AuditorService:
     ) -> List[Dict[str, str]]:
         is_auto = (entity_type == "autonomous")
         reg_str = f" ({professional_registry})" if professional_registry and professional_registry.strip() else ""
-        lang = (language or "pt").lower()
+        lang = AuditorService.detect_entity_language(niche, city_region, url, language)
 
         if lang == "en":
             if is_auto:
@@ -139,7 +174,7 @@ class AuditorService:
         clean_name = company_name.lower().strip()
         domain = re.sub(r"https?://(www\.)?", "", company_url).split("/")[0].lower()
 
-        is_spontaneous_prompt = ("Descoberta" in category)
+        is_spontaneous_prompt = any(k in category for k in ["Descoberta", "Discovery", "Descubrimiento"])
 
         # Frases em que a IA diz que não conhece ou não tem informações suficientes sobre a empresa (PT, EN, ES)
         unknown_phrases = [
@@ -187,7 +222,7 @@ class AuditorService:
                 else:
                     # Nos prompts 2 (Comparativo) e 3 (Reputação), onde o nome já foi dado na pergunta:
                     # Só dá #1 se a IA declarar explicitamente que é a líder/1º lugar; caso contrário, avalia como menção comparativa (#2 ou #3)
-                    explicit_top1 = any(expr in lower_text for expr in ["1º lugar", "primeiro lugar", "recomendação número 1", "principal referência"])
+                    explicit_top1 = any(expr in lower_text for expr in ["1º lugar", "primeiro lugar", "recomendação número 1", "principal referência", "#1", "first place", "number 1", "top reference", "primary choice", "primer lugar", "recomendación número 1", "referencia número 1"])
                     if explicit_top1:
                         rank_position = 1
                     else:
@@ -276,8 +311,8 @@ class AuditorService:
                 {
                     "role": "system",
                     "content": (
-                        "Você é um assistente de busca e recomendação com conhecimento profundo de mercado e reputação empresarial. "
-                        "Responda de forma clara usando listas numeradas (1., 2., 3.) e tópicos objetivos. NUNCA use tabelas com barras (|---|)."
+                        "You are a global search and market recommendation assistant with deep knowledge of business reputation. "
+                        "Always respond in the exact language of the user prompt (English, Spanish, or Portuguese) using numbered lists (1., 2., 3.) and bullet points. NEVER use markdown tables (|---|)."
                     )
                 },
                 {"role": "user", "content": prompt}
@@ -310,7 +345,7 @@ class AuditorService:
             "messages": [
                 {
                     "role": "system",
-                    "content": "Você é um motor de busca generativo. Forneça respostas precisas com listas numeradas (1., 2., 3.) sem usar tabelas Markdown (|---|)."
+                    "content": "You are a generative search engine. Provide accurate answers in the exact language of the user prompt (English, Spanish, or Portuguese) with numbered lists (1., 2., 3.) and no Markdown tables (|---|)."
                 },
                 {"role": "user", "content": prompt}
             ]
@@ -383,7 +418,7 @@ class AuditorService:
         payload = {
             "model": "openrouter/auto",
             "messages": [
-                {"role": "system", "content": "Você é um motor de recomendação e análise de autoridade digital no Brasil. Responda em português."},
+                {"role": "system", "content": "You are a global generative search and digital authority recommendation engine. Always respond in the exact language of the user prompt (English, Spanish, or Portuguese)."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.3
@@ -411,7 +446,7 @@ class AuditorService:
         payload = {
             "model": "mistral-small-latest",
             "messages": [
-                {"role": "system", "content": "Você é um motor de busca e recomendação de empresas e especialistas no Brasil. Responda sempre em português."},
+                {"role": "system", "content": "You are a global business and specialist recommendation search engine. Always respond in the exact language of the user prompt (English, Spanish, or Portuguese)."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.3,
@@ -440,7 +475,7 @@ class AuditorService:
         payload = {
             "model": "Qwen/Qwen2.5-72B-Instruct",
             "messages": [
-                {"role": "system", "content": "Você é um motor de busca generativo especializado no mercado brasileiro."},
+                {"role": "system", "content": "You are a global generative search engine. Always respond in the exact language of the user prompt (English, Spanish, or Portuguese)."},
                 {"role": "user", "content": prompt}
             ],
             "max_tokens": 900
@@ -685,26 +720,25 @@ class AuditorService:
             "solution_preview": "Ativação dos 5 Blocos FAQ Zero-Click + Selo Verificado #1 + Sindicador Spark 24/7."
         })
 
-        lang = (language or "pt").lower()
+        lang = AuditorService.detect_entity_language(niche, city_region, url, language)
         if lang == "en":
+            en_entity_label = f"the specialist {company_name}{reg_label}" if is_auto else company_name
+            en_c1 = comp_list[0] if len(comp_list) > 0 else (f"other {niche} specialists" if is_auto else f"local {niche} leaders")
             en_suggestions = []
             for s in suggestions:
                 t = s["title"]
-                p = s["problem"]
-                imp = s["impact"]
-                sol = s["solution_preview"]
                 if "1." in t:
                     en_suggestions.append({
                         "title": f"1. Technical Shielding: Add /llms.txt and Schema.org Graph to {url}" if is_rank_one else f"1. Missing Technical Credentials (/llms.txt & Schema Graph) on {url}",
                         "problem": f"We inspected `{url}` in real time and detected that your website does not have `/llms.txt` and Schema.org Entity Graph configured for ChatGPT and Google Gemini.",
-                        "impact": f"Decreases by up to {round(100 - profile['visibility_score'], 1)}% the probability of AI engines citing {entity_label} when users search for specialists.",
+                        "impact": f"Decreases by up to {round(100 - profile['visibility_score'], 1)}% the probability of AI engines citing {en_entity_label} when users search for specialists.",
                         "solution_preview": f"Our AI generates your verified Authority Entity Graph + complete /llms.txt file within seconds."
                     })
                 elif "2." in t:
                     en_suggestions.append({
                         "title": f"2. Regional Semantic Authority Article for '{niche}' in {city_region}",
                         "problem": f"Your page needs continuous Off-Page entity anchoring on indexed third-party comparison portals to secure #1 placement.",
-                        "impact": f"Competitors like {c1} can overtake your ranking when users query ChatGPT or Perplexity for local recommendations.",
+                        "impact": f"Competitors like {en_c1} can overtake your ranking when users query ChatGPT or Perplexity for local recommendations.",
                         "solution_preview": f"Instant automated publication of the 'Top 5 Specialists in {city_region}' authority guide placing you at #1."
                     })
                 else:
@@ -717,6 +751,8 @@ class AuditorService:
             return en_suggestions
 
         if lang == "es":
+            es_entity_label = f"el/la especialista {company_name}{reg_label}" if is_auto else company_name
+            es_c1 = comp_list[0] if len(comp_list) > 0 else (f"otros especialistas de {niche}" if is_auto else f"líderes locales de {niche}")
             es_suggestions = []
             for s in suggestions:
                 t = s["title"]
@@ -724,15 +760,15 @@ class AuditorService:
                     es_suggestions.append({
                         "title": f"1. Blindaje Técnico: Agregar /llms.txt y Schema.org en {url}" if is_rank_one else f"1. Ausencia de Credenciales Técnicas (/llms.txt y Schema.org) en {url}",
                         "problem": f"Inspeccionamos `{url}` en tiempo real y detectamos que su página aún no tiene configurado `/llms.txt` ni el Grafo Schema.org para ChatGPT y Google Gemini.",
-                        "impact": f"Reduce hasta en un {round(100 - profile['visibility_score'], 1)}% la probabilidad de que la IA recomiende a {entity_label} frente a consultas locales.",
+                        "impact": f"Reduce hasta en un {round(100 - profile['visibility_score'], 1)}% la probabilidad de que la IA recomiende a {es_entity_label} frente a consultas locales.",
                         "solution_preview": f"Nuestra IA genera el Grafo de Entidad verificado + archivo /llms.txt a medida en segundos."
                     })
                 elif "2." in t:
                     es_suggestions.append({
                         "title": f"2. Publicación de Guía 'Top 5' de Autoridad para '{niche}' en {city_region}",
                         "problem": f"Se requiere validación semántica Off-Page continua para blindar la recomendación número 1 en motores generativos.",
-                        "impact": f"Competidores como {c1} pueden recibir la preferencia de la IA si no existe contenido comparativo indexado.",
-                        "solution_preview": f"Publicación automatizada del Guía Oficial 'Top 5 en {city_region}' posicionando su nombre en 1º lugar absoluto."
+                        "impact": f"Competidores como {es_c1} pueden recibir la preferencia de la IA si no existe contenido comparativo indexado.",
+                        "solution_preview": f"Publicación automatizada de la Guía Oficial 'Top 5 en {city_region}' posicionando su nombre en 1º lugar absoluto."
                     })
                 else:
                     es_suggestions.append({
@@ -779,7 +815,7 @@ class AuditorService:
             c1 = comp_list[0] if len(comp_list) > 0 else f"Referência Líder em {niche}"
             c2 = comp_list[1] if len(comp_list) > 1 else f"Grupo Especializado {niche}"
             c3 = comp_list[2] if len(comp_list) > 2 else f"Centro Técnico {niche} {city_region}"
-        lang = (language or "pt").lower()
+        lang = AuditorService.detect_entity_language(niche, city_region, url, language)
 
         if lang == "en":
             ec1 = comp_list[0] if len(comp_list) > 0 else (f"Senior Specialist in {niche}" if is_auto else f"Leading Reference in {niche}")
@@ -1033,6 +1069,7 @@ class AuditorService:
         openai_key = api_keys.get("openai_api_key") or settings.OPENAI_API_KEY
         perplexity_key = api_keys.get("perplexity_api_key") or settings.PERPLEXITY_API_KEY
 
+        lang = cls.detect_entity_language(niche, city_region, url, language)
         any_live_key = any([gemini_key, groq_key, openrouter_key, mistral_key, hf_key, tavily_key, openai_key, perplexity_key])
         profile = cls.compute_real_site_profile(company_name, niche, city_region, url, scraped_content, signals)
 
@@ -1041,7 +1078,7 @@ class AuditorService:
             prompt_text = item["prompt"]
 
             response_text = None
-            provider_used = "Inspeção Técnica Real + Motor Multi-LLM"
+            provider_used = "Real-Time Technical Inspection + Multi-LLM" if lang == "en" else ("Inspección Técnica Real + Motor Multi-LLM" if lang == "es" else "Inspeção Técnica Real + Motor Multi-LLM")
 
             if not is_paid:
                 # Prioriza Groq Cloud (1.3s) para velocidade instantânea; no Prompt 2 tenta Gemini (max 3.0s) com fallback automático para Groq
@@ -1049,19 +1086,19 @@ class AuditorService:
                     resp = await cls.call_groq(prompt_text, groq_key)
                     if resp:
                         response_text = resp
-                        provider_used = "Groq Cloud GPT-OSS-120B (API Gratuita)" if idx == 0 else "Groq Cloud Qwen 3.8 (API Gratuita)"
+                        provider_used = ("Groq Cloud GPT-OSS-120B (Live AI)" if idx == 0 else "Groq Cloud Qwen 3.8 (Live AI)") if lang != "pt" else ("Groq Cloud GPT-OSS-120B (API Gratuita)" if idx == 0 else "Groq Cloud Qwen 3.8 (API Gratuita)")
 
                 if gemini_key and not response_text:
                     resp = await cls.call_gemini(prompt_text, gemini_key)
                     if resp:
                         response_text = resp
-                        provider_used = "Google Gemini Flash (API Gratuita)"
+                        provider_used = "Google Gemini Flash (Live AI)" if lang != "pt" else "Google Gemini Flash (API Gratuita)"
 
                 if groq_key and not response_text:
                     resp = await cls.call_groq(prompt_text, groq_key)
                     if resp:
                         response_text = resp
-                        provider_used = "Groq Cloud GPT-OSS-120B (API Gratuita)"
+                        provider_used = "Groq Cloud GPT-OSS-120B (Live AI)" if lang != "pt" else "Groq Cloud GPT-OSS-120B (API Gratuita)"
 
                 if openrouter_key and not response_text:
                     resp = await cls.call_openrouter(prompt_text, openrouter_key)

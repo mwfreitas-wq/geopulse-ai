@@ -179,8 +179,8 @@
           <div class="bg-white rounded-3xl border border-slate-200 shadow-soft p-6 sm:p-7 space-y-5">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Simulador do Desafio de 14 Dias</span>
-                <h2 class="text-lg font-extrabold text-slate-900">Como sua posição sobe dia após dia</h2>
+                <span id="hero-sim-header-badge" class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Simulador do Desafio de 14 Dias</span>
+                <h2 id="hero-sim-header-title" class="text-lg font-extrabold text-slate-900">Como sua posição sobe dia após dia</h2>
               </div>
               <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
                 <button id="hero-sim-before-btn" onclick="switchHeroSim('before')" class="px-2.5 py-1.5 rounded-lg text-xs font-extrabold bg-white text-rose-600 shadow-sm">Dia 0 (Hoje)</button>
@@ -243,10 +243,10 @@
         <form id="geo-audit-form" onsubmit="handleDiagnosticSubmit(event)" class="space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-2 rounded-2xl border border-slate-200">
             <button type="button" id="btn-type-company" onclick="setEntityType('company')" class="py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-md transition-all flex items-center justify-center gap-2">
-              <span>🏢</span> Sou Empresa / Clínica / Escritório
+              <span>🏢</span> <span id="btn-type-company-text">Sou Empresa / Clínica / Escritório</span>
             </button>
             <button type="button" id="btn-type-autonomous" onclick="setEntityType('autonomous')" class="py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
-              <span>👨‍⚕️</span> Sou Profissional Liberal / Autônomo
+              <span>👨‍⚕️</span> <span id="btn-type-autonomous-text">Sou Profissional Liberal / Autônomo</span>
             </button>
           </div>
           <input type="hidden" id="entity_type" value="company" />
@@ -291,11 +291,11 @@
           <!-- CONTATO -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label class="block text-xs font-extrabold uppercase text-slate-700 mb-2">📱 WhatsApp com DDD</label>
+              <label id="label-whatsapp" class="block text-xs font-extrabold uppercase text-slate-700 mb-2">📱 WhatsApp com DDD *</label>
               <input type="text" id="whatsapp" placeholder="Ex: (11) 98765-4321" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500" />
             </div>
             <div>
-              <label class="block text-xs font-extrabold uppercase text-slate-700 mb-2">✉️ Seu E-mail para Receber o Relatório</label>
+              <label id="label-email" class="block text-xs font-extrabold uppercase text-slate-700 mb-2">✉️ Seu E-mail para Receber o Relatório</label>
               <input type="email" id="email" placeholder="Ex: seuemail@dominio.com.br" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500" />
             </div>
           </div>
@@ -303,7 +303,7 @@
           <input type="hidden" id="photo_url" value="" />
 
           <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span class="text-xs text-slate-500">🔒 Diagnóstico 100% Gratuito em 10 segundos</span>
+            <span id="form-security-note" class="text-xs text-slate-500">🔒 Diagnóstico 100% Gratuito em 10 segundos</span>
             <button type="submit" id="submit-audit-btn" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold text-sm sm:text-base shadow-glow transition hover:opacity-95">
               🔍 Executar Diagnóstico Gratuito nas IAs Agora
             </button>
@@ -785,17 +785,78 @@
       }
     }
 
+    let heroSimCurrentMode = 'before';
+
     function switchHeroSim(mode) {
-      const isAfter = mode === 'after';
-      document.getElementById('hero-sim-day-label').textContent = isAfter ? 'Resultado no Dia 14 (Após 14 ações da IA):' : 'Status no Dia 0 (Sem a IA trabalhar):';
-      document.getElementById('hero-sim-score-pill').textContent = isAfter ? 'Score: 94.5%' : 'Score: 21.4%';
-      document.getElementById('hero-sim-progress').style.width = isAfter ? '94.5%' : '21.4%';
-      document.getElementById('hero-sim-progress').className = `h-full rounded-full transition-all duration-700 ${isAfter ? 'bg-emerald-500' : 'bg-rose-500'}`;
-      document.getElementById('hero-sim-badge').textContent = isAfter ? '🏆 DIA 14: VOCÊ EM 1º LUGAR NAS IAs' : '⚠️ VOCÊ FORA DO RANKING DA IA';
-      document.getElementById('hero-sim-response').innerHTML = isAfter
-        ? `<div class="p-3 rounded-xl bg-white border-2 border-emerald-500 font-bold text-emerald-800">🥇 1. SUA EMPRESA / SEU NOME — Recomendado #1</div>`
-        : `<div class="p-2.5 rounded-xl bg-white border border-slate-200 font-semibold">🥇 1. Seu Concorrente Direto — Recomendado #1</div><div class="p-2.5 rounded-xl bg-rose-100 text-rose-800 font-bold">❌ Sua Empresa (Invisível)</div>`;
+      heroSimCurrentMode = mode;
+      renderHeroSim(mode, window.currentLang || 'pt');
     }
+
+    function renderHeroSim(mode, lang) {
+      const isAfter = (mode === 'after');
+      const l = (lang && I18N[lang]) ? lang : (window.currentLang || 'pt');
+      const dict = I18N[l] || I18N.pt;
+      const s = dict.sim || {};
+
+      const btnBefore = document.getElementById('hero-sim-before-btn');
+      const btnAfter = document.getElementById('hero-sim-after-btn');
+
+      if (btnBefore) {
+        btnBefore.textContent = s.btnDay0 || 'Dia 0 (Hoje)';
+        btnBefore.className = isAfter
+          ? 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 cursor-pointer'
+          : 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold bg-white text-rose-600 shadow-sm cursor-pointer';
+      }
+      if (btnAfter) {
+        btnAfter.textContent = s.btnDay14 || 'Dia 14 (Pós-IA)';
+        btnAfter.className = isAfter
+          ? 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold bg-white text-emerald-600 shadow-sm cursor-pointer'
+          : 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 cursor-pointer';
+      }
+
+      const dayLbl = document.getElementById('hero-sim-day-label');
+      if (dayLbl) dayLbl.textContent = isAfter ? s.day14Label : s.day0Label;
+
+      const scorePill = document.getElementById('hero-sim-score-pill');
+      if (scorePill) {
+        scorePill.textContent = isAfter ? s.day14Score : s.day0Score;
+        scorePill.className = `px-2 py-0.5 rounded-full font-mono font-extrabold ${isAfter ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`;
+      }
+
+      const progress = document.getElementById('hero-sim-progress');
+      if (progress) {
+        progress.style.width = isAfter ? '94.5%' : '21.4%';
+        progress.className = `h-full rounded-full transition-all duration-700 ${isAfter ? 'bg-emerald-500' : 'bg-rose-500'}`;
+      }
+
+      const simBox = document.getElementById('hero-sim-box');
+      if (simBox) {
+        simBox.className = `rounded-2xl p-4 border-2 space-y-2.5 transition-all ${isAfter ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/50'}`;
+      }
+
+      const badge = document.getElementById('hero-sim-badge');
+      if (badge) {
+        badge.textContent = isAfter ? s.day14Badge : s.day0Badge;
+        badge.className = `px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${isAfter ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'}`;
+      }
+
+      const responseContainer = document.getElementById('hero-sim-response');
+      if (responseContainer) {
+        if (isAfter) {
+          responseContainer.innerHTML = `<div class="p-3 rounded-xl bg-white border-2 border-emerald-500 font-bold text-emerald-800">${s.day14YourCompany}</div>`;
+        } else {
+          responseContainer.innerHTML = `
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200 font-semibold text-slate-900">${s.day0Competitor}</div>
+            <div class="p-2.5 rounded-xl bg-rose-100/80 border border-rose-300 text-rose-800 font-bold flex items-center justify-between">
+              <span>${s.day0YourCompany}</span>
+              <span class="text-[10px] uppercase">${s.day0Invisible}</span>
+            </div>
+          `;
+        }
+      }
+    }
+    window.switchHeroSim = switchHeroSim;
+    window.renderHeroSim = renderHeroSim;
 
     window.applyEntityLabelsI18n = function(type, dict) {
       if (!dict) dict = I18N[currentLang] || I18N.pt;
@@ -858,26 +919,67 @@
     }
 
     function fillPreset(p) {
+      const l = window.currentLang || 'pt';
       if (p === 'advogado') {
         setEntityType('autonomous');
-        document.getElementById('name').value = 'Dr. Rafael Vasconcelos';
-        document.getElementById('url').value = 'https://www.vasconcelosadvocacia.com.br';
-        document.getElementById('niche').value = 'Advocacia Trabalhista e Empresarial';
-        document.getElementById('city_region').value = 'São Paulo - SP';
-        document.getElementById('professional_registry').value = 'OAB/SP 412.890';
-        document.getElementById('competitors').value = 'Almeida & Santos Advogados, Dra. Juliana Freitas';
-        document.getElementById('whatsapp').value = '(11) 98765-4321';
-        document.getElementById('email').value = 'contato@vasconcelosadvocacia.com.br';
+        if (l === 'en') {
+          document.getElementById('name').value = 'Dr. Robert Vance, Esq.';
+          document.getElementById('url').value = 'https://www.vancelegal.com';
+          document.getElementById('niche').value = 'Corporate & Employment Law';
+          document.getElementById('city_region').value = 'Miami, FL';
+          document.getElementById('professional_registry').value = 'FL Bar #412890';
+          document.getElementById('competitors').value = 'Apex Law Group, Morgan & Partners';
+          document.getElementById('whatsapp').value = '+1 (305) 555-0192';
+          document.getElementById('email').value = 'contact@vancelegal.com';
+        } else if (l === 'es') {
+          document.getElementById('name').value = 'Dr. Rafael Morales';
+          document.getElementById('url').value = 'https://www.moralesabogados.es';
+          document.getElementById('niche').value = 'Derecho Laboral y Corporativo';
+          document.getElementById('city_region').value = 'Madrid - España';
+          document.getElementById('professional_registry').value = 'Colegio de Abogados 412.890';
+          document.getElementById('competitors').value = 'Bufete García, Morales & Asociados';
+          document.getElementById('whatsapp').value = '+34 612 345 678';
+          document.getElementById('email').value = 'contacto@moralesabogados.es';
+        } else {
+          document.getElementById('name').value = 'Dr. Rafael Vasconcelos';
+          document.getElementById('url').value = 'https://www.vasconcelosadvocacia.com.br';
+          document.getElementById('niche').value = 'Advocacia Trabalhista e Empresarial';
+          document.getElementById('city_region').value = 'São Paulo - SP';
+          document.getElementById('professional_registry').value = 'OAB/SP 412.890';
+          document.getElementById('competitors').value = 'Almeida & Santos Advogados, Dra. Juliana Freitas';
+          document.getElementById('whatsapp').value = '(11) 98765-4321';
+          document.getElementById('email').value = 'contato@vasconcelosadvocacia.com.br';
+        }
       } else {
         setEntityType('company');
-        document.getElementById('name').value = 'Clínica OdontoPrime Implantes';
-        document.getElementById('url').value = 'https://www.odontoprimebh.com.br';
-        document.getElementById('niche').value = 'Implantes Dentários e Estética Dental';
-        document.getElementById('city_region').value = 'Belo Horizonte - MG';
-        document.getElementById('professional_registry').value = 'CRO/MG Clínica 54.321';
-        document.getElementById('competitors').value = 'Oral Sin BH, OdontoCompany Centro';
-        document.getElementById('whatsapp').value = '(31) 99876-5432';
-        document.getElementById('email').value = 'atendimento@odontoprimebh.com.br';
+        if (l === 'en') {
+          document.getElementById('name').value = 'Prime Dental Care Clinic';
+          document.getElementById('url').value = 'https://www.primedentalcare.com';
+          document.getElementById('niche').value = 'Dental Implants & Cosmetic Dentistry';
+          document.getElementById('city_region').value = 'Miami, FL';
+          document.getElementById('professional_registry').value = 'Dental Board Clinic #54321';
+          document.getElementById('competitors').value = 'Smile Dental Studio, Ocean Dental';
+          document.getElementById('whatsapp').value = '+1 (305) 555-0143';
+          document.getElementById('email').value = 'contact@primedentalcare.com';
+        } else if (l === 'es') {
+          document.getElementById('name').value = 'Clínica OdontoPrime Implantes';
+          document.getElementById('url').value = 'https://www.odontoprime.es';
+          document.getElementById('niche').value = 'Implantes Dentales y Estética';
+          document.getElementById('city_region').value = 'Madrid - España';
+          document.getElementById('professional_registry').value = 'Registro Sanitario Clínica #54321';
+          document.getElementById('competitors').value = 'Clínica Dental Sol, Dental Centro';
+          document.getElementById('whatsapp').value = '+34 698 765 432';
+          document.getElementById('email').value = 'atencion@odontoprime.es';
+        } else {
+          document.getElementById('name').value = 'Clínica OdontoPrime Implantes';
+          document.getElementById('url').value = 'https://www.odontoprimebh.com.br';
+          document.getElementById('niche').value = 'Implantes Dentários e Estética Dental';
+          document.getElementById('city_region').value = 'Belo Horizonte - MG';
+          document.getElementById('professional_registry').value = 'CRO/MG Clínica 54.321';
+          document.getElementById('competitors').value = 'Oral Sin BH, OdontoCompany Centro';
+          document.getElementById('whatsapp').value = '(31) 99876-5432';
+          document.getElementById('email').value = 'atendimento@odontoprimebh.com.br';
+        }
       }
     }
 
@@ -1073,11 +1175,33 @@
 
     function runInstantDemo(mode, custom = null) {
       const isPaid = mode === 'paid';
+      const l = window.currentLang || 'pt';
+      const isEn = l === 'en';
+      const isEs = l === 'es';
+
+      const defName = isEn ? 'Prime Dental Care Clinic' : (isEs ? 'Clínica OdontoPrime' : 'Clínica OdontoPrime');
+      const defUrl = isEn ? 'https://primedentalcare.com' : (isEs ? 'https://odontoprime.es' : 'https://odontoprime.com.br');
+      const defNiche = isEn ? 'Dental Implants & Cosmetic' : (isEs ? 'Implantes Dentales' : 'Implantes Dentários');
+      const defCity = isEn ? 'Miami, FL' : (isEs ? 'Madrid - España' : 'Belo Horizonte - MG');
+
+      const citedResp = isEn 
+        ? '1. Prime Dental Care Clinic — Ranked #1 after the 14-day GEO semantic indexing.' 
+        : (isEs ? '1. Clínica OdontoPrime — Recomendada en 1º lugar tras los 14 días de indexación GEO.' : '1. Clínica OdontoPrime — Recomendada em 1º lugar após os 14 dias de indexação GEO.');
+      const notCitedResp = isEn 
+        ? 'Your business does not appear in spontaneous AI recommendations yet. Activate the 14-Day Challenge.' 
+        : (isEs ? 'Tu empresa aún no aparece en las recomendaciones espontáneas de IA. Activa el Desafío de 14 Días.' : 'Sua empresa ainda não aparece nas recomendações espontâneas. Ative o Desafio de 14 Dias.');
+
+      const promptCat = isEn ? 'Spontaneous Discovery' : (isEs ? 'Descubrimiento Espontáneo' : 'Descoberta Espontânea');
+      const promptTxt = isEn ? 'What are the best specialists in the area?' : (isEs ? '¿Cuáles son los mejores especialistas de la zona?' : 'Quais os melhores especialistas na região?');
+      const sugTitle = isEn ? 'Days 1 to 14: Full GEO & AIO Infrastructure' : (isEs ? 'Días 1 a 14: Infraestructura Completa GEO y AIO' : 'Dias 1 a 14: Infraestrutura Completa GEO & AIO');
+      const sugProb = isEn ? 'Missing /llms.txt protocol and Top 5 Guide.' : (isEs ? 'Ausencia de protocolo /llms.txt y Guía Top 5.' : 'Ausência de protocolo /llms.txt e Guia Top 5.');
+      const sugSol = isEn ? 'Our AI executes 14 daily actions to rank you #1.' : (isEs ? 'Nuestra IA ejecuta 14 acciones diarias para posicionarte en el #1.' : 'Nossa IA executa 14 ações diárias para posicionar você em #1.');
+
       renderDiagnosticResults({
-        company: { id: 999, name: custom?.name || 'Clínica OdontoPrime', url: custom?.url || 'https://odontoprime.com.br', niche: custom?.niche || 'Implantes Dentários', city_region: custom?.city_region || 'Belo Horizonte - MG', is_paid: isPaid, sprint_day_current: isPaid ? 14 : 0 },
+        company: { id: 999, name: custom?.name || defName, url: custom?.url || defUrl, niche: custom?.niche || defNiche, city_region: custom?.city_region || defCity, is_paid: isPaid, sprint_day_current: isPaid ? 14 : 0 },
         metrics: { visibility_score: isPaid ? 94.5 : 22.8, top_rank_achieved: isPaid ? 1 : null },
-        audits: [{ prompt_category: 'Descoberta Espontânea', model_provider: 'ChatGPT Search', prompt_text: 'Quais os melhores especialistas na região?', is_cited: isPaid, response_text: isPaid ? '1. Clínica OdontoPrime — Recomendada em 1º lugar após os 14 dias de indexação GEO.' : 'Sua empresa ainda não aparece nas recomendações espontâneas. Ative o Desafio de 14 Dias.' }],
-        suggestions: [{ title: 'Dias 1 a 14: Infraestrutura Completa GEO & AIO', problem: 'Ausência de protocolo /llms.txt e Guia Top 5.', solution_preview: 'Nossa IA executa 14 ações diárias para posicionar você em #1.' }]
+        audits: [{ prompt_category: promptCat, model_provider: 'ChatGPT Search', prompt_text: promptTxt, is_cited: isPaid, response_text: isPaid ? citedResp : notCitedResp }],
+        suggestions: [{ title: sugTitle, problem: sugProb, solution_preview: sugSol }]
       });
     }
 

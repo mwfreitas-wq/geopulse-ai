@@ -41,28 +41,84 @@ const I18N = {
     videoBadge: "Explicação Rápida (40s)",
     videoListen: "🔊 Clique para ouvir",
 
-    simBtnDay0: "Dia 0 (Hoje)",
-    simBtnDay14: "Dia 14 (Pós-IA)",
-    simExplainTitle: "💡 Pelo que você está pagando no Desafio (R$ 197 único):",
-    simExplainDesc: "Durante <strong>14 dias seguidos</strong>, nossa IA executa 1 etapa técnica por dia (cria seus arquivos semânticos, publica artigos comparativos, envia pings aos robôs e reaudita sua nota) para colocar você no topo das pesquisas feitas por IA.",
+    // SIMULADOR DO DESAFIO (Imagem do usuário)
+    sim: {
+      headerBadge: "Simulador do Desafio de 14 Dias",
+      headerTitle: "Como sua posição sobe dia após dia",
+      btnDay0: "Dia 0 (Hoje)",
+      btnDay14: "Dia 14 (Pós-IA)",
+      day0Label: "Status no Dia 0 (Sem a IA trabalhar):",
+      day0Score: "Score: 21.4%",
+      day0Badge: "⚠️ VOCÊ FORA DO RANKING DA IA",
+      day0Competitor: "🥇 1. Seu Concorrente Direto — <span class=\"text-emerald-600 font-bold\">Recomendado #1</span>",
+      day0YourCompany: "❌ Sua Empresa / Seu Nome",
+      day0Invisible: "Invisível no Chat",
+
+      day14Label: "Resultado no Dia 14 (Após 14 ações da IA):",
+      day14Score: "Score: 94.5%",
+      day14Badge: "🚀 DIA 14: VOCÊ EM 1º LUGAR NAS IAs",
+      day14YourCompany: "🥇 1. SUA EMPRESA / SEU NOME — Recomendado #1",
+
+      explainTitle: "💡 Pelo que você está pagando no Desafio (R$ 197 único):",
+      explainDesc: "Durante <strong>14 dias seguidos</strong>, nossa IA executa 1 etapa técnica por dia (cria seus arquivos semânticos, publica artigos comparativos, envia pings aos robôs e reaudita sua nota) para colocar você no topo das pesquisas feitas por IA."
+    },
 
     step1Badge: "👇 Passo 1 (Gratuito): Descubra sua Nota Atual em 10 Segundos",
     formMainTitle: "Auditoria Gratuita de Visibilidade em IA",
-    formSubTitle: "Veja exatamente como sua empresa aparece (ou se é ignorada) no ChatGPT, Gemini e Perplexity quando um cliente busca seu serviço.",
-    labelEntity: "Tipo de Perfil a Auditar:",
-    entityCompany: "🏢 Empresa / Clínica / Comércio",
-    entityPersonal: "👤 Profissional Liberal / Especialista",
-    labelName: "Nome da Empresa ou Profissional *",
-    namePlaceholder: "Ex: OdontoPrime Implantes ou Dra. Camila Mendes",
-    labelUrl: "Site, Instagram ou Google Maps *",
-    labelNiche: "Seu Nicho / Especialidade *",
-    labelCity: "Cidade e Estado de Atuação *",
-    labelCouncil: "Registro de Classe (OAB, CRM, CRO, CRC...)",
-    labelCompetitors: "Principais Concorrentes na Região (opcional)",
-    labelWhatsapp: "WhatsApp para Receber o Relatório Oficial *",
-    labelEmail: "E-mail Profissional (opcional)",
-    privacyNote: "🔒 Seus dados são 100% confidenciais. Usamos apenas para conectar os robôs de busca e emitir o diagnóstico.",
-    submitBtn: "⚡ Executar Diagnóstico Gratuito nas IAs Agora",
+
+    presets: {
+      adv: "⚖️ Exemplo Advogado",
+      clinica: "🦷 Exemplo Clínica",
+      demo: "⚡ Simular Diagnóstico Agora"
+    },
+
+    entityButtons: {
+      company: "Sou Empresa / Clínica / Escritório",
+      autonomous: "Sou Profissional Liberal / Autônomo"
+    },
+
+    formCompany: {
+      nameLabel: "🏢 Nome da Empresa, Clínica ou Marca *",
+      namePlaceholder: "Ex: Clínica OdontoPrime ou Silva & Associados",
+      urlLabel: "🌐 Site Oficial ou Instagram da Empresa *",
+      urlPlaceholder: "Ex: www.suaempresa.com.br ou @suaempresa",
+      nicheLabel: "🎯 Especialidade ou Ramo de Atuação *",
+      nichePlaceholder: "Ex: Implantes Dentários, Advocacia Trabalhista, Contabilidade",
+      cityLabel: "📍 Cidade e Estado da Empresa *",
+      cityPlaceholder: "Ex: São Paulo - SP, Belo Horizonte - MG",
+      registryLabel: "🏛️ CNPJ ou Registro Oficial da Empresa (Opcional)",
+      registryPlaceholder: "Ex: 00.000.000/0001-00 ou Registro em Conselho",
+      registryHint: "Ajuda os robôs de IA a confirmarem a legitimidade da sua empresa.",
+      competitorsLabel: "⚔️ Concorrentes Diretos na Região (Opcional)",
+      competitorsPlaceholder: "Ex: Concorrente 1, Concorrente 2",
+      competitorsHint: "A IA compara sua empresa contra eles nas recomendações de busca."
+    },
+
+    formAuto: {
+      nameLabel: "👤 Seu Nome Profissional Completo *",
+      namePlaceholder: "Ex: Dra. Camila Mendes ou Dr. Rafael Vasconcelos",
+      urlLabel: "🌐 Seu Instagram Profissional, LinkedIn ou Site *",
+      urlPlaceholder: "Ex: @dr.seunome ou www.seusite.com.br",
+      nicheLabel: "🎯 Sua Especialidade de Atuação *",
+      nichePlaceholder: "Ex: Dermatologia, Direito Tributário, Psicologia Clínica",
+      cityLabel: "📍 Cidade e Estado Onde Você Atende *",
+      cityPlaceholder: "Ex: Rio de Janeiro - RJ, Curitiba - PR",
+      registryLabel: "📜 Registro de Classe Profissional (CRM, OAB, CRO, CRP, CRC...)",
+      registryPlaceholder: "Ex: CRM/SP 123.456 ou OAB/RJ 98.765",
+      registryHint: "Fundamental para a IA certificar você como Autoridade Técnica verificada.",
+      competitorsLabel: "⚔️ Outros Especialistas que Concorrem com Você (Opcional)",
+      competitorsPlaceholder: "Ex: Dr. Fulano, Clínica Tal",
+      competitorsHint: "Para a IA comparar sua autoridade contra os nomes já citados."
+    },
+
+    contact: {
+      whatsapp: "📱 WhatsApp com DDD *",
+      whatsappPlaceholder: "Ex: (11) 98765-4321",
+      email: "✉️ Seu E-mail para Receber o Relatório",
+      emailPlaceholder: "Ex: seuemail@dominio.com.br",
+      securityNote: "🔒 Diagnóstico 100% Gratuito em 10 segundos",
+      submitBtn: "🔍 Executar Diagnóstico Gratuito nas IAs Agora"
+    },
 
     sprintSection: {
       badge: "Transparência Total: Pelo que você está pagando?",
@@ -238,28 +294,84 @@ const I18N = {
     videoBadge: "Quick Overview (40s)",
     videoListen: "🔊 Click to listen",
 
-    simBtnDay0: "Day 0 (Today)",
-    simBtnDay14: "Day 14 (Post-AI)",
-    simExplainTitle: "💡 What you are paying for in the Challenge ($47 USD one-time):",
-    simExplainDesc: "For <strong>14 straight days</strong>, our AI executes 1 technical step each day (generating semantic files, publishing comparison articles, pinging search bots, and re-auditing your score) to position you at the top of AI search queries.",
+    // SIMULATOR (User screenshot)
+    sim: {
+      headerBadge: "14-Day Challenge Simulator",
+      headerTitle: "How your position climbs day after day",
+      btnDay0: "Day 0 (Today)",
+      btnDay14: "Day 14 (Post-AI)",
+      day0Label: "Status on Day 0 (Before AI works):",
+      day0Score: "Score: 21.4%",
+      day0Badge: "⚠️ YOU OUT OF THE AI RANKING",
+      day0Competitor: "🥇 1. Your Direct Competitor — <span class=\"text-emerald-600 font-bold\">Recommended #1</span>",
+      day0YourCompany: "❌ Your Business / Your Name",
+      day0Invisible: "Invisible in Chat",
+
+      day14Label: "Result on Day 14 (After 14 AI actions):",
+      day14Score: "Score: 94.5%",
+      day14Badge: "🚀 DAY 14: YOU IN #1 PLACE ON AIs",
+      day14YourCompany: "🥇 1. YOUR BUSINESS / YOUR NAME — Recommended #1",
+
+      explainTitle: "💡 What you are paying for in the Challenge ($47 USD one-time):",
+      explainDesc: "For <strong>14 straight days</strong>, our AI executes 1 technical step each day (generating semantic files, publishing comparison articles, pinging search bots, and re-auditing your score) to position you at the top of AI search queries."
+    },
 
     step1Badge: "👇 Step 1 (Free): Discover your Current Score in 10 Seconds",
     formMainTitle: "Free AI Visibility Audit",
-    formSubTitle: "See exactly how your business appears (or gets ignored) on ChatGPT, Gemini, and Perplexity when potential clients search for your services.",
-    labelEntity: "Profile Type to Audit:",
-    entityCompany: "🏢 Company / Clinic / Retail",
-    entityPersonal: "👤 Independent Specialist / Professional",
-    labelName: "Company or Professional Name *",
-    namePlaceholder: "E.g.: Prime Dental Care or Dr. Camila Mendes",
-    labelUrl: "Website, Instagram, or Google Maps *",
-    labelNiche: "Your Industry / Specialization *",
-    labelCity: "City and State / Region of Operation *",
-    labelCouncil: "Professional License ID (Bar, Medical, Board...)",
-    labelCompetitors: "Main Local Competitors (optional)",
-    labelWhatsapp: "WhatsApp/Phone to Receive Official Report *",
-    labelEmail: "Business Email (optional)",
-    privacyNote: "🔒 Your information is 100% confidential. Used solely to run the AI search audit and deliver your diagnostic.",
-    submitBtn: "⚡ Run Free AI Visibility Audit Now",
+
+    presets: {
+      adv: "⚖️ Lawyer Example",
+      clinica: "🦷 Clinic Example",
+      demo: "⚡ Simulate Audit Now"
+    },
+
+    entityButtons: {
+      company: "Company / Clinic / Business",
+      autonomous: "Independent / Specialist"
+    },
+
+    formCompany: {
+      nameLabel: "🏢 Business, Clinic, or Brand Name *",
+      namePlaceholder: "E.g.: Prime Dental Care or Silva & Associates",
+      urlLabel: "🌐 Official Website or Social Profile *",
+      urlPlaceholder: "E.g.: www.yourcompany.com or @yourbusiness",
+      nicheLabel: "🎯 Industry or Service Category *",
+      nichePlaceholder: "E.g.: Dental Implants, Corporate Law, Accounting",
+      cityLabel: "📍 City and Region / State *",
+      cityPlaceholder: "E.g.: Miami - FL, New York - NY, London - UK",
+      registryLabel: "🏛️ Business Registration or Tax ID (Optional)",
+      registryPlaceholder: "E.g.: EIN, Registration Number, or Chamber ID",
+      registryHint: "Helps AI search engines confirm business legitimacy.",
+      competitorsLabel: "⚔️ Direct Local Competitors (Optional)",
+      competitorsPlaceholder: "E.g.: Competitor 1, Competitor 2",
+      competitorsHint: "AI compares your authority against them in search queries."
+    },
+
+    formAuto: {
+      nameLabel: "👤 Full Professional Name *",
+      namePlaceholder: "E.g.: Dr. Camila Mendes or Attorney John Smith",
+      urlLabel: "🌐 Professional Instagram, LinkedIn, or Website *",
+      urlPlaceholder: "E.g.: @dr.johnsmith or www.johnsmithlaw.com",
+      nicheLabel: "🎯 Your Specialty / Area of Expertise *",
+      nichePlaceholder: "E.g.: Dermatology, Tax Law, Clinical Psychology",
+      cityLabel: "📍 City and Region / State where you practice *",
+      cityPlaceholder: "E.g.: Los Angeles - CA, Chicago - IL, Toronto - ON",
+      registryLabel: "📜 Professional License or Board ID (Bar, Medical, Board...)",
+      registryPlaceholder: "E.g.: Bar #12345 or Medical Board #67890",
+      registryHint: "Crucial for AI models to verify you as a certified authority.",
+      competitorsLabel: "⚔️ Other Specialists Competing with You (Optional)",
+      competitorsPlaceholder: "E.g.: Dr. Jane Doe, Top Firm",
+      competitorsHint: "Enables AI to measure your ranking against established authorities."
+    },
+
+    contact: {
+      whatsapp: "📱 WhatsApp / Phone Number *",
+      whatsappPlaceholder: "E.g.: +1 (305) 555-0192",
+      email: "✉️ Your Email to Receive the Report",
+      emailPlaceholder: "E.g.: you@yourcompany.com",
+      securityNote: "🔒 100% Free Audit in 10 seconds",
+      submitBtn: "🔍 Run Free AI Visibility Audit Now"
+    },
 
     sprintSection: {
       badge: "Total Transparency: What are you paying for?",
@@ -435,28 +547,84 @@ const I18N = {
     videoBadge: "Resumen Rápido (40s)",
     videoListen: "🔊 Haz clic para escuchar",
 
-    simBtnDay0: "Día 0 (Hoy)",
-    simBtnDay14: "Día 14 (Post-IA)",
-    simExplainTitle: "💡 Por qué estás pagando en el Desafío ($47 USD único):",
-    simExplainDesc: "Durante <strong>14 días seguidos</strong>, nuestra IA ejecuta 1 etapa técnica por día (crea tus archivos semánticos, publica artículos comparativos, envía pings a los rastreadores y reaudita tu nota) para posicionarte en el #1 de las búsquedas de IA.",
+    // SIMULADOR (Imagen del usuario)
+    sim: {
+      headerBadge: "Simulador del Desafío de 14 Días",
+      headerTitle: "Cómo tu posición sube día tras día",
+      btnDay0: "Día 0 (Hoy)",
+      btnDay14: "Día 14 (Post-IA)",
+      day0Label: "Estado en el Día 0 (Sin la IA trabajar):",
+      day0Score: "Score: 21.4%",
+      day0Badge: "⚠️ ESTÁS FUERA DEL RANKING DE IA",
+      day0Competitor: "🥇 1. Tu Competidor Directo — <span class=\"text-emerald-600 font-bold\">Recomendado #1</span>",
+      day0YourCompany: "❌ Tu Empresa / Tu Nombre",
+      day0Invisible: "Invisible en el Chat",
+
+      day14Label: "Resultado en el Día 14 (Tras 14 acciones de la IA):",
+      day14Score: "Score: 94.5%",
+      day14Badge: "🚀 DÍA 14: TÚ EN 1º LUGAR EN LAS IAs",
+      day14YourCompany: "🥇 1. TU EMPRESA / TU NOMBRE — Recomendado #1",
+
+      explainTitle: "💡 Por qué estás pagando en el Desafío ($47 USD único):",
+      explainDesc: "Durante <strong>14 días seguidos</strong>, nuestra IA ejecuta 1 etapa técnica por día (crea tus archivos semánticos, publica artículos comparativos, envía pings a los rastreadores y reaudita tu nota) para posicionarte en el #1 de las búsquedas de IA."
+    },
 
     step1Badge: "👇 Paso 1 (Gratis): Descubre tu Puntuación Actual en 10 Segundos",
-    formMainTitle: "Auditoría Gratuita de Visibilidad en IA",
-    formSubTitle: "Mira exactamente cómo aparece tu empresa (o si es ignorada) en ChatGPT, Gemini y Perplexity cuando un cliente busca tu servicio.",
-    labelEntity: "Tipo de Perfil a Auditar:",
-    entityCompany: "🏢 Empresa / Clínica / Comercio",
-    entityPersonal: "👤 Profesional Independiente / Especialista",
-    labelName: "Nombre de la Empresa o Profesional *",
-    namePlaceholder: "Ej.: Clínica OdontoPrime o Dra. Camila Morales",
-    labelUrl: "Sitio Web, Instagram o Google Maps *",
-    labelNiche: "Tu Nicho / Especialidad *",
-    labelCity: "Ciudad y Región de Actuación *",
-    labelCouncil: "Registro Profesional (Colegio Médico, Abogados...)",
-    labelCompetitors: "Principales Competidores en la Región (opcional)",
-    labelWhatsapp: "WhatsApp para Recibir el Informe Oficial *",
-    labelEmail: "Correo Electrónico Profesional (opcional)",
-    privacyNote: "🔒 Tus datos son 100% confidenciales. Solo los usamos para conectar los motores de búsqueda y emitir el diagnóstico.",
-    submitBtn: "⚡ Ejecutar Auditoría Gratuita en las IAs Ahora",
+    formMainTitle: "Auditoría Gratuita de Visibilidade en IA",
+
+    presets: {
+      adv: "⚖️ Ejemplo Abogado",
+      clinica: "🦷 Ejemplo Clínica",
+      demo: "⚡ Simular Auditoría Ahora"
+    },
+
+    entityButtons: {
+      company: "Empresa / Clínica / Negocio",
+      autonomous: "Profesional Independiente / Autónomo"
+    },
+
+    formCompany: {
+      nameLabel: "🏢 Nombre de la Empresa, Clínica o Marca *",
+      namePlaceholder: "Ej.: Clínica OdontoPrime o Silva & Asociados",
+      urlLabel: "🌐 Sitio Web Oficial o Instagram del Negocio *",
+      urlPlaceholder: "Ej.: www.tuempresa.com o @tuempresa",
+      nicheLabel: "🎯 Especialidad o Rubro de Actividad *",
+      nichePlaceholder: "Ej.: Implantes Dentales, Abogacía Laboral, Contabilidad",
+      cityLabel: "📍 Ciudad y Región / Provincia *",
+      cityPlaceholder: "Ej.: Madrid - España, Buenos Aires - Argentina, Santiago - Chile",
+      registryLabel: "🏛️ CIF / RFC o Registro Oficial de la Empresa (Opcional)",
+      registryPlaceholder: "Ej.: CIF B-12345678 o Registro Mercantil",
+      registryHint: "Ayuda a los motores de IA a confirmar la legitimidad de tu negocio.",
+      competitorsLabel: "⚔️ Competidores Directos en la Región (Opcional)",
+      competitorsPlaceholder: "Ej.: Competidor 1, Competidor 2",
+      competitorsHint: "La IA comparará tu empresa contra ellos en las recomendaciones."
+    },
+
+    formAuto: {
+      nameLabel: "👤 Tu Nombre Profesional Completo *",
+      namePlaceholder: "Ej.: Dra. Camila Morales o Lic. Rafael Morales",
+      urlLabel: "🌐 Tu Instagram Profesional, LinkedIn o Sitio Web *",
+      urlPlaceholder: "Ej.: @dr.tunombre o www.tusitio.com",
+      nicheLabel: "🎯 Tu Especialidad o Área de Práctica *",
+      nichePlaceholder: "Ej.: Dermatología, Derecho Tributario, Psicología",
+      cityLabel: "📍 Ciudad y Región donde Atiendes *",
+      cityPlaceholder: "Ej.: Bogotá - Colombia, CDMX - México, Lima - Perú",
+      registryLabel: "📜 Colegiatura o Matrícula Profesional (Colegio Médico, Abogados...)",
+      registryPlaceholder: "Ej.: Matrícula Profesional 45.678",
+      registryHint: "Clave para que la IA te certifique como Autoridad Técnica verificada.",
+      competitorsLabel: "⚔️ Otros Especialistas que Compiten Contigo (Opcional)",
+      competitorsPlaceholder: "Ej.: Dr. Gómez, Centro Médico X",
+      competitorsHint: "Permite a la IA comparar tu posicionamiento contra la competencia."
+    },
+
+    contact: {
+      whatsapp: "📱 WhatsApp / Teléfono de Contacto *",
+      whatsappPlaceholder: "Ej.: +34 612 345 678",
+      email: "✉️ Tu Correo Electrónico para Recibir el Informe",
+      emailPlaceholder: "Ej.: tu@tuempresa.com",
+      securityNote: "🔒 Auditoría 100% Gratuita en 10 segundos",
+      submitBtn: "🔍 Ejecutar Auditoría Gratuita en las IAs Ahora"
+    },
 
     sprintSection: {
       badge: "Transparencia Total: ¿Por qué estás pagando?",
@@ -891,70 +1059,69 @@ function applyLanguage(lang) {
     }
   }
 
-  // Simulador Dia 0 vs Dia 14
-  const simDay0 = document.getElementById("sim-btn-day0");
-  if (simDay0) simDay0.textContent = dict.simBtnDay0;
+  // SIMULADOR DO DESAFIO (Imagem do usuário)
+  const simHBadge = document.getElementById("hero-sim-header-badge");
+  if (simHBadge && dict.sim) simHBadge.textContent = dict.sim.headerBadge;
 
-  const simDay14 = document.getElementById("sim-btn-day14");
-  if (simDay14) simDay14.textContent = dict.simBtnDay14;
+  const simHTitle = document.getElementById("hero-sim-header-title");
+  if (simHTitle && dict.sim) simHTitle.textContent = dict.sim.headerTitle;
 
   const simExpTitle = document.getElementById("sim-explain-title");
-  if (simExpTitle) simExpTitle.innerHTML = dict.simExplainTitle;
+  if (simExpTitle && dict.sim) simExpTitle.innerHTML = dict.sim.explainTitle;
 
   const simExpDesc = document.getElementById("sim-explain-desc");
-  if (simExpDesc) simExpDesc.innerHTML = dict.simExplainDesc;
+  if (simExpDesc && dict.sim) simExpDesc.innerHTML = dict.sim.explainDesc;
 
-  // Formulário de Auditoria
-  const step1 = document.getElementById("step1-badge-txt");
-  if (step1) step1.textContent = dict.step1Badge;
+  if (typeof window.renderHeroSim === "function") {
+    window.renderHeroSim(window.heroSimCurrentMode || "before", lang);
+  }
+
+  // Formulário de Auditoria & Presets
+  const step1 = document.getElementById("step1-badge");
+  if (step1 && dict.step1Badge) step1.textContent = dict.step1Badge;
 
   const formTitle = document.getElementById("form-main-title");
-  if (formTitle) formTitle.textContent = dict.formMainTitle;
+  if (formTitle && dict.formMainTitle) formTitle.textContent = dict.formMainTitle;
 
-  const formSub = document.getElementById("form-sub-title");
-  if (formSub) formSub.textContent = dict.formSubTitle;
+  const btnAdv = document.getElementById("btn-preset-adv");
+  if (btnAdv && dict.presets) btnAdv.textContent = dict.presets.adv;
 
-  const lblEntity = document.getElementById("label-entity-type");
-  if (lblEntity) lblEntity.textContent = dict.labelEntity;
+  const btnClinica = document.getElementById("btn-preset-clinica");
+  if (btnClinica && dict.presets) btnClinica.textContent = dict.presets.clinica;
 
-  const optComp = document.getElementById("opt-entity-company");
-  if (optComp) optComp.textContent = dict.entityCompany;
+  const btnDemo = document.getElementById("btn-demo-sim");
+  if (btnDemo && dict.presets) btnDemo.textContent = dict.presets.demo;
 
-  const optPers = document.getElementById("opt-entity-personal");
-  if (optPers) optPers.textContent = dict.entityPersonal;
+  const btnCompTxt = document.getElementById("btn-type-company-text");
+  if (btnCompTxt && dict.entityButtons) btnCompTxt.textContent = dict.entityButtons.company;
 
-  const lblName = document.getElementById("lbl-name-text");
-  if (lblName) lblName.textContent = dict.labelName;
+  const btnAutoTxt = document.getElementById("btn-type-autonomous-text");
+  if (btnAutoTxt && dict.entityButtons) btnAutoTxt.textContent = dict.entityButtons.autonomous;
 
-  const inputName = document.getElementById("name");
-  if (inputName) inputName.placeholder = dict.namePlaceholder;
+  // Atualiza labels de acordo com o tipo ativo (empresa ou autônomo)
+  const curType = document.getElementById("entity_type")?.value || "company";
+  if (typeof window.applyEntityLabelsI18n === "function") {
+    window.applyEntityLabelsI18n(curType, dict);
+  }
 
-  const lblUrl = document.getElementById("lbl-url-text");
-  if (lblUrl) lblUrl.textContent = dict.labelUrl;
+  // Contato e Envio do formulário
+  const lblWpp = document.getElementById("label-whatsapp");
+  if (lblWpp && dict.contact) lblWpp.textContent = dict.contact.whatsapp;
 
-  const lblNiche = document.getElementById("lbl-niche-text");
-  if (lblNiche) lblNiche.textContent = dict.labelNiche;
+  const inpWpp = document.getElementById("whatsapp");
+  if (inpWpp && dict.contact) inpWpp.placeholder = dict.contact.whatsappPlaceholder;
 
-  const lblCity = document.getElementById("lbl-city-text");
-  if (lblCity) lblCity.textContent = dict.labelCity;
+  const lblMail = document.getElementById("label-email");
+  if (lblMail && dict.contact) lblMail.textContent = dict.contact.email;
 
-  const lblCouncil = document.getElementById("lbl-council-text");
-  if (lblCouncil) lblCouncil.textContent = dict.labelCouncil;
+  const inpMail = document.getElementById("email");
+  if (inpMail && dict.contact) inpMail.placeholder = dict.contact.emailPlaceholder;
 
-  const lblComp = document.getElementById("lbl-competitors-text");
-  if (lblComp) lblComp.textContent = dict.labelCompetitors;
+  const secNote = document.getElementById("form-security-note");
+  if (secNote && dict.contact) secNote.textContent = dict.contact.securityNote;
 
-  const lblWpp = document.getElementById("lbl-whatsapp-text");
-  if (lblWpp) lblWpp.textContent = dict.labelWhatsapp;
-
-  const lblEmail = document.getElementById("lbl-email-text");
-  if (lblEmail) lblEmail.textContent = dict.labelEmail;
-
-  const privNote = document.getElementById("privacy-note-txt");
-  if (privNote) privNote.textContent = dict.privacyNote;
-
-  const subBtn = document.getElementById("submit-diag-btn");
-  if (subBtn) subBtn.textContent = dict.submitBtn;
+  const subBtn = document.getElementById("submit-audit-btn");
+  if (subBtn && dict.contact) subBtn.textContent = dict.contact.submitBtn;
 
   // 14-Day Section Header & Grid (Image 1)
   const spBadge = document.getElementById("sprint-section-badge");
@@ -1072,7 +1239,6 @@ function applyLanguage(lang) {
 
   const pixBox = document.getElementById("pix-payment-box");
   if (pixBox) {
-    // Show PIX box for Brazilian users (pt); hide for foreign users (en/es) or display international notice
     if (lang === "pt") {
       pixBox.style.display = "block";
     } else {

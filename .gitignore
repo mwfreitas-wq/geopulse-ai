@@ -12,3 +12,5 @@ venv/
 PROJETO_COMPLETO_PARA_ANALISE.txt
 .vscode/
 .idea/
+
+ENVIAR_PARA_GITHUB.bat

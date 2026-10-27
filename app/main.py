@@ -487,6 +487,7 @@ async def run_geo_diagnostic(data: CompanyCreate, db: AsyncSession = Depends(get
     whatsapp_clean = (data.whatsapp or "").strip()
     email_clean = (data.email or "").strip()
     comp_clean = data.competitors.strip() if data.competitors else ""
+    req_lang = (getattr(data, "language", None) or "pt").lower()
 
     keys = await get_all_configured_keys(db)
     await db.commit()
@@ -512,7 +513,8 @@ async def run_geo_diagnostic(data: CompanyCreate, db: AsyncSession = Depends(get
                 scraped_content="",
                 signals=None,
                 entity_type=entity_type,
-                professional_registry=prof_reg
+                professional_registry=prof_reg,
+                language=req_lang
             )
         )
 
@@ -649,7 +651,8 @@ async def run_geo_diagnostic(data: CompanyCreate, db: AsyncSession = Depends(get
         signals=signals,
         entity_type=entity_type,
         professional_registry=prof_reg,
-        top_rank=top_rank
+        top_rank=top_rank,
+        language=req_lang
     )
 
     return FullDiagnosticResponse(
@@ -1917,6 +1920,7 @@ class SupportChatRequest(BaseModel):
     niche: Optional[str] = None
     city_region: Optional[str] = None
     score: Optional[float] = None
+    language: Optional[str] = "pt"
 
 
 class SupportInquiryRequest(BaseModel):
@@ -1930,31 +1934,57 @@ class SupportInquiryRequest(BaseModel):
 
 @app.post("/api/support/chat")
 async def support_ai_chat(data: SupportChatRequest, db: AsyncSession = Depends(get_db)):
-    """
-    Agente de IA de Suporte e Vendas:
-    Responde dúvidas de clientes leigos sobre como funciona a ativação do 1º lugar,
-    preço (R$ 197 taxa única), formas de pagamento (PIX e Mercado Pago) e garantia de 7 dias.
-    """
     keys = await get_all_configured_keys(db)
     user_msg = data.message.strip()
+    lang = (data.language or "pt").lower()
 
     context_info = ""
     if data.company_name:
-        context_info += f" Cliente consultou: '{data.company_name}', especialidade: '{data.niche or ''}', cidade: '{data.city_region or ''}', nota atual: {data.score or 'Não calculada'}%."
+        context_info = f" Company: '{data.company_name}', niche: '{data.niche or ""}', city: '{data.city_region or ""}', score: {data.score or "N/A"}%."
 
-    prompt = (
-        f"Você é a Especialista de Atendimento do GeoPulse AI, uma plataforma que coloca empresas e profissionais autônomos no topo das recomendações do ChatGPT, Google Gemini e Perplexity.\n"
-        f"Contexto do cliente:{context_info}\n\n"
-        f"Informações essenciais que você domina:\n"
-        f"1. O cliente paga uma taxa única de R$ 197,00 (preço promocional, sem mensalidades escondidas).\n"
-        f"2. Após a ativação, a IA gera e publica na web o Guia Oficial Top 5 da cidade, com Schema.org JSON-LD e /llms.txt embutidos em 10 segundos.\n"
-        f"3. O cliente não precisa entender de código nem mexer no site/Instagram dele.\n"
-        f"4. Aceita PIX imediato e Cartão de Crédito via Mercado Pago.\n"
-        f"5. Tem Garantia Blindada de 7 dias (se não for publicado imediatamente, devolvemos 100%).\n"
-        f"6. Se o cliente tiver uma dúvida muito específica ou quiser atendimento direto da diretoria, oriente ele gentilmente a usar o botão 'Enviar Mensagem para a Equipe' logo abaixo no chat.\n\n"
-        f"Pergunta do cliente: \"{user_msg}\"\n\n"
-        f"Responda em português, de forma simpática, direta, encorajadora e em no máximo 3 ou 4 parágrafos curtos. Não mencione o endereço de e-mail interno."
-    )
+    if lang == "en":
+        prompt = f"""You are the Support and Growth Specialist for GeoPulse AI, a platform that ranks local businesses and professionals #1 on ChatGPT, Google Gemini, and Perplexity.
+User Context: {context_info}
+
+Key facts to communicate:
+1. One-time promotional price: $47.00 USD (no monthly fees or subscriptions).
+2. Our AI autonomously publishes the official 'Top 5 City Authority Guide' with Schema.org JSON-LD and /llms.txt protocols in seconds.
+3. No coding required and no modifications to their website needed.
+4. Accepts major Credit/Debit Cards via secure checkout.
+5. 7-Day Money-Back Guarantee: 100% refund if not published immediately.
+6. Keep answers encouraging, friendly, and concise (2-3 short paragraphs).
+
+User message: "{user_msg}"
+Answer in English."""
+    elif lang == "es":
+        prompt = f"""Eres el Especialista de Soporte y Crecimiento de GeoPulse AI, la plataforma que posiciona negocios y profesionales en el puesto #1 en ChatGPT, Google Gemini y Perplexity.
+Contexto del usuario: {context_info}
+
+Datos esenciales:
+1. Precio promocional de tarifa única: $47.00 USD (sin cuotas mensuales).
+2. Nuestra IA publica de forma autónoma el Guía Oficial Top 5 de la ciudad con Schema.org JSON-LD y /llms.txt en segundos.
+3. No requiere conocimientos de programación ni modificar su sitio web.
+4. Acepta Tarjetas de Crédito/Débito vía pasarela de pago segura.
+5. Garantía de 7 Días: 100% de devolución sin complicaciones.
+6. Respuestas directas, empáticas y concisas (2 a 3 párrafos).
+
+Mensaje del usuario: "{user_msg}"
+Responde en español."""
+    else:
+        prompt = f"""Você é a Especialista de Atendimento do GeoPulse AI, uma plataforma que coloca empresas e profissionais autônomos no topo das recomendações do ChatGPT, Google Gemini e Perplexity.
+Contexto do cliente: {context_info}
+
+Informações essenciais que você domina:
+1. O cliente paga uma taxa única de R$ 197,00 (preço promocional, sem mensalidades escondidas).
+2. Após a ativação, a IA gera e publica na web o Guia Oficial Top 5 da cidade, com Schema.org JSON-LD e /llms.txt embutidos em 10 segundos.
+3. O cliente não precisa entender de código nem mexer no site/Instagram dele.
+4. Aceita PIX imediato e Cartão de Crédito via Mercado Pago.
+5. Tem Garantia Blindada de 7 dias (se não for publicado imediatamente, devolvemos 100%).
+6. Se o cliente tiver uma dúvida muito específica ou quiser atendimento direto da diretoria, oriente ele gentilmente a usar o botão 'Enviar Mensagem para a Equipe' logo abaixo no chat.
+
+Pergunta do cliente: "{user_msg}"
+
+Responda em português, de forma simpática, direta, encorajadora e em no máximo 3 ou 4 parágrafos curtos. Não mencione o endereço de e-mail interno."""
 
     ai_reply = None
     if keys.get("groq_api_key"):
@@ -1963,21 +1993,42 @@ async def support_ai_chat(data: SupportChatRequest, db: AsyncSession = Depends(g
         ai_reply = await AuditorService.call_gemini(prompt, keys["gemini_api_key"])
 
     if not ai_reply:
-        # Respostas inteligentes pré-programadas de fallback
         lower = user_msg.lower()
-        if "preço" in lower or "valor" in lower or "custa" in lower or "quanto" in lower:
-            ai_reply = "O investimento é de apenas **R$ 197,00 em taxa única promocional** (sem mensalidades). Você tem acesso vitalício a todos os 7 ativos gerados e publicação imediata do seu Guia Oficial Top #1!"
-        elif "como funciona" in lower or "o que faz" in lower:
-            ai_reply = "Nossa tecnologia **GEO (Generative Engine Optimization)** cria e publica na web um Artigo de Autoridade oficial ('Top 5 da sua Cidade') injetando dados estruturados JSON-LD e o arquivo `/llms.txt`. Assim, quando alguém busca sua especialidade no ChatGPT ou Gemini, os algoritmos recomendam o seu nome em #1º lugar!"
-        elif "site" in lower or "código" in lower or "programador" in lower:
-            ai_reply = "Você **não precisa mexer em nada no seu site** e nem contratar programador! Funciona perfeitamente mesmo que você só tenha Instagram, LinkedIn ou uma página simples, pois nossa IA publica tudo externamente na web."
-        elif "garantia" in lower or "seguro" in lower:
-            ai_reply = "Sim! Oferecemos **Garantia Blindada de 7 Dias**. Se a sua estrutura não for gerada e publicada imediatamente, você recebe 100% do seu dinheiro de volta sem burocracia."
+        if lang == "en":
+            if "price" in lower or "cost" in lower or "how much" in lower:
+                ai_reply = "The investment is a **one-time promotional fee of $47.00 USD** (no recurring subscriptions). You get lifetime access to all 7 generated assets and immediate publication of your official Top #1 Authority Guide!"
+            elif "how it works" in lower or "what it does" in lower:
+                ai_reply = "Our **GEO (Generative Engine Optimization)** technology generates and publishes an official Authority Article with embedded Schema.org JSON-LD and `/llms.txt`. When users search for your niche on ChatGPT or Gemini, the algorithms recommend you as the #1 choice!"
+            elif "website" in lower or "code" in lower or "developer" in lower:
+                ai_reply = "You **do not need any coding or developer skills**! It works seamlessly even if you only have Instagram, LinkedIn, or a basic page, because our AI hosts and syndicates everything externally."
+            elif "guarantee" in lower or "refund" in lower:
+                ai_reply = "Yes! We offer a **7-Day 100% Money-Back Guarantee**. If your structure is not generated and published immediately, you receive a full refund, no questions asked."
+            else:
+                ai_reply = "GeoPulse AI ranks your name or business as the **#1 recommendation on ChatGPT and Gemini**. Activation is instant for a **one-time $47.00 USD fee**. Click the button below if you want direct consultation with our team!"
+        elif lang == "es":
+            if "precio" in lower or "cuanto" in lower or "costo" in lower:
+                ai_reply = "La inversión es de solo **$47.00 USD en tarifa única promocional** (sin pagos mensuales). ¡Obtienes acceso de por vida a los 7 activos y publicación inmediata de tu Guía Oficial Top #1!"
+            elif "como funciona" in lower or "que hace" in lower:
+                ai_reply = "Nuestra tecnología **GEO (Generative Engine Optimization)** publica un Artículo Oficial de Autoridad con Schema.org JSON-LD y `/llms.txt`. Así, cuando alguien busca tu especialidad en ChatGPT o Gemini, ¡los motores te recomiendan en 1º lugar!"
+            elif "sitio" in lower or "codigo" in lower or "programador" in lower:
+                ai_reply = "¡**No necesitas tocar tu sitio web** ni contratar programadores! Funciona perfecto aunque solo tengas Instagram o LinkedIn, ya que nuestra IA publica y aloja todo externamente."
+            elif "garantia" in lower or "reembolso" in lower:
+                ai_reply = "¡Sí! Ofrecemos **Garantía Incondicional de 7 Días**. Si tu estructura no se genera y publica inmediatamente, recibes el 100% de tu dinero de vuelta."
+            else:
+                ai_reply = "GeoPulse AI posiciona tu negocio o nombre en el **1º Lugar de recomendaciones de ChatGPT y Gemini**. La activación es inmediata por **$47.00 USD tarifa única**. ¡Haz clic abajo si deseas contactar a nuestro equipo!"
         else:
-            ai_reply = "O GeoPulse AI posiciona seu nome ou empresa em **1º Lugar nas indicações do ChatGPT e Gemini**. A ativação é imediata por **R$ 197 taxa única**. Se quiser falar diretamente com nossa equipe especializada para um caso personalizado, basta clicar no botão abaixo para nos enviar uma mensagem direta!"
+            if "preço" in lower or "valor" in lower or "custa" in lower or "quanto" in lower:
+                ai_reply = "O investimento é de apenas **R$ 197,00 em taxa única promocional** (sem mensalidades). Você tem acesso vitalício a todos os 7 ativos gerados e publicação imediata do seu Guia Oficial Top #1!"
+            elif "como funciona" in lower or "o que faz" in lower:
+                ai_reply = "Nossa tecnologia **GEO (Generative Engine Optimization)** cria e publica na web um Artigo de Autoridade oficial ('Top 5 da sua Cidade') injetando dados estruturados JSON-LD e o arquivo `/llms.txt`. Assim, quando alguém busca sua especialidade no ChatGPT ou Gemini, os algoritmos recomendam o seu nome em #1º lugar!"
+            elif "site" in lower or "código" in lower or "programador" in lower:
+                ai_reply = "Você **não precisa mexer em nada no seu site** e nem contratar programador! Funciona perfeitamente mesmo que você só tenha Instagram, LinkedIn ou uma página simples, pois nossa IA publica tudo externamente na web."
+            elif "garantia" in lower or "seguro" in lower:
+                ai_reply = "Sim! Oferecemos **Garantia Blindada de 7 Dias**. Se a sua estrutura não for gerada e publicada imediatamente, você recebe 100% do seu dinheiro de volta sem burocracia."
+            else:
+                ai_reply = "O GeoPulse AI posiciona seu nome ou empresa em **1º Lugar nas indicações do ChatGPT e Gemini**. A ativação é imediata por **R$ 197 taxa única**. Se quiser falar diretamente com nossa equipe especializada para um caso personalizado, basta clicar no botão abaixo para nos enviar uma mensagem direta!"
 
     return {"reply": ai_reply}
-
 
 @app.post("/api/support/inquiry")
 async def support_send_inquiry(data: SupportInquiryRequest, db: AsyncSession = Depends(get_db)):

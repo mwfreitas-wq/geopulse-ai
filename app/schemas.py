@@ -18,6 +18,7 @@ class CompanyCreate(BaseModel):
     whatsapp: Optional[str] = Field(default="", description="WhatsApp com DDD do cliente/lead para contato comercial")
     email: Optional[str] = Field(default="", description="E-mail do cliente/lead")
     competitors: Optional[str] = Field(default="", description="Até 3 concorrentes ou outros profissionais separados por vírgula")
+    language: Optional[str] = Field(default="pt", description="Idioma do visitante: pt, en ou es")
 
 
 class PhotoUploadRequest(BaseModel):

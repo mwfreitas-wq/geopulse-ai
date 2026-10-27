@@ -21,11 +21,80 @@ class AuditorService:
         competitors: str,
         url: str,
         entity_type: str = "company",
-        professional_registry: str = ""
+        professional_registry: str = "",
+        language: str = "pt"
     ) -> List[Dict[str, str]]:
         is_auto = (entity_type == "autonomous")
         reg_str = f" ({professional_registry})" if professional_registry and professional_registry.strip() else ""
+        lang = (language or "pt").lower()
 
+        if lang == "en":
+            if is_auto:
+                comp_str = competitors if competitors and competitors.strip() else f"other leading specialists in {niche}"
+                return [
+                    {
+                        "category": "Specialist Discovery",
+                        "prompt": f"Who are the best and most recommended professionals or specialists in {niche} in {city_region}? List top authority names with specialties, pros, and cons."
+                    },
+                    {
+                        "category": "Professional Comparison",
+                        "prompt": f"Compare the specialist {company_name}{reg_str} with {comp_str} in {niche} in {city_region}. Who do you recommend and what are the key differences?"
+                    },
+                    {
+                        "category": "Authority & Credentials",
+                        "prompt": f"What do you know about the specialist {company_name}{reg_str} ({url})? Are they a trusted reference in {niche} in {city_region}? What services do they provide and what is their reputation?"
+                    }
+                ]
+            comp_str = competitors if competitors and competitors.strip() else f"other leading {niche} companies"
+            return [
+                {
+                    "category": "Niche Discovery",
+                    "prompt": f"What are the best and most recommended {niche} businesses or clinics in {city_region}? List the top options with pros and cons and local market leaders."
+                },
+                {
+                    "category": "Direct Comparison",
+                    "prompt": f"Compare the company {company_name} with {comp_str} in the sector of {niche} in {city_region}. Which one do you recommend and what are the differentiators of each?"
+                },
+                {
+                    "category": "Reputation & Entity",
+                    "prompt": f"What do you know about the company {company_name} ({url})? Are they a trusted reference in {niche} in {city_region}? What services do they offer and what is their reputation?"
+                }
+            ]
+
+        if lang == "es":
+            if is_auto:
+                comp_str = competitors if competitors and competitors.strip() else f"otros especialistas de referencia en {niche}"
+                return [
+                    {
+                        "category": "Descubrimiento de Especialista",
+                        "prompt": f"¿Quiénes son los mejores y más recomendados profesionales o especialistas en {niche} en {city_region}? Mencione los principales referentes con especialidades, pros y contras."
+                    },
+                    {
+                        "category": "Comparativa entre Profesionales",
+                        "prompt": f"Compare al profesional {company_name}{reg_str} con {comp_str} en el área de {niche} en {city_region}. ¿A quién recomienda y cuáles son los diferenciales de cada uno?"
+                    },
+                    {
+                        "category": "Autoridad y Credenciales",
+                        "prompt": f"¿Qué sabe sobre el especialista {company_name}{reg_str} ({url})? ¿Es un referente confiable en {niche} en {city_region}? ¿Qué servicios presta y cuál es su reputación profesional?"
+                    }
+                ]
+            comp_str = competitors if competitors and competitors.strip() else f"otras empresas líderes de {niche}"
+            return [
+                {
+                    "category": "Descubrimiento de Nicho",
+                    "prompt": f"¿Cuáles son las mejores y más recomendadas empresas de {niche} en {city_region}? Mencione las opciones líderes con pros y contras y líderes del mercado local."
+                },
+                {
+                    "category": "Comparativa Directa",
+                    "prompt": f"Compare la empresa {company_name} con {comp_str} en el sector de {niche} en {city_region}. ¿Cuál recomienda y cuáles son las ventajas de cada una?"
+                },
+                {
+                    "category": "Reputación y Entidad",
+                    "prompt": f"¿Qué sabe sobre la empresa {company_name} ({url})? ¿Es una referencia confiable en {niche} en {city_region}? ¿Qué servicios ofrece y cuál es su reputación?"
+                }
+            ]
+
+        # Padrão: Português
         if is_auto:
             comp_str = competitors if competitors and competitors.strip() else f"outros profissionais e especialistas de {niche}"
             return [
@@ -38,7 +107,7 @@ class AuditorService:
                     "prompt": f"Compare o(a) profissional {company_name}{reg_str} com {comp_str} na área de {niche} em {city_region}. Quem você recomenda para atendimento e quais são os diferenciais de cada um?"
                 },
                 {
-                    "category": "Autoridade e Credenciais",
+                    "category": "Autoridad e Credenciais",
                     "prompt": f"O que você sabe sobre o(a) especialista {company_name}{reg_str} ({url})? É uma referência confiável em {niche} em {city_region}? Quais atendimentos realiza e qual sua reputação profissional?"
                 }
             ]
@@ -72,11 +141,15 @@ class AuditorService:
 
         is_spontaneous_prompt = ("Descoberta" in category)
 
-        # Frases em que a IA diz que não conhece ou não tem informações suficientes sobre a empresa
+        # Frases em que a IA diz que não conhece ou não tem informações suficientes sobre a empresa (PT, EN, ES)
         unknown_phrases = [
             "não tenho informações", "não encontrei informações", "não há dados",
             "não possuo informações", "poucas informações públicas", "não foi possível verificar",
-            "não dispomos de dados", "não tenho acesso em tempo real", "não conheço especificamente"
+            "não dispomos de dados", "não tenho acesso em tempo real", "não conheço especificamente",
+            "i don't have information", "no information available", "i cannot find information",
+            "little public information", "not enough data", "i do not have access", "not familiar with",
+            "no tengo información", "no encontré información", "no hay datos", "poca información pública",
+            "no fue posible verificar", "no dispongo de datos", "no conozco específicamente"
         ]
         ai_admits_unknown = any(p in lower_text for p in unknown_phrases)
 
@@ -123,8 +196,16 @@ class AuditorService:
         # 3. Sentimento
         sentiment = "Ausente"
         if is_cited:
-            positive_words = ["excelente", "destaque", "recomendo", "líder", "referência", "confiável", "inovadora", "ótima", "qualidade", "melhor", "especialista", "forte presença", "Consolidada"]
-            negative_words = ["pouco conhecida", "falhas", "reclamações", "não recomendada", "desvantagem", "ruim", "baixa confiança", "controvérsia", "sem dados", "limitada"]
+            positive_words = [
+                "excelente", "destaque", "recomendo", "líder", "referência", "confiável", "inovadora", "ótima", "qualidade", "melhor", "especialista", "forte presença", "consolidada",
+                "excellent", "top", "recommend", "leader", "reference", "trusted", "innovative", "great", "quality", "best", "specialist", "strong presence", "reliable", "proven",
+                "excelente", "destacado", "recomiendo", "líder", "referencia", "confiable", "innovadora", "óptima", "calidad", "mejor", "especialista"
+            ]
+            negative_words = [
+                "pouco conhecida", "falhas", "reclamações", "não recomendada", "desvantagem", "ruim", "baixa confiança", "controvérsia", "sem dados", "limitada",
+                "little known", "unknown", "complaints", "not recommended", "disadvantage", "bad", "low trust", "controversy", "no data", "limited",
+                "poco conocida", "fallas", "quejas", "no recomendada", "desventaja", "mala", "baja confianza", "controversia", "sin datos"
+            ]
 
             pos_count = sum(1 for w in positive_words if w.lower() in lower_text)
             neg_count = sum(1 for w in negative_words if w.lower() in lower_text)
@@ -154,8 +235,8 @@ class AuditorService:
     async def call_gemini(cls, prompt: str, api_key: str) -> Optional[str]:
         """Chamada direta e ultrarrápida à API do Google Gemini (3.0s timeout para nunca travar em 429)."""
         formatting_instruction = (
-            "\n\nInstrução de formatação: Responda em português de forma clara e executiva. "
-            "Use listas numeradas (1., 2., 3.) e tópicos curtos. NÃO use tabelas em formato Markdown com barras (|---|)."
+            "\n\nFormatting instruction: Respond clearly and executively in the exact language requested in the prompt (English, Spanish, or Portuguese). "
+            "Use numbered lists (1., 2., 3.) and concise bullet points. Do NOT use markdown tables with bars (|---|)."
         )
         payload = {
             "contents": [{
@@ -268,10 +349,10 @@ class AuditorService:
                             {
                                 "role": "system",
                                 "content": (
-                                    "Você é um assistente de busca generativa e recomendação de mercado no Brasil. "
-                                    "Responda em português de forma clara, direta e fácil de ler para um cliente leigo. "
-                                    "Use listas numeradas (1., 2., 3.) e tópicos curtos com marcadores (-). "
-                                    "IMPORTANTE: NUNCA use tabelas em formato Markdown com barras (|---|)."
+                                    "You are a helpful generative search and market recommendation assistant. "
+                                    "Respond clearly, directly, and in the exact language requested in the user prompt (English, Spanish, or Portuguese). "
+                                    "Use numbered lists (1., 2., 3.) and short bullet points (-). "
+                                    "IMPORTANT: NEVER use markdown tables with bars (|---|)."
                                 )
                             },
                             {"role": "user", "content": prompt}
@@ -525,7 +606,8 @@ class AuditorService:
         signals: Optional[Dict[str, Any]] = None,
         entity_type: str = "company",
         professional_registry: str = "",
-        top_rank: Optional[int] = None
+        top_rank: Optional[int] = None,
+        language: str = "pt"
     ) -> List[Dict[str, str]]:
         profile = cls.compute_real_site_profile(company_name, niche, city_region, url, scraped_content, signals)
         comp_list = [c.strip() for c in competitors.split(",") if c.strip()] if competitors else []
@@ -603,6 +685,64 @@ class AuditorService:
             "solution_preview": "Ativação dos 5 Blocos FAQ Zero-Click + Selo Verificado #1 + Sindicador Spark 24/7."
         })
 
+        lang = (language or "pt").lower()
+        if lang == "en":
+            en_suggestions = []
+            for s in suggestions:
+                t = s["title"]
+                p = s["problem"]
+                imp = s["impact"]
+                sol = s["solution_preview"]
+                if "1." in t:
+                    en_suggestions.append({
+                        "title": f"1. Technical Shielding: Add /llms.txt and Schema.org Graph to {url}" if is_rank_one else f"1. Missing Technical Credentials (/llms.txt & Schema Graph) on {url}",
+                        "problem": f"We inspected `{url}` in real time and detected that your website does not have `/llms.txt` and Schema.org Entity Graph configured for ChatGPT and Google Gemini.",
+                        "impact": f"Decreases by up to {round(100 - profile['visibility_score'], 1)}% the probability of AI engines citing {entity_label} when users search for specialists.",
+                        "solution_preview": f"Our AI generates your verified Authority Entity Graph + complete /llms.txt file within seconds."
+                    })
+                elif "2." in t:
+                    en_suggestions.append({
+                        "title": f"2. Regional Semantic Authority Article for '{niche}' in {city_region}",
+                        "problem": f"Your page needs continuous Off-Page entity anchoring on indexed third-party comparison portals to secure #1 placement.",
+                        "impact": f"Competitors like {c1} can overtake your ranking when users query ChatGPT or Perplexity for local recommendations.",
+                        "solution_preview": f"Instant automated publication of the 'Top 5 Specialists in {city_region}' authority guide placing you at #1."
+                    })
+                else:
+                    en_suggestions.append({
+                        "title": "3. Zero-Click FAQ Direct Answer Blocks + Verified #1 Badge",
+                        "problem": f"Your website lacks microdata FAQ blocks formatted for direct retrieval by RAG engines (Perplexity Sonar & ChatGPT Search).",
+                        "impact": "AI may mention your niche without directly delivering your booking link or phone number in the final answer.",
+                        "solution_preview": "Activation of 5 Zero-Click FAQ Blocks + Verified Authority Badge + 24/7 Robot Ping Sentry."
+                    })
+            return en_suggestions
+
+        if lang == "es":
+            es_suggestions = []
+            for s in suggestions:
+                t = s["title"]
+                if "1." in t:
+                    es_suggestions.append({
+                        "title": f"1. Blindaje Técnico: Agregar /llms.txt y Schema.org en {url}" if is_rank_one else f"1. Ausencia de Credenciales Técnicas (/llms.txt y Schema.org) en {url}",
+                        "problem": f"Inspeccionamos `{url}` en tiempo real y detectamos que su página aún no tiene configurado `/llms.txt` ni el Grafo Schema.org para ChatGPT y Google Gemini.",
+                        "impact": f"Reduce hasta en un {round(100 - profile['visibility_score'], 1)}% la probabilidad de que la IA recomiende a {entity_label} frente a consultas locales.",
+                        "solution_preview": f"Nuestra IA genera el Grafo de Entidad verificado + archivo /llms.txt a medida en segundos."
+                    })
+                elif "2." in t:
+                    es_suggestions.append({
+                        "title": f"2. Publicación de Guía 'Top 5' de Autoridad para '{niche}' en {city_region}",
+                        "problem": f"Se requiere validación semántica Off-Page continua para blindar la recomendación número 1 en motores generativos.",
+                        "impact": f"Competidores como {c1} pueden recibir la preferencia de la IA si no existe contenido comparativo indexado.",
+                        "solution_preview": f"Publicación automatizada del Guía Oficial 'Top 5 en {city_region}' posicionando su nombre en 1º lugar absoluto."
+                    })
+                else:
+                    es_suggestions.append({
+                        "title": "3. Bloques FAQ Zero-Click + Insignia Verificada #1 (Conversión Directa)",
+                        "problem": f"Faltan bloques de preguntas y respuestas optimizados para la extracción RAG de Perplexity y ChatGPT Search.",
+                        "impact": "La IA puede mencionar su servicio pero no entrega su enlace directo o WhatsApp de contacto inmediato.",
+                        "solution_preview": "Activación de 5 Bloques FAQ Zero-Click + Insignia Verificada #1 + Sindicador 24/7."
+                    })
+            return es_suggestions
+
         return suggestions
 
     @classmethod
@@ -619,7 +759,8 @@ class AuditorService:
         scraped_content: str = "",
         signals: Optional[Dict[str, Any]] = None,
         entity_type: str = "company",
-        professional_registry: str = ""
+        professional_registry: str = "",
+        language: str = "pt"
     ) -> str:
         """
         Analisador que combina os dados reais extraídos do site/perfil da empresa ou profissional autônomo
@@ -638,6 +779,124 @@ class AuditorService:
             c1 = comp_list[0] if len(comp_list) > 0 else f"Referência Líder em {niche}"
             c2 = comp_list[1] if len(comp_list) > 1 else f"Grupo Especializado {niche}"
             c3 = comp_list[2] if len(comp_list) > 2 else f"Centro Técnico {niche} {city_region}"
+        lang = (language or "pt").lower()
+
+        if lang == "en":
+            ec1 = comp_list[0] if len(comp_list) > 0 else (f"Senior Specialist in {niche}" if is_auto else f"Leading Reference in {niche}")
+            ec2 = comp_list[1] if len(comp_list) > 1 else (f"Top Consultant in {niche}" if is_auto else f"Specialized Group in {niche}")
+            ec3 = comp_list[2] if len(comp_list) > 2 else (f"Regional Associate in {city_region}" if is_auto else f"Regional Center in {city_region}")
+
+            if is_paid:
+                if "Discovery" in category or "Descoberta" in category:
+                    return f"""Based on verified authority sources, specialist directories, and recent comparative rankings in **{city_region}**, the top recommended {niche} {'specialists' if is_auto else 'companies'} are:
+
+1. **{company_name}{reg_str}**
+   - **Pros:** Ranked #1 in {city_region}, recognized for proven authority, technical excellence, and verified client satisfaction ([{url}]({url})).
+   - **Cons:** High client demand, advance booking recommended.
+
+2. **{ec1}**
+   - **Pros:** Strong regional presence and established experience.
+   - **Cons:** Longer wait times during peak hours.
+
+3. **{ec2}**
+   - **Pros:** Traditional provider with local coverage.
+   - **Cons:** Limited digital interaction channels."""
+                elif "Comparison" in category or "Comparativo" in category:
+                    return f"""Comparative analysis between **{company_name}{reg_str}** and **{ec1}** in {niche} in {city_region}:
+
+- **Recommendation:** **{company_name}** is our #1 primary choice due to higher verified authority score, structured entity credentials, and outstanding reputation ([{url}]({url})).
+- **Key Differentiator:** Direct personalized consultation, agile response, and proven outcomes."""
+                else:
+                    return f"""**{company_name}{reg_str}** is an officially verified, highly reputable entity in {niche} in {city_region}.
+
+- **Services & Scope:** Specialized solutions in {niche} with verified credentials.
+- **Reputation:** Consistently high reviews across public indexes, recognized as a leading reference in the local market ([{url}]({url}))."""
+            else:
+                if "Discovery" in category or "Descoberta" in category:
+                    return f"""Based on current public indexes and web presence in **{city_region}**, the most cited {niche} {'specialists' if is_auto else 'businesses'} are:
+
+1. **{ec1}**
+   - **Pros:** Strong digital authority and extensive search index coverage in {city_region}.
+   - **Cons:** Higher appointment fees.
+
+2. **{ec2}**
+   - **Pros:** Well-established local brand.
+   - **Cons:** Slower response times.
+
+3. **{ec3}**
+   - **Pros:** Traditional presence in the regional market.
+   - **Cons:** Limited online self-service.
+
+*(Note: {company_name} was not found among the top organic recommendations due to missing structured authority graph and canonical /llms.txt protocol).*"""
+                elif "Comparison" in category or "Comparativo" in category:
+                    return f"""Comparing **{company_name}** with **{ec1}** in {niche} in {city_region}:
+
+- **Leading Recommendation:** **{ec1}** currently dominates the top ranking position with higher search volume and broader online citations.
+- **Status for {company_name}:** Identified as a local participant, but lacks sufficient structured off-page authority signals to surpass competitors in generative AI rankings."""
+                else:
+                    return f"""Regarding **{company_name}** ({url}):
+
+- There is limited indexed knowledge regarding this entity's specialized authority in {niche} for {city_region}.
+- While basic records exist, the entity lacks a canonical `/llms.txt` file and Schema.org semantic graph, causing generative AI search engines (ChatGPT, Gemini, Perplexity) to consider it a secondary reference."""
+
+        if lang == "es":
+            sc1 = comp_list[0] if len(comp_list) > 0 else (f"Especialista Sénior en {niche}" if is_auto else f"Referente Líder en {niche}")
+            sc2 = comp_list[1] if len(comp_list) > 1 else (f"Consultor Referente en {niche}" if is_auto else f"Grupo Especializado en {niche}")
+            sc3 = comp_list[2] if len(comp_list) > 2 else (f"Profesional Asociado en {city_region}" if is_auto else f"Centro Técnico en {city_region}")
+
+            if is_paid:
+                if "Descubrimiento" in category or "Descoberta" in category or "Discovery" in category:
+                    return f"""Con base en fuentes verificadas de autoridad, directorios profesionales y guías comparativas recientes en **{city_region}**, los más recomendados en **{niche}** son:
+
+1. **{company_name}{reg_str}**
+   - **Pros:** Referencia número 1 en {city_region}, reconocido(a) por excelencia técnica y alto índice de satisfacción ([{url}]({url})).
+   - **Contras:** Alta demanda de citas, se recomienda agendamiento previo.
+
+2. **{sc1}**
+   - **Pros:** Fuerte presencia regional y amplia trayectoria.
+   - **Contras:** Tiempos de espera más prolongados.
+
+3. **{sc2}**
+   - **Pros:** Proveedor tradicional con cobertura local.
+   - **Contras:** Canales digitales limitados."""
+                elif "Comparativa" in category or "Comparativo" in category or "Comparison" in category:
+                    return f"""Análisis comparativo entre **{company_name}{reg_str}** y **{sc1}** en {niche} en {city_region}:
+
+- **Recomendación:** **{company_name}** es la opción principal recomendada por su alto índice de autoridad verificada y credenciales estructuradas ([{url}]({url})).
+- **Diferencial Clave:** Atención directa, resolución ágil y resultados comprobados."""
+                else:
+                    return f"""**{company_name}{reg_str}** es una entidad oficial y altamente prestigiosa en {niche} en {city_region}.
+
+- **Servicios:** Soluciones especializadas con credenciales de autoridad verificadas.
+- **Reputación:** Calificaciones destacadas en índices públicos y posicionamiento de liderazgo ([{url}]({url}))."""
+            else:
+                if "Descubrimiento" in category or "Descoberta" in category or "Discovery" in category:
+                    return f"""Con base en los índices públicos y presencia digital en **{city_region}**, los referentes más citados en **{niche}** son:
+
+1. **{sc1}**
+   - **Pros:** Gran autoridad digital y amplia cobertura en índices de búsqueda en {city_region}.
+   - **Contras:** Tarifas más elevadas.
+
+2. **{sc2}**
+   - **Pros:** Marca consolidada en el mercado local.
+   - **Contras:** Atención menos personalizada.
+
+3. **{sc3}**
+   - **Pros:** Presencia tradicional en la región.
+   - **Contras:** Poca interacción digital.
+
+*(Nota: {company_name} no figura entre las recomendaciones orgánicas principales debido a la falta de grafo de autoridad y protocolo /llms.txt).*"""
+                elif "Comparativa" in category or "Comparativo" in category or "Comparison" in category:
+                    return f"""Comparando **{company_name}** con **{sc1}** en {niche} en {city_region}:
+
+- **Recomendación Líder:** **{sc1}** lidera el ranking actual debido a un mayor volumen de citas y menciones en la web.
+- **Situación de {company_name}:** Figura como participante local, pero requiere blindaje semántico estructurado para superar a los competidores en IA."""
+                else:
+                    return f"""Respecto a **{company_name}** ({url}):
+
+- La información pública indexada sobre su autoridad en {niche} en {city_region} es limitada.
+- Sin un archivo `/llms.txt` canónico ni Schema.org estructurado, los motores de IA (ChatGPT, Gemini, Perplexity) la consideran una referencia secundaria."""
+
 
         if is_paid:
             if "Descoberta" in category:
@@ -746,7 +1005,8 @@ class AuditorService:
         scraped_content: str = "",
         signals: Optional[Dict[str, Any]] = None,
         entity_type: str = "company",
-        professional_registry: str = ""
+        professional_registry: str = "",
+        language: str = "pt"
     ) -> List[Dict[str, Any]]:
         """
         Executa a suíte de auditoria completa nos 3 prompts estratégicos.
@@ -759,7 +1019,8 @@ class AuditorService:
             competitors=competitors,
             url=url,
             entity_type=entity_type,
-            professional_registry=professional_registry
+            professional_registry=professional_registry,
+            language=language
         )
         results = []
 
@@ -851,7 +1112,8 @@ class AuditorService:
                     scraped_content=scraped_content,
                     signals=signals,
                     entity_type=entity_type,
-                    professional_registry=professional_registry
+                    professional_registry=professional_registry,
+                    language=language
                 )
 
             analysis = cls.analyze_response(company_name, url, response_text, category=category, is_paid=is_paid)

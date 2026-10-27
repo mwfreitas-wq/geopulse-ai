@@ -46,6 +46,7 @@
     .marquee-track:hover { animation-play-state: paused; }
     .glass-nav { background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); }
   </style>
+  <script src="/static/i18n.js"></script>
 </head>
 <body class="antialiased selection:bg-emerald-500 selection:text-white">
 
@@ -54,10 +55,10 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-2 shrink-0">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        <span class="font-extrabold text-emerald-400 uppercase tracking-wider">Motor 14 Dias ao Vivo:</span>
+        <span id="live-bar-title" class="font-extrabold text-emerald-400 uppercase tracking-wider">Motor 14 Dias ao Vivo:</span>
       </div>
       <div class="overflow-hidden w-full">
-        <div class="marquee-track gap-12 text-slate-300 font-medium">
+        <div id="live-marquee-track" class="marquee-track gap-12 text-slate-300 font-medium">
           <span>⚙️ <strong>Dia 14/14 Concluído:</strong> Dr. Henrique Vasconcelos (SP) subiu de 24% para 94.5% (1º Lugar no ChatGPT Search)</span>
           <span>🚀 <strong>Dia 2/14 Executado:</strong> Clínica OdontoPrime (BH) teve seu Guia Oficial Top 5 publicado automaticamente pela IA</span>
           <span>📡 <strong>Dia 10/14 Executado:</strong> Escritório Contábil Atlas (PR) recebeu Ping IndexNow nos robôs do Bing e Perplexity</span>
@@ -75,24 +76,31 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="text-xl font-extrabold tracking-tight text-slate-900">GeoPulse <span class="text-emerald-600">AI</span></span>
-            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">Desafio 14 Dias IA</span>
+            <span id="nav-badge-text" class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">Desafio 14 Dias IA</span>
           </div>
-          <p class="text-[11px] text-slate-500 font-medium hidden sm:block">A IA que trabalha 14 dias por você para posicionar sua marca no topo</p>
+          <p id="nav-sub-text" class="text-[11px] text-slate-500 font-medium hidden sm:block">A IA que trabalha 14 dias por você para posicionar sua marca no topo</p>
         </div>
       </a>
 
       <nav class="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
-        <a href="#video-apresentacao" class="hover:text-emerald-600 transition">🎥 Vídeo (40s)</a>
-        <a href="#desafio-14-dias" class="hover:text-emerald-600 transition font-bold text-slate-900">🔥 O Desafio de 14 Dias</a>
-        <a href="#como-funciona" class="hover:text-emerald-600 transition">Como Funciona</a>
-        <a href="/diretorio" class="hover:text-emerald-600 transition">Diretório Oficial</a>
+        <a id="nav-link-video" href="#video-apresentacao" class="hover:text-emerald-600 transition">🎥 Vídeo (40s)</a>
+        <a id="nav-link-challenge" href="#desafio-14-dias" class="hover:text-emerald-600 transition font-bold text-slate-900">🔥 O Desafio de 14 Dias</a>
+        <a id="nav-link-how" href="#como-funciona" class="hover:text-emerald-600 transition">Como Funciona</a>
+        <a id="nav-link-dir" href="/diretorio" class="hover:text-emerald-600 transition">Diretório Oficial</a>
       </nav>
 
-      <div class="flex items-center gap-2.5">
-        <button onclick="runInstantDemo('paid')" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold transition">
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- SELETOR DE IDIOMA MULTILÍNGUE (AUTO-DETECT + MANUAL) -->
+        <div class="flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200 shadow-inner">
+          <button type="button" onclick="setLanguage('pt')" id="lang-btn-pt" class="px-2 py-1 rounded-lg text-xs font-extrabold transition flex items-center gap-1 bg-white shadow-sm text-slate-900" title="Português (Brasil)">🇧🇷 <span class="hidden sm:inline">PT</span></button>
+          <button type="button" onclick="setLanguage('en')" id="lang-btn-en" class="px-2 py-1 rounded-lg text-xs font-extrabold transition flex items-center gap-1 text-slate-500 hover:text-slate-900" title="English (Global)">🇺🇸 <span class="hidden sm:inline">EN</span></button>
+          <button type="button" onclick="setLanguage('es')" id="lang-btn-es" class="px-2 py-1 rounded-lg text-xs font-extrabold transition flex items-center gap-1 text-slate-500 hover:text-slate-900" title="Español">🇪🇸 <span class="hidden sm:inline">ES</span></button>
+        </div>
+
+        <button id="nav-demo-btn" onclick="runInstantDemo('paid')" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold transition">
           📊 Ver Evolução 14 Dias
         </button>
-        <a href="#diagnostico-form" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition">
+        <a id="nav-cta-btn" href="#diagnostico-form" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition">
           Teste Gratuito (10s) ↓
         </a>
       </div>
@@ -104,15 +112,15 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-4xl mx-auto space-y-5">
         <div class="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-white border border-emerald-300 shadow-sm text-xs font-bold text-slate-700">
-          <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold uppercase">Desafio Guiado de 14 Dias</span>
-          <span>Nossa IA trabalha 14 dias consecutivos por você para colocar seu nome no topo das pesquisas de IA</span>
+          <span id="hero-badge-pill" class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold uppercase">Desafio Guiado de 14 Dias</span>
+          <span id="hero-badge-desc">Nossa IA trabalha 14 dias consecutivos por você para colocar seu nome no topo das pesquisas de IA</span>
         </div>
 
-        <h1 class="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-slate-900 tracking-tight leading-[1.12]">
+        <h1 id="hero-headline" class="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-slate-900 tracking-tight leading-[1.12]">
           Se um cliente abrir o <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ChatGPT agora</span> na sua cidade, quem a IA recomenda?
         </h1>
 
-        <p class="text-base sm:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
+        <p id="hero-paragraph" class="text-base sm:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
           Descubra sua nota gratuitamente em <strong>10 segundos</strong>. E se você estiver invisível, ative nosso <strong>Desafio de 14 Dias</strong>: nossa Inteligência Artificial assume o trabalho pesado e executa <strong>14 ações técnicas diárias</strong> para fazer sua empresa ou nome profissional subir no ranking do ChatGPT, Gemini e Perplexity.
         </p>
       </div>
@@ -127,7 +135,7 @@
                 <span class="w-3 h-3 rounded-full bg-rose-400"></span>
                 <span class="w-3 h-3 rounded-full bg-amber-400"></span>
                 <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-                <span class="ml-2 text-xs font-bold text-slate-700">🎥 Apresentação Oficial GeoPulse AI (0:40s)</span>
+                <span id="hero-video-title" class="ml-2 text-xs font-bold text-slate-700">🎥 Apresentação Oficial GeoPulse AI (0:40s)</span>
               </div>
               <span class="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
                 ▶ Alta Definição (HD)
@@ -206,8 +214,8 @@
             </div>
 
             <div class="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-xs text-emerald-950 space-y-1">
-              <div class="font-extrabold text-emerald-800">💡 Pelo que você está pagando no Desafio (R$ 197 único):</div>
-              <p class="leading-relaxed text-slate-700">
+              <div id="sim-explain-title" class="font-extrabold text-emerald-800">💡 Pelo que você está pagando no Desafio (R$ 197 único):</div>
+              <p id="sim-explain-desc" class="leading-relaxed text-slate-700">
                 Durante <strong>14 dias seguidos</strong>, nossa IA executa 1 etapa técnica por dia (cria seus arquivos semânticos, publica artigos comparativos, envia pings aos robôs e reaudita sua nota) para colocar você no topo das pesquisas feitas por IA.
               </p>
             </div>
@@ -221,14 +229,14 @@
   <section id="diagnostico-form" class="py-16 sm:py-20 bg-white border-b border-slate-200">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-10 space-y-3">
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold uppercase animate-float">
+        <span id="step1-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold uppercase animate-float">
           👇 Passo 1 (Gratuito): Descubra sua Nota Atual em 10 Segundos
         </span>
-        <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900">Auditoria Gratuita de Visibilidade em IA</h2>
+        <h2 id="form-main-title" class="text-2xl sm:text-4xl font-extrabold text-slate-900">Auditoria Gratuita de Visibilidade em IA</h2>
         <div class="pt-2 flex flex-wrap items-center justify-center gap-2">
-          <button type="button" onclick="fillPreset('advogado')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-xs font-bold text-slate-700">⚖️ Exemplo Advogado</button>
-          <button type="button" onclick="fillPreset('clinica')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-xs font-bold text-slate-700">🦷 Exemplo Clínica</button>
-          <button type="button" onclick="runInstantDemo('free')" class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-xs font-extrabold text-amber-800">⚡ Simular Diagnóstico Agora</button>
+          <button id="btn-preset-adv" type="button" onclick="fillPreset('advogado')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-xs font-bold text-slate-700">⚖️ Exemplo Advogado</button>
+          <button id="btn-preset-clinica" type="button" onclick="fillPreset('clinica')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-xs font-bold text-slate-700">🦷 Exemplo Clínica</button>
+          <button id="btn-demo-sim" type="button" onclick="runInstantDemo('free')" class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-xs font-extrabold text-amber-800">⚡ Simular Diagnóstico Agora</button>
         </div>
       </div>
 
@@ -381,9 +389,9 @@
             </p>
           </div>
           <div class="shrink-0 bg-white px-5 py-3 rounded-2xl border-2 border-rose-300 shadow-sm text-right">
-            <span class="text-[10px] font-bold text-slate-400 uppercase block">Perda Mensal Estimada</span>
+            <span id="loss-title-monthly-lbl" class="text-[10px] font-bold text-slate-400 uppercase block">Perda Mensal Estimada</span>
             <span id="loss-total-money" class="text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono">- R$ 14.400</span>
-            <span class="text-[10px] text-rose-500 font-bold block">/ mês para concorrentes</span>
+            <span id="loss-sub-monthly-lbl" class="text-[10px] text-rose-500 font-bold block">/ mês para concorrentes</span>
           </div>
         </div>
 
@@ -410,11 +418,11 @@
         <div class="bg-white/95 backdrop-blur rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div>
-              <span class="text-xs font-extrabold text-slate-800 uppercase">Simule com o seu Ticket Médio Real:</span>
-              <p class="text-[11px] text-slate-500">Arraste para ajustar quanto em média um cliente gasta com você:</p>
+              <span id="loss-ticket-sim-title" class="text-xs font-extrabold text-slate-800 uppercase">Simule com o seu Ticket Médio Real:</span>
+              <p id="loss-ticket-sim-sub" class="text-[11px] text-slate-500">Arraste para ajustar quanto em média um cliente gasta com você:</p>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-slate-600">Ticket Selecionado:</span>
+              <span id="loss-ticket-sim-badge" class="text-xs font-bold text-slate-600">Ticket Selecionado:</span>
               <span id="loss-ticket-display" class="px-3.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-mono font-extrabold text-sm border border-emerald-200">R$ 800</span>
             </div>
           </div>
@@ -491,13 +499,13 @@
             <span class="text-5xl">🛡️</span>
           </div>
           <div class="space-y-3 text-center md:text-left">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-extrabold uppercase border border-emerald-500/30">
+            <div id="guar-badge-txt" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-extrabold uppercase border border-emerald-500/30">
               Risco Zero Absoluto • Proteção ao Consumidor
             </div>
-            <h3 class="text-2xl sm:text-3xl font-extrabold text-white">
+            <h3 id="guar-title-txt" class="text-2xl sm:text-3xl font-extrabold text-white">
               Garantia Incondicional de 7 Dias: Devolução de 100%
             </h3>
-            <p class="text-sm text-slate-300 leading-relaxed max-w-2xl">
+            <p id="guar-desc-txt" class="text-sm text-slate-300 leading-relaxed max-w-2xl">
               Confiamos tanto na eficácia da nossa tecnologia de engenharia semântica que assumimos todo o risco: se em até <strong>7 dias</strong> após a contratação sua estrutura GEO, seu arquivo <code>/llms.txt</code> e seu Guia Oficial Top 5 não forem publicados e entregues no servidor, basta nos enviar uma única mensagem e <strong>devolvemos 100% do seu valor via PIX na mesma hora</strong>, sem perguntas e sem letras miúdas.
             </p>
           </div>
@@ -507,9 +515,9 @@
       <!-- FAQ QUEBRA DE OBJEÇÕES -->
       <div class="space-y-8">
         <div class="text-center max-w-2xl mx-auto space-y-2">
-          <span class="px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">Tire suas Dúvidas</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Perguntas Frequentes sobre o Desafio</h2>
-          <p class="text-xs sm:text-sm text-slate-500">Tudo o que você precisa saber antes de ativar a autoridade da sua marca na IA.</p>
+          <span id="faq-badge-txt" class="px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">Tire suas Dúvidas</span>
+          <h2 id="faq-title-txt" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Perguntas Frequentes sobre o Desafio</h2>
+          <p id="faq-sub-txt" class="text-xs sm:text-sm text-slate-500">Tudo o que você precisa saber antes de ativar a autoridade da sua marca na IA.</p>
         </div>
 
         <div class="space-y-3 max-w-3xl mx-auto">
@@ -650,9 +658,9 @@
   <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-4 relative my-8">
       <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 font-bold hover:bg-slate-200 transition">✕</button>
-      <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🚀 Desafio Sprint de 14 Dias IA</span>
-      <h3 class="text-2xl font-extrabold text-slate-900">Ativar 14 Dias de Trabalho da IA</h3>
-      <p class="text-xs text-slate-600 leading-relaxed">
+      <span id="checkout-badge-pill" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase">🚀 Desafio Sprint de 14 Dias IA</span>
+      <h3 id="checkout-title-h3" class="text-2xl font-extrabold text-slate-900">Ativar 14 Dias de Trabalho da IA</h3>
+      <p id="checkout-desc-p" class="text-xs text-slate-600 leading-relaxed">
         Investimento em <strong>taxa única</strong> (sem mensalidades). Inclui os 14 dias de engenharia semântica + 7 ativos vitais + publicação do Guia Oficial Top 5.
       </p>
 
@@ -662,10 +670,10 @@
           <input type="checkbox" id="order-bump-checkbox" onchange="toggleOrderBump(this.checked)" class="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600 shrink-0" />
           <div class="space-y-0.5">
             <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-xs font-black text-slate-900">SIM! Adicionar Pacote Expansão Regional</span>
-              <span class="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 text-[9px] font-black uppercase">+ R$ 50,00</span>
+              <span id="order-bump-title-txt" class="text-xs font-black text-slate-900">SIM! Adicionar Pacote Expansão Regional</span>
+              <span id="order-bump-badge-txt" class="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 text-[9px] font-black uppercase">+ R$ 50,00</span>
             </div>
-            <p class="text-[11px] text-slate-600 leading-snug">
+            <p id="order-bump-desc-txt" class="text-[11px] text-slate-600 leading-snug">
               Blindagem semântica em até <strong>3 cidades vizinhas</strong> da sua região + Kit com <strong>Bio de Alta Conversão & 5 Posts de Autoridade IA</strong> para Instagram e LinkedIn.
             </p>
           </div>
@@ -674,17 +682,17 @@
 
       <!-- TOTAL A PAGAR -->
       <div class="flex items-center justify-between px-2 pt-1 border-t border-slate-100">
-        <span class="text-xs font-bold text-slate-600">Total a Pagar (Taxa Única):</span>
-        <span class="text-xl font-black text-slate-900 font-mono">R$ <span id="modal-total-display">197,00</span></span>
+        <span id="checkout-total-lbl" class="text-xs font-bold text-slate-600">Total a Pagar (Taxa Única):</span>
+        <span class="text-xl font-black text-slate-900 font-mono"><span id="checkout-currency-symbol">R$</span> <span id="modal-total-display">197,00</span></span>
       </div>
 
       <!-- BOTÃO MERCADO PAGO -->
-      <button onclick="startMercadoPagoCheckout()" class="w-full py-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2">
+      <button id="checkout-mp-btn" onclick="startMercadoPagoCheckout()" class="w-full py-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2">
         <span>💳</span> Pagar com Mercado Pago (PIX ou Cartão em até 12x)
       </button>
 
       <!-- BLOCO PIX OFICIAL DO BANCO CENTRAL COM QR CODE VISUAL -->
-      <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3.5 text-left">
+      <div id="pix-payment-box" class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3.5 text-left">
         <div class="flex items-center justify-between text-xs font-extrabold text-slate-700">
           <span>PIX Instantâneo Oficial (Banco Central):</span>
           <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-mono font-black" id="pix-amount-badge">R$ 197,00</span>
@@ -790,6 +798,46 @@
         : `<div class="p-2.5 rounded-xl bg-white border border-slate-200 font-semibold">🥇 1. Seu Concorrente Direto — Recomendado #1</div><div class="p-2.5 rounded-xl bg-rose-100 text-rose-800 font-bold">❌ Sua Empresa (Invisível)</div>`;
     }
 
+    window.applyEntityLabelsI18n = function(type, dict) {
+      if (!dict) dict = I18N[currentLang] || I18N.pt;
+      const isAuto = (type === 'autonomous');
+      const d = isAuto ? dict.formAuto : dict.formCompany;
+      
+      const lblName = document.getElementById('label-name');
+      if (lblName) lblName.textContent = d.nameLabel;
+      const inpName = document.getElementById('name');
+      if (inpName) inpName.placeholder = d.namePlaceholder;
+
+      const lblUrl = document.getElementById('label-url');
+      if (lblUrl) lblUrl.textContent = d.urlLabel;
+      const inpUrl = document.getElementById('url');
+      if (inpUrl) inpUrl.placeholder = d.urlPlaceholder;
+
+      const lblNiche = document.getElementById('label-niche');
+      if (lblNiche) lblNiche.textContent = d.nicheLabel;
+      const inpNiche = document.getElementById('niche');
+      if (inpNiche) inpNiche.placeholder = d.nichePlaceholder;
+
+      const lblCity = document.getElementById('label-city');
+      if (lblCity) lblCity.textContent = d.cityLabel;
+      const inpCity = document.getElementById('city_region');
+      if (inpCity) inpCity.placeholder = d.cityPlaceholder;
+
+      const lblReg = document.getElementById('label-registry');
+      if (lblReg) lblReg.textContent = d.registryLabel;
+      const inpReg = document.getElementById('professional_registry');
+      if (inpReg) inpReg.placeholder = d.registryPlaceholder;
+      const hintReg = document.getElementById('hint-registry');
+      if (hintReg) hintReg.textContent = d.registryHint;
+
+      const lblComp = document.getElementById('label-competitors');
+      if (lblComp) lblComp.textContent = d.competitorsLabel;
+      const inpComp = document.getElementById('competitors');
+      if (inpComp) inpComp.placeholder = d.competitorsPlaceholder;
+      const hintComp = document.getElementById('hint-competitors');
+      if (hintComp) hintComp.textContent = d.competitorsHint;
+    };
+
     function setEntityType(type) {
       document.getElementById('entity_type').value = type;
       const isAuto = (type === 'autonomous');
@@ -800,54 +848,14 @@
       if (isAuto) {
         btnAuto.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-md transition-all flex items-center justify-center gap-2";
         btnComp.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2";
-        
-        document.getElementById('label-name').textContent = "👨‍⚕️ Seu Nome Profissional Completo *";
-        document.getElementById('name').placeholder = "Ex: Dr. Roberto Guimarães ou Dra. Camila Mendes";
-        
-        document.getElementById('label-url').textContent = "🌐 Seu Perfil no Instagram, Site ou LinkedIn *";
-        document.getElementById('url').placeholder = "Ex: instagram.com/dr.roberto ou www.drroberto.com.br";
-        
-        document.getElementById('label-niche').textContent = "🎯 Sua Especialidade ou Área de Atuação *";
-        document.getElementById('niche').placeholder = "Ex: Advogado Trabalhista, Médico Cirurgião, Dentista, Psicóloga";
-        
-        document.getElementById('label-city').textContent = "📍 Cidade e Estado onde você Atende *";
-        document.getElementById('city_region').placeholder = "Ex: São Paulo - SP, Rio de Janeiro - RJ";
-        
-        document.getElementById('label-registry').textContent = "📜 Seu Registro Profissional (OAB, CRM, CRO, CREA, CRP, CRC, etc.) *";
-        document.getElementById('professional_registry').placeholder = "Ex: OAB/SP 123.456, CRM 98.765, CRO 12.345";
-        document.getElementById('hint-registry').textContent = "Essencial para o ChatGPT e Gemini recomendarem seu nome com autoridade e credibilidade máxima.";
-        
-        document.getElementById('label-competitors').textContent = "⚔️ Outros Profissionais Concorrentes na Região (Opcional)";
-        document.getElementById('competitors').placeholder = "Ex: Dr. Concorrente X, Dra. Concorrente Y";
-        document.getElementById('hint-competitors').textContent = "A IA compara você diretamente com outros profissionais da mesma cidade.";
-        
         document.getElementById('box-registry').className = "p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50/40 space-y-1.5 transition-all shadow-sm";
       } else {
         btnComp.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-md transition-all flex items-center justify-center gap-2";
         btnAuto.className = "py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2";
-        
-        document.getElementById('label-name').textContent = "🏢 Nome da Empresa, Clínica ou Marca *";
-        document.getElementById('name').placeholder = "Ex: Clínica OdontoPrime ou Silva & Associados";
-        
-        document.getElementById('label-url').textContent = "🌐 Site Oficial ou Instagram da Empresa *";
-        document.getElementById('url').placeholder = "Ex: www.suaempresa.com.br ou @suaempresa";
-        
-        document.getElementById('label-niche').textContent = "🎯 Especialidade ou Ramo de Atuação da Empresa *";
-        document.getElementById('niche').placeholder = "Ex: Implantes Dentários, Advocacia Empresarial, Contabilidade";
-        
-        document.getElementById('label-city').textContent = "📍 Cidade e Estado da Empresa *";
-        document.getElementById('city_region').placeholder = "Ex: São Paulo - SP, Belo Horizonte - MG";
-        
-        document.getElementById('label-registry').textContent = "🏛️ CNPJ ou Registro Oficial da Empresa (Opcional)";
-        document.getElementById('professional_registry').placeholder = "Ex: 00.000.000/0001-00 ou Registro em Conselho";
-        document.getElementById('hint-registry').textContent = "Ajuda os robôs de IA a confirmarem a legitimidade da sua empresa.";
-        
-        document.getElementById('label-competitors').textContent = "⚔️ Concorrentes Diretos na Região (Opcional)";
-        document.getElementById('competitors').placeholder = "Ex: Concorrente 1, Concorrente 2";
-        document.getElementById('hint-competitors').textContent = "A IA compara sua empresa contra eles nas recomendações de busca.";
-        
         document.getElementById('box-registry').className = "p-4 rounded-2xl border border-slate-200 bg-white space-y-1.5 transition-all";
       }
+
+      window.applyEntityLabelsI18n(type, I18N[currentLang] || I18N.pt);
     }
 
     function fillPreset(p) {
@@ -936,7 +944,8 @@
         professional_registry: document.getElementById('professional_registry')?.value || '',
         competitors: document.getElementById('competitors')?.value || '',
         whatsapp: document.getElementById('whatsapp')?.value || '',
-        email: document.getElementById('email')?.value || ''
+        email: document.getElementById('email')?.value || '',
+        language: currentLang
       };
 
       try {
@@ -953,19 +962,20 @@
     }
 
     let currentLossEstimatedClients = 18;
-    function updateLossCalculation(ticketVal) {
-      const ticket = parseFloat(ticketVal) || 800;
+    window.updateLossCalculation = function(ticketVal) {
+      const dict = I18N[currentLang] || I18N.pt;
+      const ticket = parseFloat(ticketVal) || dict.defaultTicket;
       const displayElem = document.getElementById('loss-ticket-display');
-      if (displayElem) displayElem.textContent = `R$ ${ticket.toLocaleString('pt-BR')}`;
+      if (displayElem) displayElem.textContent = `${dict.currencySymbol} ${ticket.toLocaleString(dict.locale)}`;
       
       const monthlyLoss = currentLossEstimatedClients * ticket;
       const annualLoss = monthlyLoss * 12;
       
       const monElem = document.getElementById('loss-total-money');
-      if (monElem) monElem.textContent = `- R$ ${monthlyLoss.toLocaleString('pt-BR')}`;
+      if (monElem) monElem.textContent = `- ${dict.currencySymbol} ${monthlyLoss.toLocaleString(dict.locale)}`;
       const annElem = document.getElementById('loss-annual-money');
-      if (annElem) annElem.textContent = `- R$ ${annualLoss.toLocaleString('pt-BR')}`;
-    }
+      if (annElem) annElem.textContent = `- ${dict.currencySymbol} ${annualLoss.toLocaleString(dict.locale)}`;
+    };
 
     function renderDiagnosticResults(data) {
       currentDiagnosticData = data;
@@ -1213,7 +1223,8 @@
           company_name: currentDiagnosticData?.company?.name || null,
           niche: currentDiagnosticData?.company?.niche || null,
           city_region: currentDiagnosticData?.company?.city_region || null,
-          score: currentDiagnosticData?.metrics?.visibility_score || null
+          score: currentDiagnosticData?.metrics?.visibility_score || null,
+          language: currentLang
         };
         const res = await fetch('/api/support/chat', {
           method: 'POST',
@@ -1313,6 +1324,12 @@
           console.error('Erro ao carregar área do cliente:', e);
         }
       }
+    });
+
+    // Inicialização automática do idioma por geolocalização / navegador
+    document.addEventListener('DOMContentLoaded', () => {
+      const detected = detectLanguage();
+      setLanguage(detected);
     });
   </script>
 </body>

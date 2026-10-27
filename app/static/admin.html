@@ -463,30 +463,45 @@
             </span>
           </div>
 
+          <!-- Aviso sobre E-mail Resend se ainda não configurado -->
+          <div x-show="!overview.api_status.resend_configured" class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <strong>💡 Dica para E-mails Automáticos:</strong> O robô já extraiu os telefones/WhatsApps e sites reais abaixo! Para que ele também dispare e-mails sozinhos em segundo plano, cadastre sua chave gratuita da <strong>Resend.com</strong> na aba <button @click="activeTab = 'apis'" class="underline font-extrabold">🔑 Central de APIs Gratuitas</button> (ou use o botão <strong>📧 Abrir no Meu E-mail</strong> abaixo).
+            </div>
+          </div>
+
           <div class="space-y-3">
             <template x-for="item in huntedLeads" :key="item.company_id">
-              <div class="p-4 rounded-2xl border border-slate-200 hover:border-purple-300 transition bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="space-y-1">
-                  <div class="flex items-center gap-2">
+              <div class="p-4 rounded-2xl border border-slate-200 hover:border-purple-300 transition bg-slate-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="space-y-1.5">
+                  <div class="flex flex-wrap items-center gap-2">
                     <strong class="text-sm text-slate-900" x-text="item.company_name"></strong>
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800" x-text="'Nota ' + item.score + '/100'"></span>
+                    <span x-show="item.phone" class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800" x-text="'📱 ' + item.phone"></span>
+                    <span x-show="!item.phone" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600">Sem WhatsApp na capa</span>
+                    <span x-show="item.email_sent" class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-100 text-blue-800">✉️ E-mail Enviado (Resend)</span>
+                    <span x-show="!item.email_sent && item.email" class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800" x-text="'📧 ' + item.email"></span>
                   </div>
-                  <p class="text-xs text-slate-500">
-                    <span x-text="item.niche"></span> • <span x-text="item.city_region"></span> • 
-                    <span class="text-red-600 font-semibold" x-text="'Perdendo para ' + item.top_competitor"></span>
+                  <p class="text-xs text-slate-600">
+                    <a :href="item.url" target="_blank" class="text-sky-700 hover:underline font-semibold" x-text="item.url"></a> •
+                    <span class="text-rose-600 font-bold" x-text="'Concorrente #1: ' + item.top_competitor"></span>
                   </p>
-                  <p class="text-[11px] text-slate-400">
-                    🔗 Link do Relatório: <a :href="item.report_url" target="_blank" class="text-purple-600 hover:underline font-mono" x-text="item.report_url"></a>
+                  <p class="text-[11px] text-slate-500">
+                    🔗 Dossiê Gerado (rastreia quando o cliente abre!): <a :href="item.report_url" target="_blank" class="text-purple-700 hover:underline font-mono font-bold" x-text="item.report_url"></a>
                   </p>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
                   <a :href="item.whatsapp_link" target="_blank"
                     class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
-                    <span>💬</span> Chamar WhatsApp (1-Clique)
+                    <span>💬</span> <span x-text="item.phone ? 'Chamar no WhatsApp Direto' : 'Enviar no WhatsApp'"></span>
+                  </a>
+                  <a x-show="item.email" :href="'mailto:' + item.email + '?subject=' + encodeURIComponent(item.email_subject) + '&body=' + encodeURIComponent(item.email_body)"
+                    class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
+                    <span>📧</span> Abrir no Meu E-mail
                   </a>
                   <a :href="item.report_url" target="_blank"
-                    class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1">
-                    <span>📄</span> Ver Dossiê
+                    class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition flex items-center gap-1">
+                    <span>📄</span> Ver Relatório
                   </a>
                 </div>
               </div>
@@ -1014,6 +1029,26 @@
                 :placeholder="overview.api_status.devto_configured ? '•••••••••••••••• (Configurada)' : 'API Key do Dev.to...'"
                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white shadow-sm" />
             </div>
+
+            <!-- 7. Resend Email API (Disparo de E-mails do Robô) -->
+            <div class="bg-white border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm"
+              :class="overview.api_status.resend_configured ? 'border-emerald-400' : 'border-slate-200'">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200 font-extrabold text-[10px]">3.000 E-MAILS/MÊS GRÁTIS</span>
+                  <span class="text-xs font-bold" :class="overview.api_status.resend_configured ? 'text-emerald-700' : 'text-slate-400'"
+                    x-text="overview.api_status.resend_configured ? '● Ativa & Disparando' : '○ Não configurada'"></span>
+                </div>
+                <h4 class="text-base font-extrabold text-slate-900">Resend.com (Disparo de E-mails do Robô)</h4>
+                <p class="text-xs text-slate-500">Permite que o Robô Caçador envie até 3.000 e-mails/mês gratuitamente para as empresas encontradas.</p>
+                <a href="https://resend.com/api-keys" target="_blank" class="inline-flex items-center gap-1 text-xs font-extrabold text-purple-700 hover:underline">
+                  🔗 Gerar Chave Grátis no Resend.com ↗
+                </a>
+              </div>
+              <input type="password" x-model="keyForm.resend_api_key"
+                :placeholder="overview.api_status.resend_configured ? '•••••••••••••••• (Configurada)' : 're_...'"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-purple-500 focus:bg-white shadow-sm" />
+            </div>
           </div>
         </div>
 
@@ -1178,6 +1213,7 @@
             medium_configured: false,
             openai_configured: false,
             perplexity_configured: false,
+            resend_configured: false,
             spark_configured: false,
             mercadopago_configured: false,
             mercadopago_public_key: '',
@@ -1204,6 +1240,7 @@
           medium_api_token: '',
           openai_api_key: '',
           perplexity_api_key: '',
+          resend_api_key: '',
           spark_webhook_url: '',
           mercadopago_access_token: '',
           mercadopago_public_key: '',

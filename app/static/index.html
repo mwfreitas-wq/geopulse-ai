@@ -2247,7 +2247,7 @@ function extractTopCompetitor(data) {
       const reportId = urlParams.get('report') || urlParams.get('relatorio') || urlParams.get('diag');
       if (reportId) {
         try {
-          const repRes = await fetch(`/api/companies/${reportId}/diagnostic`);
+          const repRes = await fetch(`/api/companies/${reportId}/diagnostic?viewed=1`);
           if (repRes.ok) {
             const repData = await repRes.json();
             renderDiagnosticResults(repData);

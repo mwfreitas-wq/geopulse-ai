@@ -291,6 +291,7 @@ async def get_all_configured_keys(db: AsyncSession) -> dict:
         "medium_api_token",
         "openai_api_key",
         "perplexity_api_key",
+        "resend_api_key",
         "spark_webhook_url",
         "mercadopago_access_token",
         "mercadopago_public_key",
@@ -426,6 +427,7 @@ async def get_api_keys_status(db: AsyncSession = Depends(get_db)):
         medium_configured=bool(keys.get("medium_api_token")),
         openai_configured=bool(keys.get("openai_api_key")),
         perplexity_configured=bool(keys.get("perplexity_api_key")),
+        resend_configured=bool(keys.get("resend_api_key") or settings.RESEND_API_KEY),
         spark_configured=bool(keys.get("spark_webhook_url")),
         mercadopago_configured=bool(keys.get("mercadopago_access_token")),
         mercadopago_public_key=keys.get("mercadopago_public_key"),
@@ -452,6 +454,7 @@ async def update_api_keys(keys_data: ApiKeysUpdate, db: AsyncSession = Depends(g
         "medium_api_token",
         "openai_api_key",
         "perplexity_api_key",
+        "resend_api_key",
         "spark_webhook_url",
         "mercadopago_access_token",
         "mercadopago_public_key",
@@ -1589,8 +1592,22 @@ async def admin_delete_company(company_id: int, db: AsyncSession = Depends(get_d
 
 @app.get("/api/companies/{company_id}", response_model=FullDiagnosticResponse)
 @app.get("/api/companies/{company_id}/diagnostic", response_model=FullDiagnosticResponse)
-async def get_company_diagnostic(company_id: int, request: Request, db: AsyncSession = Depends(get_db)):
+async def get_company_diagnostic(company_id: int, request: Request, viewed: Optional[int] = 0, db: AsyncSession = Depends(get_db)):
     resp = await _build_diagnostic(company_id, db)
+    if viewed == 1 and not _is_admin(request):
+        try:
+            lead_res = await db.execute(select(LeadCapture).filter_by(company_id=company_id).order_by(LeadCapture.id.desc()))
+            lead_row = lead_res.scalars().first()
+            if lead_row and "Visualizado" not in (lead_row.status or ""):
+                lead_row.status = "👀 Relatório Visualizado!"
+                await db.commit()
+            asyncio.create_task(notify_owner(
+                f"👀 Lead Abriu o Relatório: {resp.company.name}",
+                f"A empresa {resp.company.name} ({resp.company.city_region}) acabou de abrir o link do Dossiê (?report={company_id})!\nHora perfeita para fechar a venda.",
+                extra={"report_url": f"{settings.SITE_URL.rstrip('/')}/?report={company_id}"}
+            ))
+        except Exception:
+            pass
     return resp if _is_admin(request) else _strip_pii(resp)
 
 
@@ -2482,17 +2499,65 @@ async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(g
             await db.commit()
             await db.refresh(company)
 
-        # Roda perfil leve de auditoria
-        score_val = 38.0
+        # Define Concorrente #1 real (outra empresa real encontrada na mesma cidade/nicho)
+        other_names = [x["company_name"] for x in raw_leads if x["company_name"] != c_name]
+        top_comp = other_names[0] if other_names else f"Clínica Referência {c_city.split(',')[0]}"
+
+        # Roda perfil e salva AuditRun real para que ?report=ID mostre os cards completos
+        score_val = 28.5
         if data.auto_audit:
             try:
                 profile = AuditorService.compute_real_site_profile(c_name, c_niche, c_city, c_url, "", {})
-                score_val = round(profile.get("simulated_score", 38.0), 1)
-                sh = ScoreHistory(company_id=company.id, visibility_score=score_val, cited_count=1, total_prompts=3, source="sales_hunter")
+                score_val = round(float(profile.get("visibility_score", 28.5)), 1)
+                existing_audits = (await db.execute(select(AuditRun).filter_by(company_id=company.id))).scalars().all()
+                if not existing_audits:
+                    audit_items = await AuditorService.run_audit_suite(
+                        company_name=c_name,
+                        niche=c_niche,
+                        city_region=c_city,
+                        competitors=top_comp,
+                        url=c_url,
+                        api_keys={},
+                        is_paid=False,
+                        scraped_content="",
+                        entity_type="company",
+                        professional_registry=""
+                    )
+                    for a_item in audit_items:
+                        db.add(AuditRun(
+                            company_id=company.id,
+                            model_provider=a_item["model_provider"],
+                            prompt_category=a_item["prompt_category"],
+                            prompt_text=a_item["prompt_text"],
+                            response_text=a_item["response_text"],
+                            is_cited=a_item["is_cited"],
+                            rank_position=a_item["rank_position"],
+                            sentiment=a_item["sentiment"],
+                            sources=a_item["sources"]
+                        ))
+                sh = ScoreHistory(company_id=company.id, visibility_score=score_val, cited_count=0, total_prompts=3, source="sales_hunter")
                 db.add(sh)
                 await db.commit()
-            except Exception:
+            except Exception as e:
                 pass
+
+        report_url = f"{base_site}/?report={company.id}"
+        outreach = SalesBotService.build_cold_outreach(
+            company_name=c_name,
+            niche=c_niche,
+            city_region=c_city,
+            score=score_val,
+            top_competitor=top_comp,
+            report_url=report_url,
+            phone=c_phone
+        )
+
+        email_sent = False
+        resend_key = keys.get("resend_api_key") or settings.RESEND_API_KEY
+        if data.auto_email and c_email and "@" in c_email and not c_email.endswith("exemplo.com.br"):
+            email_sent = await send_email(c_email, outreach["email_subject"], outreach["email_html"], api_key=resend_key)
+
+        status_label = "E-mail Enviado ✉️" if email_sent else ("WhatsApp Extraído 📱" if c_phone else "Relatório Gerado 📄")
 
         # Cria registro na tabela LeadCapture para acompanhamento no CRM
         lead_cap = LeadCapture(
@@ -2504,25 +2569,11 @@ async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(g
             niche=c_niche,
             city_region=c_city,
             score=score_val,
-            status="Prospectado (Robô)"
+            status=status_label,
+            notes=f"Relatório: {report_url}"
         )
         db.add(lead_cap)
         await db.commit()
-
-        top_comp = f"Líderes em {c_niche} de {c_city.split(',')[0]}"
-        report_url = f"{base_site}/?report={company.id}"
-        outreach = SalesBotService.build_cold_outreach(
-            company_name=c_name,
-            niche=c_niche,
-            city_region=c_city,
-            score=score_val,
-            top_competitor=top_comp,
-            report_url=report_url
-        )
-
-        email_sent = False
-        if data.auto_email and c_email and "@" in c_email and not c_email.endswith("exemplo.com.br"):
-            email_sent = await send_email(c_email, outreach["email_subject"], outreach["email_html"])
 
         results.append({
             "company_id": company.id,

@@ -1,33 +1,22 @@
 """
 Robô de Vendas Inteligente (Sales Hunter & AI Closer) para o GeoPulse AI.
-Funciona 100% sem custos adicionais de API de terceiros, utilizando as chaves já configuradas
-(Groq gratuito gpt-oss-120b, Gemini ou fallback inteligente) e sem cobranças de WhatsApp.
-
-Recursos:
-1. AI Sales Closer (Chat Consultivo):
-   Atua diretamente na tela do diagnóstico para transformar visitantes em clientes pagantes.
-   Conhece o Nicho, Cidade, Nota da Empresa e o Concorrente #1 que está na frente.
-   Quebra objeções sobre Top 10, garantia de 14 dias, facilidade de implementação (sem mexer em código),
-   e envia botões de checkout (PIX, Cartão e PayPal).
-
-2. Sales Hunter (Motor Caçador de Leads):
-   Gera leads empresariais qualificados para qualquer Nicho + Cidade no Brasil, EUA ou América Latina.
-   Executa a auditoria automática de cada empresa no banco do GeoPulse AI.
-   Descobre o Concorrente #1 da região e prepara e-mails de abordagem hiperpersonalizados (Resend)
-   e links de abordagem comercial prontos para WhatsApp com 1 clique (sem custo de API de WhatsApp).
+Funciona 100% sem custos adicionais de API de terceiros, utilizando busca real na Web (Yahoo/Bing)
+combinada com extração direta de WhatsApp, Telefone e E-mail dos sites das empresas encontradas,
+além de suporte opcional às chaves LLM (Groq gratuito gpt-oss-120b, Gemini ou OpenAI).
 """
 import asyncio
+import base64
 import json
 import logging
 import re
 from typing import Any, Dict, List, Optional
-from urllib.parse import quote
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 import httpx
+from bs4 import BeautifulSoup
 
 from app.config import settings
 from app.services.auditor import AuditorService
-from app.services.notifier import send_email
 
 logger = logging.getLogger("geopulse.sales_bot")
 
@@ -135,7 +124,6 @@ class SalesBotService:
         if lang not in ["pt", "en", "es"]:
             lang = "pt"
 
-        # Prompts por idioma
         if lang == "en":
             system_prompt = (
                 "You are an Elite AI Search Growth Consultant for GeoPulse AI (GEO - Generative Engine Optimization). "
@@ -169,14 +157,13 @@ class SalesBotService:
                 f"Nota atual de Visibilidade em IA: {score_val}/100. Concorrente #1 que hoje domina as recomendações locais: '{competitor}'. "
                 "OBJETIVO: Responder ao cliente de forma acolhedora, executiva e altamente persuasiva. Romper objeções e "
                 "incentivar a contratação imediata do 'Desafio de 14 Dias Rumo ao Top 10 de Buscas' (R$ 197 via PIX ou Cartão Mercado Pago). "
-                "REGLAS OBRIGATÓRIAS: "
+                "REGRAS OBRIGATÓRIAS: "
                 "1. Responda em no máximo 2 a 3 parágrafos objetivos (use negrito e listas quando ajudar a leitura). "
                 "2. NUNCA prometa 1º lugar garantido; o compromisso oficial é colocar a marca no TOP 10 dos motores de IA com máxima visibilidade e autoridade. "
                 "3. Enfatize que NÃO é necessário mexer no site atual nem contratar programadores; nossa plataforma publica o dossiê de autoridade, Schema.org e llms.txt na nuvem. "
                 "4. Destaque a garantia incondicional e o risco zero."
             )
 
-        # Contexto das mensagens anteriores
         history_text = ""
         if conversation_history:
             for item in conversation_history[-4:]:
@@ -187,7 +174,6 @@ class SalesBotService:
 
         reply = await cls._call_llm(system_prompt, user_prompt, keys)
 
-        # Fallback inteligente e consultivo caso todas as APIs estejam fora
         if not reply:
             lower = message.lower()
             if lang == "en":
@@ -245,7 +231,6 @@ class SalesBotService:
                         f"com máxima visibilidade no **Top 10 oficial de recomendações**, sem você precisar entender de tecnologia."
                     )
 
-        # Sugestões de ação rápida para o usuário clicar
         quick_actions = [
             {"label": "🚀 Como funciona a garantia de 14 dias?", "prompt": "Como funciona a garantia e o desafio de 14 dias?"},
             {"label": "💳 Quais as formas de pagamento?", "prompt": "Quais as formas de pagamento disponíveis?"},
@@ -274,8 +259,172 @@ class SalesBotService:
         }
 
     # =========================================================================
-    # 2. SALES HUNTER (CAÇADOR DE LEADS AUTOMÁTICO PARA O PAINEL ADMIN)
+    # 2. SALES HUNTER (CAÇADOR DE LEADS REAIS NA WEB + EXTRAÇÃO DE CONTATOS)
     # =========================================================================
+
+    @staticmethod
+    def _decode_yahoo_url(href: str) -> str:
+        m = re.search(r"/RU=([^/]+)/RK=", href)
+        if m:
+            return unquote(m.group(1))
+        return href
+
+    @staticmethod
+    def _decode_bing_url(href: str) -> str:
+        try:
+            qs = parse_qs(urlparse(href).query)
+            u = qs.get("u", [""])[0]
+            if u.startswith("a1"):
+                b64 = u[2:]
+                b64 += "=" * (-len(b64) % 4)
+                return base64.urlsafe_b64decode(b64).decode("utf-8", errors="ignore")
+        except Exception:
+            pass
+        return href
+
+    @staticmethod
+    def _clean_company_title(raw_title: str, url: str) -> str:
+        """Limpa o título de SEO da página para ficar um Nome de Empresa limpo e identificável."""
+        t = re.sub(r"https?://[^\s]+", "", raw_title)
+        t = re.sub(r"^[a-z0-9.-]+\.(com\.br|com|org\.br|net|med\.br|odo\.br|adv\.br)\s*", "", t, flags=re.I)
+        parts = [p.strip() for p in re.split(r"\s*[\|\-–—:]\s*", t) if len(p.strip()) >= 3]
+        generic_Starts = ("contato", "home", "início", "inicio", "sobre", "clínica odontológica", "clinica odontologica", "dentista em")
+        best = parts[0] if parts else t.strip()
+        for p in parts:
+            if not any(p.lower().startswith(g) for g in generic_Starts):
+                best = p
+                break
+        domain_raw = urlparse(url).netloc.lower().replace("www.", "").split(".")[0]
+        if len(best) < 4 or best.lower() in generic_Starts:
+            best = f"{best} ({domain_raw.capitalize()})" if best else domain_raw.capitalize()
+        elif domain_raw not in best.lower().replace(" ", ""):
+            best = f"{best[:45]} ({domain_raw})"
+        return best[:75]
+
+    @classmethod
+    async def _scrape_site_contacts(cls, client: httpx.AsyncClient, url: str) -> Dict[str, str]:
+        """Visita o site real da empresa (em <4.5s) e extrai WhatsApp, Telefone com DDD e E-mail."""
+        phone = ""
+        email = ""
+        try:
+            r = await client.get(url, timeout=4.5)
+            html = r.text
+            # 1. Procura links diretos de WhatsApp (wa.me/55... ou api.whatsapp.com/send?phone=...)
+            wpp_matches = re.findall(r"(?:wa\.me/|phone=)(\d{10,14})", html)
+            if wpp_matches:
+                phone = wpp_matches[0]
+            else:
+                # 2. Procura telefones brasileiros com DDD: (19) 99999-9999 ou (11) 3333-4444
+                br_phones = re.findall(r"\([1-9]{2}\)\s*9?\d{4}[-\s]\d{4}", html)
+                if br_phones:
+                    digits = re.sub(r"\D", "", br_phones[0])
+                    phone = f"55{digits}" if len(digits) in (10, 11) else digits
+
+            # 3. Procura e-mails reais na página
+            email_matches = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", html)
+            blocked_ext = (".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".css", ".js", "sentry.io", "wixpress.com", "example.com")
+            for em in email_matches:
+                em_low = em.lower()
+                if not any(em_low.endswith(ext) or ext in em_low for ext in blocked_ext):
+                    email = em_low
+                    break
+        except Exception:
+            pass
+        return {"phone": phone, "email": email}
+
+    @classmethod
+    async def _search_real_web_leads(cls, niche: str, city_region: str, qty: int) -> List[Dict[str, Any]]:
+        """
+        Faz busca orgânica ao vivo no Yahoo Search / Bing por empresas reais de `niche` em `city_region`,
+        filtra diretórios genéricos (Doctoralia, GuiaMais, etc.) e extrai telefone/WhatsApp/e-mail de cada site!
+        """
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+        }
+        blocked_domains = (
+            "yahoo.com", "bing.com", "google.com", "doctoralia.com", "guiamais.com",
+            "apontador.com", "solutudo.com", "reclameaqui.com", "facebook.com",
+            "instagram.com", "linkedin.com", "youtube.com", "wikipedia.org",
+            "tiktok.com", "yelp.com", "tripadvisor.com", "jusbrasil.com.br", "econodata.com.br"
+        )
+        candidates: List[Dict[str, str]] = []
+        seen_domains = set()
+
+        async with httpx.AsyncClient(verify=False, timeout=8.0, follow_redirects=True, headers=headers) as client:
+            # 1. Busca no Yahoo Brasil (excelente para sites de empresas locais sem bloqueio de captcha)
+            try:
+                q = f"{niche} {city_region} contato whatsapp"
+                r = await client.get("https://br.search.yahoo.com/search", params={"p": q, "n": 20})
+                soup = BeautifulSoup(r.text, "html.parser")
+                for div in soup.select("div.algo"):
+                    a = div.select_one("h3.title a")
+                    if not a:
+                        continue
+                    real_url = cls._decode_yahoo_url(a.get("href", ""))
+                    if not real_url.startswith("http"):
+                        continue
+                    dom = urlparse(real_url).netloc.lower().replace("www.", "")
+                    if not dom or dom in seen_domains or any(b in dom for b in blocked_domains):
+                        continue
+                    for sp in a.select("span"):
+                        sp.decompose()
+                    raw_title = a.get_text(" ", strip=True)
+                    clean_name = cls._clean_company_title(raw_title, real_url)
+                    seen_domains.add(dom)
+                    candidates.append({"company_name": clean_name, "url": real_url, "domain": dom})
+                    if len(candidates) >= qty + 3:
+                        break
+            except Exception as e:
+                logger.warning(f"Yahoo search warning: {e}")
+
+            # 2. Se ainda precisar de mais empresas, complementa com Bing Search
+            if len(candidates) < qty:
+                try:
+                    q_bing = f"{niche} em {city_region} contato"
+                    r2 = await client.get("https://www.bing.com/search", params={"q": q_bing})
+                    soup2 = BeautifulSoup(r2.text, "html.parser")
+                    for li in soup2.select("li.b_algo"):
+                        a = li.select_one("h2 a")
+                        if not a:
+                            continue
+                        real_url = cls._decode_bing_url(a.get("href", ""))
+                        if not real_url.startswith("http"):
+                            continue
+                        dom = urlparse(real_url).netloc.lower().replace("www.", "")
+                        if not dom or dom in seen_domains or any(b in dom for b in blocked_domains):
+                            continue
+                        clean_name = cls._clean_company_title(a.get_text(" ", strip=True), real_url)
+                        seen_domains.add(dom)
+                        candidates.append({"company_name": clean_name, "url": real_url, "domain": dom})
+                        if len(candidates) >= qty + 2:
+                            break
+                except Exception as e:
+                    logger.warning(f"Bing search warning: {e}")
+
+            # 3. Visita em paralelo os sites candidatos para extrair WhatsApp, Telefone e E-mail reais
+            selected = candidates[:qty]
+            tasks = [cls._scrape_site_contacts(client, c["url"]) for c in selected]
+            scraped_contacts = await asyncio.gather(*tasks, return_exceptions=True)
+
+            final_leads: List[Dict[str, Any]] = []
+            for c, contact_res in zip(selected, scraped_contacts):
+                c_phone = ""
+                c_email = ""
+                if isinstance(contact_res, dict):
+                    c_phone = contact_res.get("phone", "")
+                    c_email = contact_res.get("email", "")
+                final_leads.append({
+                    "company_name": c["company_name"],
+                    "url": c["url"],
+                    "niche": niche.strip(),
+                    "city_region": city_region.strip(),
+                    "phone": c_phone,
+                    "email": c_email,
+                    "decision_maker": "Diretoria / Atendimento",
+                })
+
+            return final_leads
 
     @classmethod
     async def hunt_leads(
@@ -286,41 +435,33 @@ class SalesBotService:
         keys: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Descobre empresas reais para prospecção no nicho e cidade solicitados.
-        Utiliza o motor LLM gratuito para listar empresas representativas com contatos e websites.
+        Descobre empresas reais na internet para o nicho e cidade solicitados,
+        extraindo site oficial, WhatsApp/telefone e e-mail diretamente das páginas das empresas.
         """
         keys = keys or {}
-        qty = max(1, min(int(quantity or 5), 15))
+        qty = max(1, min(int(quantity or 5), 12))
         niche_clean = niche.strip()
         city_clean = city_region.strip()
 
+        # 1. Prioridade Máxima: Busca Web Real (Yahoo/Bing + Scraping de WhatsApp e E-mail reais do site)
+        leads = await cls._search_real_web_leads(niche_clean, city_clean, qty)
+        if leads:
+            return leads
+
+        # 2. Fallback Secundário via LLM (se configurada)
         system_prompt = (
-            "You are an Elite B2B Commercial Prospector and Business Researcher. "
-            "Your task is to identify REAL, high-potential businesses (clinics, law firms, real estate, aesthetics, local services) "
-            "in the requested city and niche. "
-            "You MUST output ONLY a valid JSON array of objects. Do not include markdown codeblocks or extra text. "
-            "Each object must have the following keys: "
-            "'company_name' (str), 'url' (str or social media link), 'niche' (str), 'city_region' (str), "
-            "'phone' (str with DDD or area code), 'email' (str or estimated contact email), 'decision_maker' (str or 'Diretoria')."
+            "You are an Elite B2B Commercial Prospector. Identify REAL businesses in the requested city and niche. "
+            "Output ONLY a valid JSON array of objects with keys: "
+            "'company_name', 'url', 'niche', 'city_region', 'phone', 'email', 'decision_maker'."
         )
-
-        user_prompt = (
-            f"Encontre {qty} empresas reais de '{niche_clean}' localizadas em '{city_clean}'. "
-            f"Retorne apenas o array JSON válido no formato especificado."
-        )
-
+        user_prompt = f"Encontre {qty} empresas reais de '{niche_clean}' localizadas em '{city_clean}'."
         raw = await cls._call_llm(system_prompt, user_prompt, keys)
-        leads: List[Dict[str, Any]] = []
-
         if raw:
-            # Limpa possíveis blocos ```json ... ```
-            cleaned = re.sub(r"^```json\s*", "", raw.strip(), flags=re.IGNORECASE)
-            cleaned = re.sub(r"^```\s*", "", cleaned)
-            cleaned = re.sub(r"\s*```$", "", cleaned)
+            cleaned = re.sub(r"^```json\s*|\s*```$", "", raw.strip(), flags=re.I)
             try:
                 data = json.loads(cleaned)
                 if isinstance(data, list):
-                    for item in data:
+                    for item in data[:qty]:
                         if isinstance(item, dict) and item.get("company_name"):
                             leads.append({
                                 "company_name": str(item.get("company_name", "")).strip(),
@@ -331,26 +472,8 @@ class SalesBotService:
                                 "email": str(item.get("email", "")).strip(),
                                 "decision_maker": str(item.get("decision_maker", "Diretoria")).strip(),
                             })
-            except Exception as e:
-                logger.warning(f"Error parsing hunter leads JSON: {e} | Raw text: {raw[:200]}")
-
-        # Se a LLM não tiver retornado ou falhar no parse, monta exemplos estruturados reais para a região
-        if not leads:
-            base_examples = [
-                {"name": f"Centro de {niche_clean.title()} {city_clean.split(',')[0]}", "domain": "exemplo-saude.com.br"},
-                {"name": f"Instituto de {niche_clean.title()} Especializado", "domain": "instituto-especialistas.com.br"},
-                {"name": f"Clínica & Consultoria {niche_clean.title()}", "domain": "clinica-referencia.com.br"},
-            ]
-            for i, ex in enumerate(base_examples[:qty]):
-                leads.append({
-                    "company_name": ex["name"],
-                    "url": f"https://www.{ex['domain']}",
-                    "niche": niche_clean,
-                    "city_region": city_clean,
-                    "phone": "",
-                    "email": f"contato@{ex['domain']}",
-                    "decision_maker": "Diretoria Comercial",
-                })
+            except Exception:
+                pass
 
         return leads
 
@@ -363,16 +486,17 @@ class SalesBotService:
         score: float,
         top_competitor: str,
         report_url: str,
+        phone: str = "",
         consultant_name: str = "Equipe GeoPulse AI",
     ) -> Dict[str, str]:
         """
         Gera copy de e-mail e link de WhatsApp hiperpersonalizados citando o concorrente real.
+        Se a empresa tiver telefone/WhatsApp extraído do site, o link já abre direto na conversa com ela!
         """
         comp_name = company_name.strip()
         comp_top = top_competitor.strip() or "os principais líderes locais"
         score_val = round(float(score or 38.0), 1)
 
-        # 1. E-mail Frio (Alta Conversão)
         email_subject = f"Auditoria de IA: {comp_name} vs {comp_top} no ChatGPT e Gemini ({city_region})"
         email_body = (
             f"Olá, diretoria da {comp_name}.\n\n"
@@ -404,20 +528,30 @@ class SalesBotService:
             f"</div>"
         )
 
-        # 2. WhatsApp Pitch (1-Clique sem custo de API)
         wpp_text = (
-            f"Olá! Tudo bem? Sou da equipe do GeoPulse AI.\n\n"
-            f"Fizemos um teste de buscas de IA (ChatGPT e Gemini) para *{niche}* em *{city_region}* e analisamos a presença da *{comp_name}*.\n\n"
-            f"🔍 *Resultado:* Sua empresa ficou com nota *{score_val}/100* e quem mais aparece recomendado aos clientes é a *{comp_top}*.\n\n"
-            f"Geramos um dossiê gratuito com o comparativo e como colocar sua empresa no Top 10:\n"
-            f"{report_url}\n\n"
-            f"Faz sentido te mostrar como ativamos isso sem mexer no seu site?"
+            f"Olá, equipe da *{comp_name}*! Tudo bem?\n\n"
+            f"Fizemos um teste de buscas de Inteligência Artificial (ChatGPT e Google Gemini) para *{niche}* em *{city_region}*.\n\n"
+            f"🔍 *Resultado da Auditoria:*\n"
+            f"• Nota da *{comp_name}*: *{score_val}/100* (Fora do Top 10)\n"
+            f"• Concorrente mais recomendado pela IA hoje: *{comp_top}*\n\n"
+            f"Geramos o dossiê gratuito da sua empresa mostrando como colocar vocês no Top 10 de recomendações em 14 dias (sem precisar mexer no site):\n"
+            f"👉 {report_url}\n\n"
+            f"Posso te explicar rapidinho como funciona?"
         )
+
+        clean_digits = re.sub(r"\D", "", phone or "")
+        if len(clean_digits) in (10, 11) and not clean_digits.startswith("55"):
+            clean_digits = f"55{clean_digits}"
+
+        if len(clean_digits) >= 10:
+            wpp_link = f"https://wa.me/{clean_digits}?text={quote(wpp_text)}"
+        else:
+            wpp_link = f"https://wa.me/?text={quote(wpp_text)}"
 
         return {
             "email_subject": email_subject,
             "email_body": email_body,
             "email_html": email_html,
             "whatsapp_text": wpp_text,
-            "whatsapp_link": f"https://wa.me/?text={quote(wpp_text)}",
+            "whatsapp_link": wpp_link,
         }

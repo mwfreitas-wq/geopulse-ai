@@ -7,8 +7,8 @@ import httpx
 from app.config import settings
 
 
-async def send_email(to: str, subject: str, html_body: str) -> bool:
-    key = (settings.RESEND_API_KEY or "").strip()
+async def send_email(to: str, subject: str, html_body: str, api_key: Optional[str] = None) -> bool:
+    key = (api_key or settings.RESEND_API_KEY or "").strip()
     if not key or not to or "@" not in to:
         return False
     try:

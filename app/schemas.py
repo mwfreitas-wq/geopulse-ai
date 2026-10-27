@@ -141,6 +141,7 @@ class ApiKeysUpdate(BaseModel):
     medium_api_token: Optional[str] = None
     openai_api_key: Optional[str] = None
     perplexity_api_key: Optional[str] = None
+    resend_api_key: Optional[str] = None
     spark_webhook_url: Optional[str] = None
     mercadopago_access_token: Optional[str] = None
     mercadopago_public_key: Optional[str] = None
@@ -160,6 +161,7 @@ class ApiKeysStatus(BaseModel):
     medium_configured: bool = False
     openai_configured: bool = False
     perplexity_configured: bool = False
+    resend_configured: bool = False
     spark_configured: bool = False
     mercadopago_configured: bool = False
     mercadopago_public_key: Optional[str] = None

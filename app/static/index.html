@@ -332,6 +332,128 @@
         </div>
       </div>
 
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <span id="res-metric1-label" class="text-xs font-bold uppercase text-slate-400">Nota Atual nas IAs (Share of Model)</span>
+          <div id="res-score-number" class="text-3xl font-extrabold text-slate-900 my-2">0%</div>
+          <p id="res-metric1-goal" class="text-xs text-emerald-700 font-bold">Meta após os 14 dias: >90%</p>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <span id="res-metric2-label" class="text-xs font-bold uppercase text-slate-400">Posição Atual no Ranking</span>
+          <div id="res-top-rank" class="text-3xl font-extrabold text-rose-600 my-2">Fora do Top 3</div>
+          <p id="res-metric2-sub" class="text-xs text-slate-500">Ranking espontâneo na sua cidade</p>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <span id="res-metric3-label" class="text-xs font-bold uppercase text-slate-400">Status do Desafio de 14 Dias</span>
+          <div id="res-sprint-badge" class="text-3xl font-extrabold text-amber-600 my-2">Dia 0/14</div>
+          <p id="res-metric3-sub" class="text-xs text-slate-500">14 ações diárias prontas para iniciar</p>
+        </div>
+      </div>
+
+      <!-- BANNER DE ESCASSEZ: VAGA NO TOP 10 DE BUSCAS -->
+      <div class="bg-gradient-to-r from-amber-500/15 via-amber-50/70 to-emerald-50/50 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-start gap-3.5">
+          <span class="text-3xl shrink-0">⚡</span>
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="scarcity-status-badge" class="px-2.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px] font-extrabold uppercase tracking-wide">Vagas Limitadas por Cidade</span>
+              <span id="scarcity-rule-label" class="text-xs font-bold text-slate-600">Objetivo do Desafio:</span>
+            </div>
+            <h4 id="scarcity-headline-container" class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
+              <span id="scarcity-vaga-text">Garanta sua vaga no Top 10 de buscas em</span> <span id="scarcity-city" class="text-emerald-700 font-black underline">sua cidade</span> <span id="scarcity-para-text">para</span> <span id="scarcity-niche" class="text-emerald-700 font-black underline">seu segmento</span>: <span id="scarcity-avail-badge" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-mono font-black text-xs sm:text-sm">DISPONÍVEL AGORA</span>
+            </h4>
+            <p id="scarcity-desc" class="text-xs text-slate-600 max-w-2xl">
+              Aumente sua visibilidade e garanta maior porcentagem de recomendações no ChatGPT e Gemini para colocar sua marca entre os 10 melhores da sua região.
+            </p>
+          </div>
+        </div>
+        <button id="scarcity-cta-btn" onclick="openCheckoutModal()" class="w-full md:w-auto shrink-0 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition">
+          Garanta sua vaga para o top 10 de buscas agora! →
+        </button>
+      </div>
+
+      <!-- BLOCO: ESTIMATIVA DE PERDA FINANCEIRA & NEGÓCIOS PERDIDOS NA IA -->
+      <div id="financial-loss-card" class="bg-gradient-to-br from-rose-50 via-white to-amber-50/40 rounded-3xl border-2 border-rose-300 p-6 sm:p-8 shadow-soft space-y-6">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-rose-100 pb-5">
+          <div class="space-y-1">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-extrabold uppercase">
+              <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+              <span id="loss-header-badge">Alerta de Faturamento: Quanto você está perdendo hoje?</span>
+            </div>
+            <h3 id="loss-header-title" class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              Estimativa de Negócios e Clientes Perdidos para Concorrentes
+            </h3>
+            <p id="loss-header-desc" class="text-xs sm:text-sm text-slate-600 max-w-3xl">
+              Quando alguém na sua cidade busca recomendação de <strong id="loss-niche-text" class="text-slate-900">sua área</strong> no ChatGPT ou Gemini, os algoritmos recomendam seus concorrentes no topo. Veja o cálculo estimado do dinheiro que está deixando de entrar no seu caixa:
+            </p>
+          </div>
+          <div class="shrink-0 bg-white px-5 py-3 rounded-2xl border-2 border-rose-300 shadow-sm text-right">
+            <span id="loss-title-monthly-lbl" class="text-[10px] font-bold text-slate-400 uppercase block">Perda Mensal Estimada</span>
+            <span id="loss-total-money" class="text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono">- R$ 14.400</span>
+            <span id="loss-sub-monthly-lbl" class="text-[10px] text-rose-500 font-bold block">/ mês para concorrentes</span>
+          </div>
+        </div>
+
+        <!-- GRADE DAS 3 MÉTRICAS DE IMPACTO -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
+            <span id="loss-metric-searches-lbl" class="text-xs font-bold uppercase text-slate-500">Buscas Locais na IA / Mês</span>
+            <div id="loss-search-volume" class="text-2xl font-extrabold text-slate-900 font-mono">~ 680 buscas</div>
+            <p id="loss-metric-searches-sub" class="text-[11px] text-slate-500">Pessoas pesquisando no ChatGPT e Gemini com alta intenção de contratação na sua cidade.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
+            <span id="loss-metric-clients-lbl" class="text-xs font-bold uppercase text-slate-500">Clientes Perdidos / Mês</span>
+            <div id="loss-clients-count" class="text-2xl font-extrabold text-rose-600 font-mono">~ 18 clientes</div>
+            <p id="loss-metric-clients-sub" class="text-[11px] text-slate-500">Clientes que fecham com o concorrente indicado em 1º lugar pela IA.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
+            <span id="loss-metric-annual-lbl" class="text-xs font-bold uppercase text-slate-500">Prejuízo Anual Projetado</span>
+            <div id="loss-annual-money" class="text-2xl font-extrabold text-rose-700 font-mono">- R$ 172.800</div>
+            <p id="loss-metric-annual-sub" class="text-[11px] text-slate-500">Estimativa anual acumulada indo para seus concorrentes diretos.</p>
+          </div>
+        </div>
+
+        <!-- SIMULADOR INTERATIVO DE TICKET MÉDIO -->
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div>
+              <span id="loss-ticket-sim-title" class="text-xs font-extrabold text-slate-800 uppercase">Simule com o seu Ticket Médio Real:</span>
+              <p id="loss-ticket-sim-sub" class="text-[11px] text-slate-500">Arraste para ajustar quanto em média um cliente gasta com você:</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="loss-ticket-sim-badge" class="text-xs font-bold text-slate-600">Ticket Selecionado:</span>
+              <span id="loss-ticket-display" class="px-3.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-mono font-extrabold text-sm border border-emerald-200">R$ 800</span>
+            </div>
+          </div>
+          
+          <div class="space-y-1">
+            <input id="loss-ticket-slider" type="range" min="100" max="5000" step="50" value="800" oninput="updateLossCalculation(this.value)" class="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg">
+            <div id="loss-ticket-scale" class="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>R$ 100</span>
+              <span>R$ 1.500</span>
+              <span>R$ 3.000</span>
+              <span>R$ 5.000+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANNER DE RETORNO DO INVESTIMENTO (R$ 197) -->
+        <div class="bg-emerald-600 rounded-2xl p-4 sm:p-5 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-glow">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span id="loss-roi-badge" class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wide">Cálculo de Retorno</span>
+              <span id="loss-roi-title" class="text-xs font-bold text-emerald-100">O GeoPulse AI custa apenas <strong id="loss-roi-price-text">R$ 197 taxa única</strong></span>
+            </div>
+            <p id="loss-roi-desc" class="text-xs sm:text-sm text-emerald-50 max-w-2xl">
+              Com <strong>apenas 1 único cliente recuperado</strong> através do ChatGPT ou Gemini, você já recupera com sobras todo o valor do Desafio de 14 Dias e consolida sua liderança na sua região.
+            </p>
+          </div>
+          <button id="loss-roi-cta-btn" onclick="openCheckoutModal()" class="w-full md:w-auto px-6 py-3.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-lg transition">
+            🛡️ Parar de Perder Clientes e Ativar (R$ 197) →
+          </button>
+        </div>
+      </div>
+
       <!-- NOVO COMPONENTE: PÓDIO DA IA & COMPARATIVO VISUAL COM CONCORRENTE LÍDER -->
       <div id="ai-leaderboard-card" class="bg-white rounded-3xl border-2 border-slate-200/90 shadow-soft p-6 sm:p-8 space-y-6">
         <!-- HEADER DO COMPARATIVO -->
@@ -476,15 +598,15 @@
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <span id="res-lead-c3-badge" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[11px] uppercase tracking-wide flex items-center gap-1 border border-emerald-300">
-                  <span>🚀</span> Meta Garantida (Dia 14)
+                  <span>🚀</span> Objetivo Top 10 (Dia 14)
                 </span>
-                <span class="text-xs font-mono font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">#1 Líder</span>
+                <span id="res-lead-c3-rank-pill" class="text-xs font-mono font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">Top 10 IA</span>
               </div>
               
               <div>
-                <span id="res-lead-c3-detected-lbl" class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Projeção com GeoPulse AI</span>
+                <span id="res-lead-c3-detected-lbl" class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Projeção de Visibilidade</span>
                 <h4 id="res-projected-entity-name" class="text-lg sm:text-xl font-black text-slate-900 leading-snug break-words">
-                  Sua Empresa no Top 1
+                  Sua Empresa no Top 10
                 </h4>
               </div>
 
@@ -499,7 +621,7 @@
                 </div>
                 <div class="flex justify-between text-[10px] font-semibold text-slate-400">
                   <span>Desafio de 14 Dias</span>
-                  <span class="text-emerald-700 font-bold">1º Lugar Oficial</span>
+                  <span id="res-lead-c3-bar-footer" class="text-emerald-700 font-bold">Objetivo: Top 10</span>
                 </div>
               </div>
 
@@ -507,11 +629,11 @@
               <div class="space-y-2 text-xs">
                 <div class="flex items-center justify-between py-1 border-b border-emerald-100">
                   <span class="text-slate-500">Fatia de Buscas Locais:</span>
-                  <span id="res-lead-c3-traffic" class="font-extrabold text-emerald-700">Reversão de Tráfego Local</span>
+                  <span id="res-lead-c3-traffic" class="font-extrabold text-emerald-700">Maior Porcentagem de Buscas</span>
                 </div>
                 <div class="flex items-center justify-between py-1 border-b border-emerald-100">
                   <span class="text-slate-500">Status no ChatGPT / Gemini:</span>
-                  <span id="res-lead-c3-status" class="font-extrabold text-emerald-700 flex items-center gap-1">✓ Recomendação #1</span>
+                  <span id="res-lead-c3-status" class="font-extrabold text-emerald-700 flex items-center gap-1">✓ Recomendado no Top 10</span>
                 </div>
                 <div class="flex items-center justify-between py-1">
                   <span class="text-slate-500">Entrega Automática:</span>
@@ -522,7 +644,7 @@
 
             <div class="mt-2 pt-3 border-t border-emerald-200 text-center">
               <button onclick="openCheckoutModal()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-glow transition flex items-center justify-center gap-1.5">
-                <span id="res-lead-c3-cta">Inverter Esse Cenário Agora →</span>
+                <span id="res-lead-c3-cta">Garanta sua vaga para o top 10 de buscas agora! →</span>
               </button>
             </div>
           </div>
@@ -621,128 +743,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div class="bg-white rounded-3xl border border-slate-200 p-6">
-          <span id="res-metric1-label" class="text-xs font-bold uppercase text-slate-400">Nota Atual nas IAs (Share of Model)</span>
-          <div id="res-score-number" class="text-3xl font-extrabold text-slate-900 my-2">0%</div>
-          <p id="res-metric1-goal" class="text-xs text-emerald-700 font-bold">Meta após os 14 dias: >90%</p>
-        </div>
-        <div class="bg-white rounded-3xl border border-slate-200 p-6">
-          <span id="res-metric2-label" class="text-xs font-bold uppercase text-slate-400">Posição Atual no Ranking</span>
-          <div id="res-top-rank" class="text-3xl font-extrabold text-rose-600 my-2">Fora do Top 3</div>
-          <p id="res-metric2-sub" class="text-xs text-slate-500">Ranking espontâneo na sua cidade</p>
-        </div>
-        <div class="bg-white rounded-3xl border border-slate-200 p-6">
-          <span id="res-metric3-label" class="text-xs font-bold uppercase text-slate-400">Status do Desafio de 14 Dias</span>
-          <div id="res-sprint-badge" class="text-3xl font-extrabold text-amber-600 my-2">Dia 0/14</div>
-          <p id="res-metric3-sub" class="text-xs text-slate-500">14 ações diárias prontas para iniciar</p>
-        </div>
-      </div>
-
-      <!-- BANNER DE ESCASSEZ: EXCLUSIVIDADE DE 1º LUGAR NA CIDADE -->
-      <div class="bg-gradient-to-r from-amber-500/15 via-amber-50/70 to-emerald-50/50 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
-        <div class="flex items-start gap-3.5">
-          <span class="text-3xl shrink-0">⚡</span>
-          <div class="space-y-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <span id="scarcity-status-badge" class="px-2.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px] font-extrabold uppercase tracking-wide">Status de Exclusividade Regional</span>
-              <span id="scarcity-rule-label" class="text-xs font-bold text-slate-600">Regra de Ouro da IA:</span>
-            </div>
-            <h4 id="scarcity-headline-container" class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
-              <span id="scarcity-vaga-text">Vaga #1 Oficial em</span> <span id="scarcity-city" class="text-emerald-700 font-black underline">sua cidade</span> <span id="scarcity-para-text">para</span> <span id="scarcity-niche" class="text-emerald-700 font-black underline">seu segmento</span>: <span id="scarcity-avail-badge" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-mono font-black text-xs sm:text-sm">DISPONÍVEL AGORA</span>
-            </h4>
-            <p id="scarcity-desc" class="text-xs text-slate-600 max-w-2xl">
-              Os algoritmos de IA só recomendam <strong>1 único profissional ou empresa no topo #1 do Guia Oficial</strong>. Ao ativar o Desafio de 14 Dias, você assegura a primazia antes que um concorrente local ocupe a indicação canônica.
-            </p>
-          </div>
-        </div>
-        <button id="scarcity-cta-btn" onclick="openCheckoutModal()" class="w-full md:w-auto shrink-0 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition">
-          Garantir Exclusividade da Vaga #1 →
-        </button>
-      </div>
-
-      <!-- BLOCO: ESTIMATIVA DE PERDA FINANCEIRA & NEGÓCIOS PERDIDOS NA IA -->
-      <div id="financial-loss-card" class="bg-gradient-to-br from-rose-50 via-white to-amber-50/40 rounded-3xl border-2 border-rose-300 p-6 sm:p-8 shadow-soft space-y-6">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-rose-100 pb-5">
-          <div class="space-y-1">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-extrabold uppercase">
-              <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
-              <span id="loss-header-badge">Alerta de Faturamento: Quanto você está perdendo hoje?</span>
-            </div>
-            <h3 id="loss-header-title" class="text-xl sm:text-2xl font-extrabold text-slate-900">
-              Estimativa de Negócios e Clientes Perdidos para Concorrentes
-            </h3>
-            <p id="loss-header-desc" class="text-xs sm:text-sm text-slate-600 max-w-3xl">
-              Quando alguém na sua cidade busca recomendação de <strong id="loss-niche-text" class="text-slate-900">sua área</strong> no ChatGPT ou Gemini, os algoritmos recomendam seus concorrentes no topo. Veja o cálculo estimado do dinheiro que está deixando de entrar no seu caixa:
-            </p>
-          </div>
-          <div class="shrink-0 bg-white px-5 py-3 rounded-2xl border-2 border-rose-300 shadow-sm text-right">
-            <span id="loss-title-monthly-lbl" class="text-[10px] font-bold text-slate-400 uppercase block">Perda Mensal Estimada</span>
-            <span id="loss-total-money" class="text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono">- R$ 14.400</span>
-            <span id="loss-sub-monthly-lbl" class="text-[10px] text-rose-500 font-bold block">/ mês para concorrentes</span>
-          </div>
-        </div>
-
-        <!-- GRADE DAS 3 MÉTRICAS DE IMPACTO -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
-            <span id="loss-metric-searches-lbl" class="text-xs font-bold uppercase text-slate-500">Buscas Locais na IA / Mês</span>
-            <div id="loss-search-volume" class="text-2xl font-extrabold text-slate-900 font-mono">~ 680 buscas</div>
-            <p id="loss-metric-searches-sub" class="text-[11px] text-slate-500">Pessoas pesquisando no ChatGPT e Gemini com alta intenção de contratação na sua cidade.</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
-            <span id="loss-metric-clients-lbl" class="text-xs font-bold uppercase text-slate-500">Clientes Perdidos / Mês</span>
-            <div id="loss-clients-count" class="text-2xl font-extrabold text-rose-600 font-mono">~ 18 clientes</div>
-            <p id="loss-metric-clients-sub" class="text-[11px] text-slate-500">Clientes que fecham com o concorrente indicado em 1º lugar pela IA.</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4 border border-rose-200 shadow-sm space-y-1">
-            <span id="loss-metric-annual-lbl" class="text-xs font-bold uppercase text-slate-500">Prejuízo Anual Projetado</span>
-            <div id="loss-annual-money" class="text-2xl font-extrabold text-rose-700 font-mono">- R$ 172.800</div>
-            <p id="loss-metric-annual-sub" class="text-[11px] text-slate-500">Estimativa anual acumulada indo para seus concorrentes diretos.</p>
-          </div>
-        </div>
-
-        <!-- SIMULADOR INTERATIVO DE TICKET MÉDIO -->
-        <div class="bg-white/95 backdrop-blur rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <div>
-              <span id="loss-ticket-sim-title" class="text-xs font-extrabold text-slate-800 uppercase">Simule com o seu Ticket Médio Real:</span>
-              <p id="loss-ticket-sim-sub" class="text-[11px] text-slate-500">Arraste para ajustar quanto em média um cliente gasta com você:</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span id="loss-ticket-sim-badge" class="text-xs font-bold text-slate-600">Ticket Selecionado:</span>
-              <span id="loss-ticket-display" class="px-3.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-mono font-extrabold text-sm border border-emerald-200">R$ 800</span>
-            </div>
-          </div>
-          
-          <div class="space-y-1">
-            <input id="loss-ticket-slider" type="range" min="100" max="5000" step="50" value="800" oninput="updateLossCalculation(this.value)" class="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg">
-            <div id="loss-ticket-scale" class="flex justify-between text-[10px] font-mono text-slate-400">
-              <span>R$ 100</span>
-              <span>R$ 1.500</span>
-              <span>R$ 3.000</span>
-              <span>R$ 5.000+</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- BANNER DE RETORNO DO INVESTIMENTO (R$ 197) -->
-        <div class="bg-emerald-600 rounded-2xl p-4 sm:p-5 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-glow">
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <span id="loss-roi-badge" class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wide">Cálculo de Retorno</span>
-              <span id="loss-roi-title" class="text-xs font-bold text-emerald-100">O GeoPulse AI custa apenas <strong id="loss-roi-price-text">R$ 197 taxa única</strong></span>
-            </div>
-            <p id="loss-roi-desc" class="text-xs sm:text-sm text-emerald-50 max-w-2xl">
-              Com <strong>apenas 1 único cliente recuperado</strong> através do ChatGPT ou Gemini, você já recupera com sobras todo o valor do Desafio de 14 Dias e consolida sua liderança na sua região.
-            </p>
-          </div>
-          <button id="loss-roi-cta-btn" onclick="openCheckoutModal()" class="w-full md:w-auto px-6 py-3.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-lg transition">
-            🛡️ Parar de Perder Clientes e Ativar (R$ 197) →
-          </button>
         </div>
       </div>
 
@@ -1458,7 +1458,7 @@ function extractTopCompetitor(data) {
 
       const projectedEntityElem = document.getElementById('res-projected-entity-name');
       if (projectedEntityElem) {
-        const suffix = l === 'en' ? 'Ranked #1' : (l === 'es' ? 'en 1º Lugar' : 'no 1º Lugar Oficial');
+        const suffix = l === 'en' ? 'in the Top 10' : (l === 'es' ? 'en el Top 10' : 'no Top 10 das IAs');
         projectedEntityElem.textContent = `${data.company.name || 'Sua Empresa'} (${suffix})`;
       }
 

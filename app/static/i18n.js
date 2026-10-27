@@ -193,16 +193,17 @@ const I18N = {
       c2SemanticsVal: "Sem /llms.txt e Sem Grafo",
       c2FooterWarning: "📉 Perdendo negócios diários na cidade",
 
-      c3Badge: "🚀 Meta Garantida (Dia 14)",
-      c3RankPill: "#1 Líder",
-      c3DetectedLbl: "Projeção com GeoPulse AI",
-      c3Traffic: "Reversão de Tráfego Local",
+      c3Badge: "🚀 Objetivo Top 10 (Dia 14)",
+      c3RankPill: "Top 10 IA",
+      c3DetectedLbl: "Projeção de Visibilidade",
+      c3Traffic: "Maior Porcentagem de Buscas",
       c3TrafficLbl: "Fatia de Buscas Locais:",
       c3StatusLbl: "Status no ChatGPT / Gemini:",
-      c3StatusVal: "✓ Recomendação #1",
+      c3StatusVal: "✓ Recomendado no Top 10",
       c3SemanticsLbl: "Entrega Automática:",
       c3SemanticsVal: "14 Ações Técnicas pela IA",
-      c3Cta: "Inverter Esse Cenário Agora →",
+      c3Cta: "Garanta sua vaga para o top 10 de buscas agora! →",
+      c3BarFooter: "Objetivo: Top 10",
 
       alertTitle: "Alerta de Concorrência:",
       alertTemplate: "Neste exato momento, quando alguém em <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-city\">{city}</span> busca por <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-niche\">{niche}</span> no ChatGPT ou Gemini, os robôs entregam como principal recomendação: <strong class=\"text-rose-700 font-black text-sm sm:text-base\" id=\"res-alert-comp-name\">{competitor}</strong>. Inicie o Desafio de 14 Dias para posicionar sua marca no topo.",
@@ -245,13 +246,13 @@ const I18N = {
     },
 
     scarcity: {
-      statusBadge: "Status de Exclusividade Regional",
-      ruleLabel: "Regra de Ouro da IA:",
-      vagaText: "Vaga #1 Oficial em",
+      statusBadge: "Vagas Limitadas por Cidade",
+      ruleLabel: "Objetivo do Desafio:",
+      vagaText: "Garanta sua vaga no Top 10 de buscas em",
       paraText: "para",
       availBadge: "DISPONÍVEL AGORA",
-      desc: "Os algoritmos de IA só recomendam <strong>1 único profissional ou empresa no topo #1 do Guia Oficial</strong>. Ao ativar o Desafio de 14 Dias, você assegura a primazia antes que um concorrente local ocupe a indicação canônica.",
-      ctaBtn: "Garantir Exclusividade da Vaga #1 →"
+      desc: "Aumente sua visibilidade e garanta maior porcentagem de recomendações no ChatGPT e Gemini para colocar sua marca entre os 10 melhores da sua região.",
+      ctaBtn: "Garanta sua vaga para o top 10 de buscas agora! →"
     },
 
     lossBadge: "Impacto Comercial Direto",
@@ -530,16 +531,17 @@ const I18N = {
       c2SemanticsVal: "Missing /llms.txt & Graph",
       c2FooterWarning: "📉 Losing daily clients in your city",
 
-      c3Badge: "🚀 Guaranteed Target (Day 14)",
-      c3RankPill: "#1 Leader",
-      c3DetectedLbl: "Projection with GeoPulse AI",
-      c3Traffic: "Full Traffic Reversal",
+      c3Badge: "🚀 Top 10 Goal (Day 14)",
+      c3RankPill: "Top 10 AI",
+      c3DetectedLbl: "Visibility Projection",
+      c3Traffic: "Higher Search Percentage",
       c3TrafficLbl: "Local Search Share:",
       c3StatusLbl: "Status on ChatGPT / Gemini:",
-      c3StatusVal: "✓ Recommendation #1",
+      c3StatusVal: "✓ Recommended in Top 10",
       c3SemanticsLbl: "Automated Delivery:",
       c3SemanticsVal: "14 Technical Actions by AI",
-      c3Cta: "Reverse This Position Now →",
+      c3Cta: "Secure your spot in the Top 10 searches now! →",
+      c3BarFooter: "Goal: Top 10",
 
       alertTitle: "Competitor Alert:",
       alertTemplate: "Right now, when someone in <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-city\">{city}</span> searches for <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-niche\">{niche}</span> on ChatGPT or Gemini, the AI engines deliver as top recommendation: <strong class=\"text-rose-700 font-black text-sm sm:text-base\" id=\"res-alert-comp-name\">{competitor}</strong>. Start the 14-Day Challenge to claim that top spot.",
@@ -867,16 +869,17 @@ const I18N = {
       c2SemanticsVal: "Sin /llms.txt ni Grafo",
       c2FooterWarning: "📉 Perdiendo negocios diarios en tu ciudad",
 
-      c3Badge: "🚀 Meta Garantizada (Día 14)",
-      c3RankPill: "#1 Líder",
-      c3DetectedLbl: "Proyección con GeoPulse AI",
-      c3Traffic: "Reversión Total del Tráfico",
+      c3Badge: "🚀 Objetivo Top 10 (Día 14)",
+      c3RankPill: "Top 10 IA",
+      c3DetectedLbl: "Proyección de Visibilidad",
+      c3Traffic: "Mayor Porcentaje de Búsquedas",
       c3TrafficLbl: "Cuota de Búsquedas Locales:",
       c3StatusLbl: "Estado en ChatGPT / Gemini:",
-      c3StatusVal: "✓ Recomendación #1",
+      c3StatusVal: "✓ Recomendado en el Top 10",
       c3SemanticsLbl: "Entrega Automatizada:",
       c3SemanticsVal: "14 Acciones Técnicas por IA",
-      c3Cta: "Invertir Este Escenario Ahora →",
+      c3Cta: "¡Asegura tu cupo para el Top 10 de búsquedas ahora! →",
+      c3BarFooter: "Objetivo: Top 10",
 
       alertTitle: "Alerta de Competencia:",
       alertTemplate: "En este preciso momento, cuando alguien en <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-city\">{city}</span> busca <span class=\"text-emerald-800 font-bold underline\" id=\"res-alert-niche\">{niche}</span> en ChatGPT o Gemini, los motores entregan como recomendación principal a: <strong class=\"text-rose-700 font-black text-sm sm:text-base\" id=\"res-alert-comp-name\">{competitor}</strong>. Activa el Desafío de 14 Días para posicionar tu marca en la cima.",
@@ -1233,6 +1236,12 @@ window.updateResultsI18n = function(lang) {
   // Card 3
   const c3Badge = document.getElementById("res-lead-c3-badge");
   if (c3Badge && res.c3Badge) c3Badge.innerHTML = `<span>🚀</span> ${res.c3Badge.replace('🚀 ', '')}`;
+
+  const c3Pill = document.getElementById("res-lead-c3-rank-pill");
+  if (c3Pill && res.c3RankPill) c3Pill.textContent = res.c3RankPill;
+
+  const c3BarFoot = document.getElementById("res-lead-c3-bar-footer");
+  if (c3BarFoot && res.c3BarFooter) c3BarFoot.textContent = res.c3BarFooter;
 
   const c3Detected = document.getElementById("res-lead-c3-detected-lbl");
   if (c3Detected && res.c3DetectedLbl) c3Detected.textContent = res.c3DetectedLbl;

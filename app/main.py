@@ -634,11 +634,50 @@ async def run_geo_diagnostic(data: CompanyCreate, db: AsyncSession = Depends(get
                         total_prompts=total_prompts, source="diagnostico"))
     db.add(SiteEvent(event="diagnostico"))
     await db.commit()
+    # Extrai o concorrente #1 citado para enriquecer o alerta de Lead Quente
+    top_comp_name = (company.competitors or "").split(",")[0].strip() if company.competitors else ""
+    if not top_comp_name and audit_responses:
+        first_txt = audit_responses[0].response_text or ""
+        m_comp = re.search(r"1\.\s*\*\*?([^\*\n\(\–\—\:]+?)\*\*?(?:$|\s*\(|\s*–|\s*—|\s*\:|\n)", first_txt)
+        if m_comp and m_comp.group(1).strip().lower() != company.name.lower():
+            top_comp_name = m_comp.group(1).strip()
+    if not top_comp_name:
+        top_comp_name = f"Líder Local em {company.niche}"
+
+    base_site = settings.SITE_URL.rstrip("/")
+    report_url = f"{base_site}/?report={company.id}"
+    wpp_digits = re.sub(r"\D", "", company.whatsapp or "")
+    wpp_phone = wpp_digits if wpp_digits.startswith("55") or len(wpp_digits) > 11 else f"55{wpp_digits}"
+    pitch_msg = (
+        f"Olá {company.name}! Tudo bem? Vi que você acabou de fazer o diagnóstico de visibilidade na IA aqui no GeoPulse AI "
+        f"para *{company.niche}* em *{company.city_region}* e sua nota atual ficou em *{visibility_score}%* "
+        f"(enquanto *{top_comp_name}* aparece na frente nas recomendações).\n\n"
+        f"Seu relatório completo está salvo aqui: {report_url}\n\n"
+        f"Posso te explicar como funciona o Desafio de 14 Dias para colocar sua marca no Top 10 do ChatGPT e Gemini?"
+    )
+    from urllib.parse import quote
+    wpp_pitch_url = f"https://wa.me/{wpp_phone}?text={quote(pitch_msg)}" if wpp_digits else ""
+
     asyncio.create_task(notify_owner(
-        "🔔 Novo lead no diagnóstico gratuito",
-        f"{company.name} — {company.niche} em {company.city_region}\nScore: {visibility_score}%\n"
-        f"WhatsApp: {company.whatsapp or '-'} | E-mail: {company.email or '-'}",
-        keys.get("spark_webhook_url")
+        f"🔥 Lead Quente: {company.name} ({visibility_score}%)",
+        f"Empresa/Profissional: {company.name}\n"
+        f"Segmento: {company.niche} — {company.city_region}\n"
+        f"Nota Atual na IA: {visibility_score}% (Concorrente #1: {top_comp_name})\n"
+        f"WhatsApp: {company.whatsapp or '-'} | E-mail: {company.email or '-'}\n"
+        f"Relatório: {report_url}",
+        keys.get("spark_webhook_url"),
+        extra={
+            "company_id": company.id,
+            "company_name": company.name,
+            "whatsapp": company.whatsapp or "",
+            "email": company.email or "",
+            "niche": company.niche,
+            "city": company.city_region,
+            "score": visibility_score,
+            "competitor": top_comp_name,
+            "report_url": report_url,
+            "whatsapp_pitch_url": wpp_pitch_url,
+        }
     ))
 
     suggestions_raw = AuditorService.generate_strategic_suggestions(
@@ -1548,6 +1587,7 @@ async def admin_delete_company(company_id: int, db: AsyncSession = Depends(get_d
     return {"message": f"Registro '{company.name}' removido com sucesso."}
 
 
+@app.get("/api/companies/{company_id}", response_model=FullDiagnosticResponse)
 @app.get("/api/companies/{company_id}/diagnostic", response_model=FullDiagnosticResponse)
 async def get_company_diagnostic(company_id: int, request: Request, db: AsyncSession = Depends(get_db)):
     resp = await _build_diagnostic(company_id, db)

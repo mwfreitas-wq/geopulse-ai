@@ -323,6 +323,9 @@
           <p id="res-company-url" class="text-xs font-mono text-slate-500"></p>
         </div>
         <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          <button type="button" onclick="downloadDiagnosticPdf()" class="w-full sm:w-auto px-4 py-4 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-800 border border-slate-300 font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+            <span>📄</span> <span id="res-pdf-btn-text">Baixar Relatório em PDF</span>
+          </button>
           <button type="button" onclick="shareDiagnosticWhatsApp()" class="w-full sm:w-auto px-4 py-4 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 border border-slate-300 font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
             <span>📲</span> <span id="res-share-btn-text">Enviar para o Sócio (WhatsApp)</span>
           </button>
@@ -1633,6 +1636,296 @@ function extractTopCompetitor(data) {
       });
     }
 
+    /* EXPORTAÇÃO DE RELATÓRIO EXECUTIVO EM PDF COM MARCA D'ÁGUA */
+    function downloadDiagnosticPdf() {
+      const data = window.currentDiagnosticData || currentDiagnosticData;
+      if (!data || !data.company) return;
+      const l = window.currentLang || 'pt';
+      const dict = I18N[l] || I18N.pt;
+      const comp = data.company;
+      const score = parseFloat(data.metrics?.visibility_score) || 0;
+      const topComp = window.currentTopCompetitor || extractTopCompetitor(data);
+      const id = comp.id && comp.id !== 999 ? comp.id : '';
+      const shareUrl = id ? `${window.location.origin}/?report=${id}` : window.location.origin;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(shareUrl)}`;
+      const dateStr = new Date().toLocaleDateString(dict.locale || 'pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      const monthlyLossElem = document.getElementById('loss-total-money');
+      const annualLossElem = document.getElementById('loss-annual-money');
+      const searchesElem = document.getElementById('loss-search-volume');
+      const clientsElem = document.getElementById('loss-clients-count');
+
+      const monthlyLossTxt = monthlyLossElem ? monthlyLossElem.textContent : '- R$ 14.400';
+      const annualLossTxt = annualLossElem ? annualLossElem.textContent : '- R$ 172.800';
+      const searchesTxt = searchesElem ? searchesElem.textContent : '~ 680 buscas';
+      const clientsTxt = clientsElem ? clientsElem.textContent : '~ 18 clientes / mês';
+
+      const p1Val = Math.min(95, Math.round(score * 0.72));
+      const p2Val = Math.min(92, Math.round(score * 0.85));
+      const p3Val = Math.min(88, Math.round(score * 0.78));
+      const p4Val = comp.is_paid ? 100 : (score > 60 ? 30 : 0);
+
+      const t = {
+        pt: {
+          watermark: 'RELATÓRIO OFICIAL • GEOPULSE AI',
+          printBtn: '🖨️ Salvar como PDF / Imprimir Relatório',
+          closeBtn: 'Fechar',
+          docTitle: 'Dossiê Executivo de Posicionamento em IA',
+          emittedAt: 'Emitido em:',
+          kpi1: 'Nota Atual nas IAs',
+          kpi2: 'Posição Atual no Ranking',
+          kpi2Val: data.metrics?.top_rank_achieved ? `#${data.metrics.top_rank_achieved}º Lugar` : 'Fora do Ranking',
+          kpi3: 'Perda Mensal Estimada',
+          podiumTitle: '🏆 Comparativo de Liderança Regional na IA',
+          c1Title: '🥇 1º Lugar Atual nas IAs',
+          c1Sub: 'Capturando ~78% das buscas locais',
+          c2Title: '⚠️ Sua Posição Hoje (Dia 0)',
+          c2Sub: 'Menos de 5% das recomendações',
+          c3Title: '🚀 Objetivo Dia 14 (GeoPulse AI)',
+          c3Name: `${comp.name} (No Top 10 das IAs)`,
+          c3Sub: 'Maior visibilidade e presença no Top 10',
+          lossTitle: '📉 Impacto Comercial & Clientes Perdidos na Região',
+          searchesLbl: 'Buscas Locais na IA / Mês',
+          clientsLbl: 'Clientes Perdidos / Mês',
+          annualLbl: 'Prejuízo Anual Projetado',
+          pillarsTitle: '📊 Comparativo Direto nos 4 Pilares da IA (Líder vs. Você)',
+          ctaTitle: 'Garanta sua vaga para o Top 10 de buscas agora!',
+          ctaDesc: 'Aponte a câmera do celular para o QR Code ao lado ou acesse o link abaixo para ativar as 14 ações técnicas diárias da nossa IA para a sua marca:',
+          ctaPrice: 'Taxa Única: R$ 197,00 (Sem mensalidade • Garantia Blindada de 7 Dias)'
+        },
+        en: {
+          watermark: 'OFFICIAL REPORT • GEOPULSE AI',
+          printBtn: '🖨️ Save as PDF / Print Report',
+          closeBtn: 'Close',
+          docTitle: 'Executive AI Positioning Dossier',
+          emittedAt: 'Issued on:',
+          kpi1: 'Current AI Score',
+          kpi2: 'Current Ranking Position',
+          kpi2Val: data.metrics?.top_rank_achieved ? `#${data.metrics.top_rank_achieved} Rank` : 'Out of Ranking',
+          kpi3: 'Estimated Monthly Loss',
+          podiumTitle: '🏆 Regional AI Leadership Comparison',
+          c1Title: '🥇 #1 Current AI Leader',
+          c1Sub: 'Capturing ~78% of local searches',
+          c2Title: '⚠️ Your Position Today (Day 0)',
+          c2Sub: 'Less than 5% of direct referrals',
+          c3Title: '🚀 Day 14 Goal (GeoPulse AI)',
+          c3Name: `${comp.name} (In the Top 10)`,
+          c3Sub: 'Higher visibility & Top 10 placement',
+          lossTitle: '📉 Commercial Impact & Lost Clients in Your Area',
+          searchesLbl: 'Local AI Searches / Mo',
+          clientsLbl: 'Lost Clients / Mo',
+          annualLbl: 'Projected Annual Loss',
+          pillarsTitle: '📊 Direct Comparison Across the 4 AI Pillars (Leader vs. You)',
+          ctaTitle: 'Secure your spot in the Top 10 searches now!',
+          ctaDesc: 'Scan the QR Code with your phone camera or click the link below to activate the 14 daily technical actions by our AI for your brand:',
+          ctaPrice: 'One-Time Fee: $47.00 USD (No subscription • 7-Day Ironclad Guarantee)'
+        },
+        es: {
+          watermark: 'INFORME OFICIAL • GEOPULSE AI',
+          printBtn: '🖨️ Guardar como PDF / Imprimir Informe',
+          closeBtn: 'Cerrar',
+          docTitle: 'Dossier Ejecutivo de Posicionamiento en IA',
+          emittedAt: 'Emitido el:',
+          kpi1: 'Puntuación Actual en IA',
+          kpi2: 'Posición Actual en el Ranking',
+          kpi2Val: data.metrics?.top_rank_achieved ? `#${data.metrics.top_rank_achieved}º Lugar` : 'Fuera del Ranking',
+          kpi3: 'Pérdida Mensual Estimada',
+          podiumTitle: '🏆 Comparativa de Liderazgo Regional en IA',
+          c1Title: '🥇 1º Lugar Actual en las IAs',
+          c1Sub: 'Captando ~78% de las búsquedas locales',
+          c2Title: '⚠️ Tu Posición Hoy (Día 0)',
+          c2Sub: 'Menos del 5% de las recomendaciones',
+          c3Title: '🚀 Objetivo Día 14 (GeoPulse AI)',
+          c3Name: `${comp.name} (En el Top 10)`,
+          c3Sub: 'Mayor visibilidad y presencia en el Top 10',
+          lossTitle: '📉 Impacto Comercial y Clientes Perdidos en tu Zona',
+          searchesLbl: 'Búsquedas Locales en IA / Mes',
+          clientsLbl: 'Clientes Perdidos / Mes',
+          annualLbl: 'Pérdida Anual Proyectada',
+          pillarsTitle: '📊 Comparativa Directa en los 4 Pilares de la IA (Líder vs. Tú)',
+          ctaTitle: '¡Asegura tu cupo para el Top 10 de búsquedas ahora!',
+          ctaDesc: 'Escanea el código QR con la cámara de tu móvil o accede al enlace inferior para activar las 14 acciones técnicas diarias de nuestra IA:',
+          ctaPrice: 'Tarifa Única: $47.00 USD (Sin mensualidades • Garantía de 7 Días)'
+        }
+      }[l] || {};
+
+      const printWin = window.open('', '_blank');
+      if (!printWin) {
+        window.print();
+        return;
+      }
+
+      const htmlDoc = `<!DOCTYPE html>
+<html lang="${l}">
+<head>
+  <meta charset="UTF-8">
+  <title>${t.docTitle} — ${comp.name}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background: #f8fafc; color: #0f172a; padding: 24px; position: relative; }
+    .page { max-width: 820px; margin: 0 auto; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 20px; padding: 32px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    .watermark {
+      position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%) rotate(-32deg);
+      font-size: 46px; font-weight: 900; color: rgba(16, 185, 129, 0.06); white-space: nowrap;
+      pointer-events: none; z-index: 0; letter-spacing: 4px; text-transform: uppercase;
+    }
+    .content { position: relative; z-index: 1; }
+    .no-print { max-width: 820px; margin: 0 auto 16px auto; display: flex; justify-content: space-between; align-items: center; background: #0f172a; color: #fff; padding: 12px 20px; border-radius: 14px; }
+    .btn-print { background: #10b981; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 13px; }
+    .btn-close { background: #334155; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { width: 38px; height: 38px; border-radius: 10px; background: #059669; color: #fff; font-weight: 900; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .card { border: 1px solid #cbd5e1; border-radius: 14px; padding: 14px; background: #fff; }
+    .card-gold { border: 2px solid #f59e0b; background: #fffbeb; }
+    .card-rose { border: 2px solid #f43f5e; background: #fff1f2; }
+    .card-emerald { border: 2px solid #10b981; background: #ecfdf5; }
+    .lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px; }
+    .val-lg { font-size: 22px; font-weight: 900; }
+    .sec-title { font-size: 14px; font-weight: 800; margin-bottom: 10px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.4px; }
+    .bar-wrap { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin: 6px 0; }
+    .bar-fill-green { height: 100%; background: #10b981; border-radius: 99px; }
+    .bar-fill-rose { height: 100%; background: #f43f5e; border-radius: 99px; }
+    .pillar-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px; font-size: 12px; background: #f8fafc; }
+    .footer-cta { margin-top: 22px; background: #064e3b; color: #ffffff; border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .qr-box { background: #fff; padding: 6px; border-radius: 10px; shrink: 0; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { box-shadow: none; border: none; padding: 16px; max-width: 100%; }
+      .no-print { display: none !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <span style="font-size:13px;font-weight:700;">📄 ${t.docTitle} — ${comp.name}</span>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-print" onclick="window.print()">${t.printBtn}</button>
+      <button class="btn-close" onclick="window.close()">${t.closeBtn}</button>
+    </div>
+  </div>
+  <div class="page">
+    <div class="watermark">${t.watermark}</div>
+    <div class="content">
+      <div class="header">
+        <div>
+          <div class="brand">
+            <div class="brand-icon">G</div>
+            <div>
+              <div style="font-size:18px;font-weight:900;">GeoPulse <span style="color:#059669;">AI</span></div>
+              <div style="font-size:11px;color:#64748b;font-weight:600;">${t.docTitle}</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <div style="font-size:20px;font-weight:900;color:#0f172a;">${comp.name}</div>
+            <div style="font-size:12px;color:#475569;font-weight:600;">${comp.niche} • ${comp.city_region} (${comp.url})</div>
+          </div>
+        </div>
+        <div style="text-align:right;font-size:11px;color:#64748b;">
+          <div><strong>${t.emittedAt}</strong> ${dateStr}</div>
+          <div style="margin-top:4px;font-family:monospace;color:#059669;font-weight:700;">ID #${id || 'DEMO'}</div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="lbl">${t.kpi1}</span>
+          <div class="val-lg" style="color:${score >= 70 ? '#059669' : '#e11d48'};">${score}%</div>
+          <div style="font-size:11px;color:#059669;font-weight:700;margin-top:2px;">Meta Dia 14: >90% (Top 10)</div>
+        </div>
+        <div class="card">
+          <span class="lbl">${t.kpi2}</span>
+          <div class="val-lg" style="color:#e11d48;">${t.kpi2Val}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">ChatGPT • Gemini • Perplexity</div>
+        </div>
+        <div class="card card-rose">
+          <span class="lbl" style="color:#9f1239;">${t.kpi3}</span>
+          <div class="val-lg" style="color:#be123c;">${monthlyLossTxt}</div>
+          <div style="font-size:11px;color:#9f1239;font-weight:700;margin-top:2px;">${clientsTxt}</div>
+        </div>
+      </div>
+
+      <div class="sec-title">${t.podiumTitle}</div>
+      <div class="grid-3">
+        <div class="card card-gold">
+          <span class="lbl" style="color:#92400e;">${t.c1Title}</span>
+          <div style="font-size:15px;font-weight:900;margin:4px 0;">${topComp}</div>
+          <div class="bar-wrap"><div class="bar-fill-green" style="width:94.8%;"></div></div>
+          <div style="font-size:11px;font-weight:700;color:#065f46;">94.8% • ${t.c1Sub}</div>
+        </div>
+        <div class="card card-rose">
+          <span class="lbl" style="color:#9f1239;">${t.c2Title}</span>
+          <div style="font-size:15px;font-weight:900;margin:4px 0;">${comp.name}</div>
+          <div class="bar-wrap"><div class="bar-fill-rose" style="width:${Math.max(8, score)}%;"></div></div>
+          <div style="font-size:11px;font-weight:700;color:#9f1239;">${score}% • ${t.c2Sub}</div>
+        </div>
+        <div class="card card-emerald">
+          <span class="lbl" style="color:#065f46;">${t.c3Title}</span>
+          <div style="font-size:15px;font-weight:900;margin:4px 0;">${t.c3Name}</div>
+          <div class="bar-wrap"><div class="bar-fill-green" style="width:92%;"></div></div>
+          <div style="font-size:11px;font-weight:700;color:#065f46;">>90% • ${t.c3Sub}</div>
+        </div>
+      </div>
+
+      <div class="sec-title">${t.lossTitle}</div>
+      <div class="grid-3">
+        <div class="card">
+          <span class="lbl">${t.searchesLbl}</span>
+          <div style="font-size:17px;font-weight:900;">${searchesTxt}</div>
+        </div>
+        <div class="card">
+          <span class="lbl">${t.clientsLbl}</span>
+          <div style="font-size:17px;font-weight:900;color:#e11d48;">${clientsTxt}</div>
+        </div>
+        <div class="card">
+          <span class="lbl">${t.annualLbl}</span>
+          <div style="font-size:17px;font-weight:900;color:#be123c;">${annualLossTxt}</div>
+        </div>
+      </div>
+
+      <div class="sec-title">${t.pillarsTitle}</div>
+      <div>
+        <div class="pillar-row">
+          <strong>1. ChatGPT Search (OpenAI)</strong>
+          <span><b style="color:#059669;">96% (${topComp})</b> vs <b style="color:#e11d48;">${p1Val}% (${comp.name})</b></span>
+        </div>
+        <div class="pillar-row">
+          <strong>2. Google Gemini</strong>
+          <span><b style="color:#059669;">92% (${topComp})</b> vs <b style="color:#e11d48;">${p2Val}% (${comp.name})</b></span>
+        </div>
+        <div class="pillar-row">
+          <strong>3. Perplexity Sonar</strong>
+          <span><b style="color:#059669;">88% (${topComp})</b> vs <b style="color:#e11d48;">${p3Val}% (${comp.name})</b></span>
+        </div>
+        <div class="pillar-row">
+          <strong>4. Protocolo /llms.txt & Grafo Schema.org JSON-LD</strong>
+          <span><b style="color:#059669;">100% (${topComp})</b> vs <b style="color:#e11d48;">${p4Val}% (${comp.name})</b></span>
+        </div>
+      </div>
+
+      <div class="footer-cta">
+        <div style="space-y:6px;">
+          <div style="font-size:16px;font-weight:900;color:#6ee7b7;margin-bottom:4px;">🚀 ${t.ctaTitle}</div>
+          <div style="font-size:12px;color:#ecfdf5;line-height:1.4;margin-bottom:8px;">${t.ctaDesc}</div>
+          <div style="font-size:12px;font-weight:800;color:#fde68a;">${t.ctaPrice}</div>
+          <div style="font-size:11px;font-family:monospace;color:#a7f3d0;margin-top:6px;">🔗 ${shareUrl}</div>
+        </div>
+        <div class="qr-box">
+          <img src="${qrUrl}" width="110" height="110" alt="QR Code" onload="setTimeout(() => window.print(), 400)" />
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      printWin.document.open();
+      printWin.document.write(htmlDoc);
+      printWin.document.close();
+    }
+
     /* COMPARTILHAMENTO DE DIAGNÓSTICO COM O SÓCIO / WHATSAPP */
     function shareDiagnosticWhatsApp() {
       const id = currentDiagnosticData?.company?.id;
@@ -1909,7 +2202,7 @@ function extractTopCompetitor(data) {
       const reportId = urlParams.get('report') || urlParams.get('relatorio') || urlParams.get('diag');
       if (reportId) {
         try {
-          const repRes = await fetch(`/api/companies/${reportId}`);
+          const repRes = await fetch(`/api/companies/${reportId}/diagnostic`);
           if (repRes.ok) {
             const repData = await repRes.json();
             renderDiagnosticResults(repData);

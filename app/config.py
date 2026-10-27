@@ -35,7 +35,8 @@ class Settings(BaseSettings):
     # E-mail transacional (Resend: https://resend.com) e notificações para o proprietário
     RESEND_API_KEY: Optional[str] = None
     MAIL_FROM: str = "GeoPulse AI <onboarding@resend.dev>"
-    OWNER_EMAIL: Optional[str] = None
+    OWNER_EMAIL: Optional[str] = "mwfreitas@gmail.com"
+    NTFY_TOPIC: str = "geopulse_leads_mwfreitas"
 
     # Proteção contra abuso e custos de API
     DIAG_RATE_PER_HOUR: int = 6        # Diagnósticos por IP por hora
@@ -55,5 +56,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-

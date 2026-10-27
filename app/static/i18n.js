@@ -153,6 +153,7 @@ const I18N = {
       statusBadge: "Diagnóstico Concluído (Dia 0)",
       reportTitle: "Relatório de Posicionamento IA",
       shareBtn: "Enviar para o Sócio (WhatsApp)",
+      pdfBtn: "Baixar Relatório em PDF",
       topCta: "🚀 Iniciar Desafio de 14 Dias (IA Trabalhando por Você — R$ 197)",
       metric1Label: "Nota Atual nas IAs (Share of Model)",
       metric1Goal: "Meta após os 14 dias: >90%",
@@ -491,6 +492,7 @@ const I18N = {
       statusBadge: "Diagnostic Completed (Day 0)",
       reportTitle: "AI Positioning Report",
       shareBtn: "Send to Partner (WhatsApp)",
+      pdfBtn: "Download PDF Report",
       topCta: "🚀 Start 14-Day Challenge (AI Working for You — $47 USD)",
       metric1Label: "Current AI Score (Share of Model)",
       metric1Goal: "Goal after 14 days: >90%",
@@ -829,6 +831,7 @@ const I18N = {
       statusBadge: "Diagnóstico Completado (Día 0)",
       reportTitle: "Informe de Posicionamiento IA",
       shareBtn: "Enviar al Socio (WhatsApp)",
+      pdfBtn: "Descargar Informe en PDF",
       topCta: "🚀 Iniciar Desafío de 14 Días (IA Trabajando por Ti — $47 USD)",
       metric1Label: "Puntuación Actual en IAs (Share of Model)",
       metric1Goal: "Meta tras los 14 días: >90%",
@@ -1091,6 +1094,9 @@ window.updateResultsI18n = function(lang) {
 
   const shareBtnText = document.getElementById("res-share-btn-text");
   if (shareBtnText) shareBtnText.textContent = res.shareBtn;
+
+  const pdfBtnText = document.getElementById("res-pdf-btn-text");
+  if (pdfBtnText && res.pdfBtn) pdfBtnText.textContent = res.pdfBtn;
 
   const topCta = document.getElementById("res-top-cta-btn");
   if (topCta) topCta.textContent = res.topCta;

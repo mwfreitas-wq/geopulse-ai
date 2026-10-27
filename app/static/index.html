@@ -2116,6 +2116,8 @@ function extractTopCompetitor(data) {
       await requestAiChatReply(val);
     }
 
+    let aiChatHistory = [];
+
     async function requestAiChatReply(userMessage) {
       const typingDiv = document.createElement('div');
       typingDiv.id = 'ai-typing-indicator';
@@ -2123,33 +2125,76 @@ function extractTopCompetitor(data) {
       typingDiv.innerHTML = `
         <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-800 font-bold flex items-center justify-center text-[10px] shrink-0">AI</div>
         <div class="bg-white p-2.5 rounded-2xl border border-slate-200 text-slate-400 text-xs italic">
-          ${(I18N[window.currentLang || 'pt']?.chat?.typing) || 'Digitando resposta...'}
+          ${(I18N[window.currentLang || 'pt']?.chat?.typing) || 'Consultor digitando...'}
         </div>
       `;
       document.getElementById('ai-chat-messages').appendChild(typingDiv);
       document.getElementById('ai-chat-messages').scrollTop = document.getElementById('ai-chat-messages').scrollHeight;
 
+      aiChatHistory.push({ role: 'user', content: userMessage });
+
       try {
+        const topComp = (typeof extractTopCompetitor === 'function' && currentDiagnosticData) ? extractTopCompetitor(currentDiagnosticData) : '';
         const payload = {
           message: userMessage,
           company_name: currentDiagnosticData?.company?.name || null,
           niche: currentDiagnosticData?.company?.niche || null,
           city_region: currentDiagnosticData?.company?.city_region || null,
           score: currentDiagnosticData?.metrics?.visibility_score || null,
-          language: currentLang
+          top_competitor: topComp || null,
+          language: window.currentLang || 'pt',
+          conversation_history: aiChatHistory.slice(-6),
+          report_id: currentDiagnosticData?.company?.id || null
         };
-        const res = await fetch('/api/support/chat', {
+        const res = await fetch('/api/sales-bot/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
         document.getElementById('ai-typing-indicator')?.remove();
-        appendChatMessage('ai', data.reply || 'Estamos à sua disposição para ativar seu Desafio de 14 Dias e colocar sua marca no topo das IAs!');
+
+        const replyText = data.reply || 'Estamos prontos para garantir sua vaga no Top 10 das IAs com garantia total!';
+        aiChatHistory.push({ role: 'assistant', content: replyText });
+        appendChatMessage('ai', replyText);
+
+        if (Array.isArray(data.quick_actions) && data.quick_actions.length > 0) {
+          const quickContainer = document.getElementById('ai-chat-quick-btns');
+          if (quickContainer) {
+            quickContainer.innerHTML = data.quick_actions.map(qa => {
+              const safePrompt = qa.prompt.replace(/'/g, "\'");
+              return `<button onclick="sendQuickChatMessage('${safePrompt}')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 whitespace-nowrap text-[11px] font-bold transition">${qa.label}</button>`;
+            }).join('');
+          }
+        }
       } catch (err) {
         document.getElementById('ai-typing-indicator')?.remove();
-        const fb = (I18N[window.currentLang || 'pt']?.chat?.fallbackReply) || 'O GeoPulse AI ativa sua presença no Top 10 das IAs por R$ 197 taxa única com Garantia Blindada de 7 Dias.';
+        const fb = (I18N[window.currentLang || 'pt']?.chat?.fallbackReply) || 'O GeoPulse AI garante sua presença no Top 10 das IAs por taxa única promocional com Garantia Blindada de 7 Dias.';
         appendChatMessage('ai', fb);
+      }
+    }
+
+    function initCloserGreeting(data) {
+      if (!data || !data.company) return;
+      const cName = data.company.name || 'sua empresa';
+      const cNiche = data.company.niche || 'seu segmento';
+      const cCity = data.company.city_region || '';
+      const topComp = (typeof extractTopCompetitor === 'function') ? extractTopCompetitor(data) : 'seus concorrentes';
+      const score = Math.round(data.metrics?.visibility_score || 35);
+      const l = window.currentLang || 'pt';
+
+      let welcome = '';
+      if (l === 'en') {
+        welcome = `Hello! I noticed that <strong>${topComp}</strong> is currently dominating AI search recommendations for ${cNiche} in ${cCity}. With a score of ${score}/100, <strong>${cName}</strong> is missing out on qualified leads. Would you like to see how we guarantee a Top 10 placement in 14 days without modifying your website?`;
+      } else if (l === 'es') {
+        welcome = `¡Hola! Noté que <strong>${topComp}</strong> domina actualmente las recomendaciones de IA en ${cCity}. Con una nota de ${score}/100, <strong>${cName}</strong> está perdiendo clientes. ¿Te gustaría saber cómo garantizamos tu puesto en el Top 10 en 14 días sin tocar tu web?`;
+      } else {
+        welcome = `Olá! Analisei seu resultado e notei que a <strong>${topComp}</strong> hoje recebe a maioria das recomendações de ${cNiche} em ${cCity}. Com a nota de ${score}/100, a <strong>${cName}</strong> está deixando de faturar. Quer que eu te explique como colocamos vocês no Top 10 em 14 dias sem você precisar mexer no seu site?`;
+      }
+
+      const welcomeEl = document.getElementById('ai-chat-welcome-msg');
+      if (welcomeEl) {
+        welcomeEl.innerHTML = welcome;
       }
     }
 

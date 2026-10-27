@@ -2404,3 +2404,144 @@ async def admin_advance_sprint(company_id: int, db: AsyncSession = Depends(get_d
         "sprint_status": company.sprint_status,
         "task_result": res
     }
+
+# ==========================================
+# ROBÔ DE VENDAS INTELIGENTE (AI CLOSER & SALES HUNTER)
+# ==========================================
+from app.schemas import SalesBotChatRequest, SalesBotHuntRequest
+from app.services.sales_bot import SalesBotService
+
+
+@app.post("/api/sales-bot/chat")
+async def sales_bot_chat(data: SalesBotChatRequest, db: AsyncSession = Depends(get_db)):
+    """
+    Chat consultivo que atua diretamente na tela do diagnóstico para converter o visitante.
+    Responde dúvidas, cita o concorrente real e incentiva o Desafio de 14 Dias Rumo ao Top 10.
+    100% gratuito (usa chaves já configuradas, como Groq gpt-oss-120b).
+    """
+    keys = await get_all_configured_keys(db)
+    if data.report_id:
+        keys["report_id"] = data.report_id
+
+    res = await SalesBotService.chat_closer(
+        message=data.message,
+        company_name=data.company_name,
+        niche=data.niche,
+        city_region=data.city_region,
+        score=data.score,
+        top_competitor=data.top_competitor,
+        language=data.language or "pt",
+        conversation_history=data.conversation_history or [],
+        keys=keys
+    )
+    return res
+
+
+@app.post("/api/admin/sales-bot/hunt", dependencies=[Depends(verify_admin_password_header)])
+async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(get_db)):
+    """
+    Motor Caçador de Leads: Localiza empresas reais para qualquer Nicho + Cidade,
+    executa auditoria automática no GeoPulse AI, identifica o concorrente #1
+    e prepara cópias prontas de E-mail e WhatsApp para prospecção sem custo de APIs extras.
+    """
+    keys = await get_all_configured_keys(db)
+    raw_leads = await SalesBotService.hunt_leads(
+        niche=data.niche,
+        city_region=data.city_region,
+        quantity=data.quantity or 5,
+        keys=keys
+    )
+
+    results = []
+    base_site = settings.SITE_URL.rstrip("/")
+    for item in raw_leads:
+        c_name = item["company_name"]
+        slug_name = re.sub(r"[^a-zA-Z0-9]", "", c_name).lower() or "empresa"
+        c_url = item.get("url") or f"https://www.{slug_name}.com.br"
+        c_niche = item.get("niche") or data.niche
+        c_city = item.get("city_region") or data.city_region
+        c_email = item.get("email", "")
+        c_phone = item.get("phone", "")
+
+        # Cria ou localiza empresa no banco
+        comp_res = await db.execute(select(Company).filter_by(name=c_name, city_region=c_city))
+        company = comp_res.scalars().first()
+        if not company:
+            company = Company(
+                name=c_name,
+                url=c_url,
+                niche=c_niche,
+                city_region=c_city,
+                whatsapp=c_phone,
+                email=c_email,
+                entity_type="company",
+                is_paid=False
+            )
+            db.add(company)
+            await db.commit()
+            await db.refresh(company)
+
+        # Roda perfil leve de auditoria
+        score_val = 38.0
+        if data.auto_audit:
+            try:
+                profile = AuditorService.compute_real_site_profile(c_name, c_niche, c_city, c_url, "", {})
+                score_val = round(profile.get("simulated_score", 38.0), 1)
+                sh = ScoreHistory(company_id=company.id, visibility_score=score_val, cited_count=1, total_prompts=3, source="sales_hunter")
+                db.add(sh)
+                await db.commit()
+            except Exception:
+                pass
+
+        # Cria registro na tabela LeadCapture para acompanhamento no CRM
+        lead_cap = LeadCapture(
+            company_id=company.id,
+            company_name=c_name,
+            contact_name=item.get("decision_maker", "Diretoria"),
+            contact_email=c_email,
+            contact_phone=c_phone,
+            niche=c_niche,
+            city_region=c_city,
+            score=score_val,
+            status="Prospectado (Robô)"
+        )
+        db.add(lead_cap)
+        await db.commit()
+
+        top_comp = f"Líderes em {c_niche} de {c_city.split(',')[0]}"
+        report_url = f"{base_site}/?report={company.id}"
+        outreach = SalesBotService.build_cold_outreach(
+            company_name=c_name,
+            niche=c_niche,
+            city_region=c_city,
+            score=score_val,
+            top_competitor=top_comp,
+            report_url=report_url
+        )
+
+        email_sent = False
+        if data.auto_email and c_email and "@" in c_email and not c_email.endswith("exemplo.com.br"):
+            email_sent = await send_email(c_email, outreach["email_subject"], outreach["email_html"])
+
+        results.append({
+            "company_id": company.id,
+            "company_name": c_name,
+            "url": c_url,
+            "email": c_email,
+            "phone": c_phone,
+            "niche": c_niche,
+            "city_region": c_city,
+            "score": score_val,
+            "top_competitor": top_comp,
+            "report_url": report_url,
+            "email_subject": outreach["email_subject"],
+            "email_body": outreach["email_body"],
+            "whatsapp_link": outreach["whatsapp_link"],
+            "email_sent": email_sent
+        })
+
+    return {
+        "ok": True,
+        "count": len(results),
+        "leads": results
+    }

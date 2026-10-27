@@ -296,3 +296,24 @@ class SprintInfoResponse(BaseModel):
     logs: List[SprintDayLog] = []
     current_score: float
     initial_score: float
+
+
+# Schemas para o Robô de Vendas Inteligente (AI Closer & Sales Hunter)
+class SalesBotChatRequest(BaseModel):
+    message: str
+    company_name: Optional[str] = None
+    niche: Optional[str] = None
+    city_region: Optional[str] = None
+    score: Optional[float] = None
+    top_competitor: Optional[str] = None
+    language: Optional[str] = 'pt'
+    conversation_history: Optional[List[dict]] = None
+    report_id: Optional[int] = None
+
+
+class SalesBotHuntRequest(BaseModel):
+    niche: str
+    city_region: str
+    quantity: Optional[int] = 5
+    auto_audit: Optional[bool] = True
+    auto_email: Optional[bool] = False

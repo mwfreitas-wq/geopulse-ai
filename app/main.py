@@ -212,6 +212,7 @@ async def _salesbot_autonomous_worker():
                         c_url = item.get("url") or f"https://www.{slug_name}.com"
                         c_email = item.get("email", "")
                         c_phone = item.get("phone", "")
+                        c_instagram = item.get("instagram", "")
 
                         # Localiza ou cadastra
                         comp_res = await db.execute(select(Company).filter_by(name=c_name, city_region=target_entry["city"]))
@@ -247,7 +248,8 @@ async def _salesbot_autonomous_worker():
                             score=score_val,
                             top_competitor=top_comp,
                             report_url=report_url,
-                            phone=c_phone
+                            phone=c_phone,
+                            instagram=c_instagram
                         )
 
                         email_sent = False
@@ -2652,6 +2654,7 @@ async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(g
         c_city = item.get("city_region") or data.city_region
         c_email = item.get("email", "")
         c_phone = item.get("phone", "")
+        c_instagram = item.get("instagram", "")
 
         # Cria ou localiza empresa no banco
         comp_res = await db.execute(select(Company).filter_by(name=c_name, city_region=c_city))
@@ -2721,7 +2724,8 @@ async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(g
             score=score_val,
             top_competitor=top_comp,
             report_url=report_url,
-            phone=c_phone
+            phone=c_phone,
+            instagram=c_instagram
         )
 
         email_sent = False
@@ -2761,6 +2765,9 @@ async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(g
             "email_subject": outreach["email_subject"],
             "email_body": outreach["email_body"],
             "whatsapp_link": outreach["whatsapp_link"],
+            "instagram": outreach.get("instagram", ""),
+            "instagram_text": outreach.get("instagram_text", ""),
+            "instagram_link": outreach.get("instagram_link", ""),
             "email_sent": email_sent
         })
 

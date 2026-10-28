@@ -581,6 +581,10 @@
                     class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
                     <span>📧</span> Abrir no Meu E-mail
                   </a>
+                  <button @click="openInstagramPitch(item)"
+                    class="px-3 py-2 rounded-xl bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 hover:opacity-90 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
+                    <span>📸</span> <span x-text="item.instagram ? 'Instagram @' + item.instagram : 'Direct Instagram'"></span>
+                  </button>
                   <a :href="item.report_url" target="_blank"
                     class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition flex items-center gap-1">
                     <span>📄</span> Ver Relatório
@@ -1639,6 +1643,14 @@
         },
 
         isTestingSmtp: false,
+
+        openInstagramPitch(item) {
+          const text = item.instagram_text || `Olá! Analisamos a presença da ${item.company_name} no ChatGPT e Gemini e notamos nota ${item.score}/100. Veja o relatório: ${item.report_url}`;
+          navigator.clipboard.writeText(text);
+          this.toastMessage = '📋 Pitch copiado! Abrindo o Instagram Direct... Basta colar (Ctrl+V) e enviar!';
+          const url = item.instagram_link || (item.instagram ? `https://ig.me/m/${item.instagram}` : 'https://www.instagram.com/direct/inbox/');
+          setTimeout(() => { window.open(url, '_blank'); }, 300);
+        },
 
         async toggleAutonomousSalesBot() {
           try {

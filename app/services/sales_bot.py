@@ -306,6 +306,7 @@ class SalesBotService:
         """Visita o site real da empresa (em <4.5s) e extrai WhatsApp, Telefone com DDD e E-mail."""
         phone = ""
         email = ""
+        instagram = ""
         try:
             r = await client.get(url, timeout=4.5)
             html = r.text
@@ -328,9 +329,18 @@ class SalesBotService:
                 if not any(em_low.endswith(ext) or ext in em_low for ext in blocked_ext):
                     email = em_low
                     break
+
+            # 4. Procura perfil oficial do Instagram (instagram.com/perfil)
+            ig_matches = re.findall(r"instagram\.com/([a-zA-Z0-9._-]+)", html)
+            blocked_ig = ("p", "reel", "reels", "tv", "explore", "stories", "share", "accounts", "legal", "about")
+            for ig in ig_matches:
+                clean_ig = ig.strip().strip("/").split("?")[0]
+                if clean_ig and clean_ig.lower() not in blocked_ig and len(clean_ig) >= 3:
+                    instagram = clean_ig
+                    break
         except Exception:
             pass
-        return {"phone": phone, "email": email}
+        return {"phone": phone, "email": email, "instagram": instagram}
 
     @classmethod
     async def _search_duckduckgo_leads(cls, client: httpx.AsyncClient, query: str, niche: str, city_region: str, qty: int) -> List[Dict[str, str]]:
@@ -457,9 +467,11 @@ class SalesBotService:
             for c, contact_res in zip(selected, scraped_contacts):
                 c_phone = ""
                 c_email = ""
+                c_instagram = ""
                 if isinstance(contact_res, dict):
                     c_phone = contact_res.get("phone", "")
                     c_email = contact_res.get("email", "")
+                    c_instagram = contact_res.get("instagram", "")
                 final_leads.append({
                     "company_name": c["company_name"],
                     "url": c["url"],
@@ -467,6 +479,7 @@ class SalesBotService:
                     "city_region": city_region.strip(),
                     "phone": c_phone,
                     "email": c_email,
+                    "instagram": c_instagram,
                     "decision_maker": "Diretoria / Atendimento",
                 })
 
@@ -557,6 +570,7 @@ class SalesBotService:
         top_competitor: str,
         report_url: str,
         phone: str = "",
+        instagram: str = "",
         consultant_name: str = "Equipe GeoPulse AI",
     ) -> Dict[str, str]:
         """
@@ -618,10 +632,25 @@ class SalesBotService:
         else:
             wpp_link = f"https://wa.me/?text={quote(wpp_text)}"
 
+        # 3. Script para Instagram Direct
+        ig_text = (
+            f"Olá! Fizemos uma auditoria de buscas por Inteligência Artificial (ChatGPT e Google Gemini) para {niche} em {city_region} e analisamos a presença da {comp_name}.\n\n"
+            f"🔍 Nota de visibilidade: {score_val}/100.\n"
+            f"🏆 Quem mais aparece recomendado aos clientes na região hoje é a {comp_top}.\n\n"
+            f"Geramos um dossiê gratuito com a análise técnica e como colocar vocês no Top 10 em 14 dias sem mexer no seu site:\n"
+            f"{report_url}\n\n"
+            f"Posso te mandar os detalhes?"
+        )
+        ig_username = re.sub(r"^@+", "", instagram.strip())
+        ig_link = f"https://ig.me/m/{ig_username}" if ig_username else f"https://www.instagram.com/direct/inbox/"
+
         return {
             "email_subject": email_subject,
             "email_body": email_body,
             "email_html": email_html,
             "whatsapp_text": wpp_text,
             "whatsapp_link": wpp_link,
+            "instagram": ig_username,
+            "instagram_text": ig_text,
+            "instagram_link": ig_link,
         }

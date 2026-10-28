@@ -333,6 +333,44 @@ class SalesBotService:
         return {"phone": phone, "email": email}
 
     @classmethod
+    async def _search_duckduckgo_leads(cls, client: httpx.AsyncClient, query: str, niche: str, city_region: str, qty: int) -> List[Dict[str, str]]:
+        """Pesquisa global de empresas via DuckDuckGo HTML (sem bloqueio de IP ou captcha)."""
+        blocked_domains = (
+            "duckduckgo.com", "yahoo.com", "bing.com", "google.com", "doctoralia", "guiamais",
+            "apontador", "solutudo", "reclameaqui", "facebook.com", "instagram.com", "linkedin.com",
+            "youtube.com", "wikipedia.org", "tiktok.com", "yelp.com", "tripadvisor", "yellowpages",
+            "mapquest", "expertise.com", "healthgrades", "zocdoc", "threebestrated"
+        )
+        candidates = []
+        seen = set()
+        try:
+            r = await client.post("https://html.duckduckgo.com/html/", data={"q": query}, timeout=9.0)
+            soup = BeautifulSoup(r.text, "html.parser")
+            for res_div in soup.select("div.result"):
+                a_title = res_div.select_one("a.result__a")
+                a_snippet = res_div.select_one("a.result__url")
+                if not a_title:
+                    continue
+                href = a_title.get("href", "")
+                # DuckDuckGo wraps URLs in /l/?kh=-1&uddg=https%3A%2F%2F...
+                m = re.search(r"uddg=([^&]+)", href)
+                raw_url = unquote(m.group(1)) if m else href
+                if not raw_url.startswith("http"):
+                    continue
+                dom = urlparse(raw_url).netloc.lower().replace("www.", "")
+                if not dom or dom in seen or any(b in dom for b in blocked_domains):
+                    continue
+                seen.add(dom)
+                title = a_title.get_text(" ", strip=True)
+                clean_name = cls._clean_company_title(title, raw_url)
+                candidates.append({"company_name": clean_name, "url": raw_url, "domain": dom})
+                if len(candidates) >= qty:
+                    break
+        except Exception as e:
+            logger.warning(f"DuckDuckGo search error: {e}")
+        return candidates
+
+    @classmethod
     async def _search_real_web_leads(cls, niche: str, city_region: str, qty: int) -> List[Dict[str, Any]]:
         """
         Faz busca orgânica ao vivo no Yahoo Search / Bing por empresas reais de `niche` em `city_region`,
@@ -351,32 +389,40 @@ class SalesBotService:
         candidates: List[Dict[str, str]] = []
         seen_domains = set()
 
-        async with httpx.AsyncClient(verify=False, timeout=8.0, follow_redirects=True, headers=headers) as client:
-            # 1. Busca no Yahoo Brasil (excelente para sites de empresas locais sem bloqueio de captcha)
-            try:
-                q = f"{niche} {city_region} contato whatsapp"
-                r = await client.get("https://br.search.yahoo.com/search", params={"p": q, "n": 20})
-                soup = BeautifulSoup(r.text, "html.parser")
-                for div in soup.select("div.algo"):
-                    a = div.select_one("h3.title a")
-                    if not a:
-                        continue
-                    real_url = cls._decode_yahoo_url(a.get("href", ""))
-                    if not real_url.startswith("http"):
-                        continue
-                    dom = urlparse(real_url).netloc.lower().replace("www.", "")
-                    if not dom or dom in seen_domains or any(b in dom for b in blocked_domains):
-                        continue
-                    for sp in a.select("span"):
-                        sp.decompose()
-                    raw_title = a.get_text(" ", strip=True)
-                    clean_name = cls._clean_company_title(raw_title, real_url)
-                    seen_domains.add(dom)
-                    candidates.append({"company_name": clean_name, "url": real_url, "domain": dom})
-                    if len(candidates) >= qty + 3:
-                        break
-            except Exception as e:
-                logger.warning(f"Yahoo search warning: {e}")
+        is_international = any(k in city_region.lower() for k in ["usa", "fl", "ny", "ca", "tx", "espan", "madrid", "barcelona", "portugal", "lisboa", "porto", "london", "uk", "france", "paris", "germany", "berlin"]) or any(k in niche.lower() for k in ["dentist", "lawyer", "attorney", "clinic", "realtor", "abogado"])
+
+        async with httpx.AsyncClient(verify=False, timeout=9.0, follow_redirects=True, headers=headers) as client:
+            # 0. Se for internacional (EUA/Europa), usa DuckDuckGo prioritariamente
+            if is_international:
+                q_ddg = f"{niche} in {city_region} official website contact"
+                candidates = await cls._search_duckduckgo_leads(client, q_ddg, niche, city_region, qty + 2)
+
+            # 1. Se for Brasil (ou DDG não retornou), busca no Yahoo Brasil
+            if len(candidates) < qty:
+                try:
+                    q = f"{niche} {city_region} contato whatsapp"
+                    r = await client.get("https://br.search.yahoo.com/search", params={"p": q, "n": 20})
+                    soup = BeautifulSoup(r.text, "html.parser")
+                    for div in soup.select("div.algo"):
+                        a = div.select_one("h3.title a")
+                        if not a:
+                            continue
+                        real_url = cls._decode_yahoo_url(a.get("href", ""))
+                        if not real_url.startswith("http"):
+                            continue
+                        dom = urlparse(real_url).netloc.lower().replace("www.", "")
+                        if not dom or dom in seen_domains or any(b in dom for b in blocked_domains):
+                            continue
+                        for sp in a.select("span"):
+                            sp.decompose()
+                        raw_title = a.get_text(" ", strip=True)
+                        clean_name = cls._clean_company_title(raw_title, real_url)
+                        seen_domains.add(dom)
+                        candidates.append({"company_name": clean_name, "url": real_url, "domain": dom})
+                        if len(candidates) >= qty + 3:
+                            break
+                except Exception as e:
+                    logger.warning(f"Yahoo search warning: {e}")
 
             # 2. Se ainda precisar de mais empresas, complementa com Bing Search
             if len(candidates) < qty:

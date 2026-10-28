@@ -385,21 +385,103 @@
       <!-- ABA NOVO: ROBÔ DE VENDAS & PROSPECÇÃO IA AUTÔNOMO                   -->
       <!-- =================================================================== -->
       <section x-show="activeTab === 'salesbot'" x-cloak class="space-y-6">
-        <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-          <div class="relative z-10 space-y-3 max-w-3xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 text-xs font-bold uppercase tracking-wider">
-              <span>🤖 Sales Hunter & Closer IA</span>
-              <span>•</span>
-              <span>100% Sem Custo de API</span>
+        <!-- CARD PRINCIPAL: BOTÃO LIGAR/DESLIGAR ROBÔ 24/7 -->
+        <div class="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-purple-800/40 relative overflow-hidden">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div class="space-y-3 max-w-2xl">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider"
+                  :class="overview.api_status.salesbot_active ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-slate-700/40 text-slate-300 border border-slate-600/30'">
+                  <span class="w-2.5 h-2.5 rounded-full" :class="overview.api_status.salesbot_active ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'"></span>
+                  <span x-text="overview.api_status.salesbot_active ? 'ROBÔ TRABALHANDO 24/7 (ATIVO)' : 'ROBÔ EM PAUSA (DESLIGADO)'"></span>
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-200 border border-purple-400/20">
+                  Brasil • Estados Unidos • Europa
+                </span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Robô de Prospecção & Disparo Contínuo 24 Horas
+              </h2>
+              <p class="text-xs sm:text-sm text-purple-200/90 leading-relaxed">
+                Ao ativar este interruptor, o robô roda em background no servidor sem parar: varre cidades do Brasil (SP, Campinas, Curitiba, BH), EUA (Miami, Orlando, NY) e Europa (Madrid, Lisboa), audita cada empresa, localiza e-mails reais e envia mensagens consultivas pelo seu e-mail próprio.
+              </p>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Motor Caçador de Clientes no Piloto Automático
-            </h2>
-            <p class="text-sm text-purple-200 leading-relaxed">
-              O robô localiza empresas no nicho e cidade que você escolher, gera a auditoria oficial de cada uma no banco de dados,
-              descobre o Concorrente #1 que está roubando clientes delas e prepara a abordagem com link exclusivo <strong>/?report=ID</strong>
-              para envio em 1 clique (E-mail Resend gratuito e WhatsApp sem custos de API).
+
+            <div class="flex flex-col items-start md:items-end gap-3 shrink-0">
+              <button @click="toggleAutonomousSalesBot()"
+                class="px-8 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 shadow-xl transform active:scale-95"
+                :class="overview.api_status.salesbot_active ? 'bg-rose-600 hover:bg-rose-500 text-white ring-4 ring-rose-500/30' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 ring-4 ring-emerald-500/30'">
+                <span class="text-xl" x-text="overview.api_status.salesbot_active ? '⏹️' : '▶️'"></span>
+                <span x-text="overview.api_status.salesbot_active ? 'DESLIGAR ROBÔ 24/7' : 'LIGAR ROBÔ AUTÔNOMO 24/7'"></span>
+              </button>
+              <span class="text-[11px] text-purple-300" x-text="overview.api_status.salesbot_active ? 'Varredura automática e envio a cada ~4 min' : 'Clique para colocar a prospecção no piloto automático'"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIGURAÇÃO DO E-MAIL PROFISSIONAL SMTP HOSTGATOR -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase"
+                  :class="overview.api_status.smtp_configured ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                  x-text="overview.api_status.smtp_configured ? 'SMTP CONFIGURADO' : 'PENDENTE DE ATIVAÇÃO'"></span>
+                <h3 class="text-base font-extrabold text-slate-900">E-mail Profissional HostGator / Titan Email</h3>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">
+                O robô utiliza o seu próprio e-mail (<strong>geopulseai@geopulseai.store</strong>) para enviar as mensagens de forma autônoma e sem limites de planos grátis.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button @click="testSmtp()" :disabled="isTestingSmtp"
+                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
+                <span x-show="!isTestingSmtp">🧪 Testar Conexão</span>
+                <span x-show="isTestingSmtp">Testando...</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Alerta Titan Email -->
+          <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1.5">
+            <p class="font-extrabold flex items-center gap-1.5">
+              <span>⚠️</span> Importante para o Titan Email liberar o envio do robô:
             </p>
+            <p>
+              Caso o teste aponte falha de autenticação, acesse seu Webmail Titan pelo navegador, clique na <strong>engrenagem ⚙️ (Configurações)</strong> no topo e clique em <strong>"Ativar o Titan nos outros aplicativos"</strong> (ou <em>"Enable Titan on other apps"</em>). Isso libera a conexão SMTP externa.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Servidor SMTP</label>
+              <input type="text" x-model="keyForm.smtp_host" placeholder="smtp.titan.email"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Porta (SSL / TLS)</label>
+              <select x-model="keyForm.smtp_port" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white">
+                <option value="465" selected>465 (SSL Recomendado)</option>
+                <option value="587">587 (STARTTLS)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Seu E-mail HostGator</label>
+              <input type="text" x-model="keyForm.smtp_user" placeholder="geopulseai@geopulseai.store"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Senha do E-mail</label>
+              <input type="password" x-model="keyForm.smtp_pass" placeholder="••••••••••••"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+            <span class="text-xs text-slate-500">Dados salvos de forma criptografada no servidor</span>
+            <button @click="saveApiKeys()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs transition shadow-sm">
+              💾 Salvar Configurações de E-mail
+            </button>
           </div>
         </div>
 
@@ -1230,6 +1312,10 @@
         },
 
         keyForm: {
+          smtp_host: 'smtp.titan.email',
+          smtp_port: 465,
+          smtp_user: 'geopulseai@geopulseai.store',
+          smtp_pass: 'Barra@3691',
           gemini_api_key: '',
           groq_api_key: '',
           openrouter_api_key: '',
@@ -1550,6 +1636,56 @@
           if (!dateStr) return '-';
           const d = new Date(dateStr);
           return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        },
+
+        isTestingSmtp: false,
+
+        async toggleAutonomousSalesBot() {
+          try {
+            const res = await fetch('/api/admin/sales-bot/toggle', {
+              method: 'POST',
+              headers: { 'x-admin-password': this.password }
+            });
+            const data = await res.json();
+            if (res.ok) {
+              this.overview.api_status.salesbot_active = data.salesbot_active;
+              this.toastMessage = data.message;
+            } else {
+              alert(data.detail || 'Erro ao alterar estado do robô.');
+            }
+          } catch (e) {
+            alert('Erro de conexão: ' + e.message);
+          }
+        },
+
+        async testSmtp() {
+          this.isTestingSmtp = true;
+          try {
+            const res = await fetch('/api/admin/smtp/test', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-admin-password': this.password
+              },
+              body: JSON.stringify({
+                smtp_host: this.keyForm.smtp_host || 'smtp.titan.email',
+                smtp_port: parseInt(this.keyForm.smtp_port || '465'),
+                smtp_user: this.keyForm.smtp_user || 'geopulseai@geopulseai.store',
+                smtp_pass: this.keyForm.smtp_pass || 'Barra@3691',
+                recipient: 'mwfreitas@gmail.com'
+              })
+            });
+            const data = await res.json();
+            if (data.ok) {
+              alert('🎉 Sucesso! E-mail de teste enviado para mwfreitas@gmail.com! O robô pode disparar à vontade.');
+            } else {
+              alert('⚠️ Atenção no teste SMTP: ' + data.message + '\n\nSe a mensagem for de autenticação, lembre-se de ativar "Acesso de outros aplicativos" nas configurações do seu Webmail Titan.');
+            }
+          } catch (e) {
+            alert('Erro ao testar SMTP: ' + e.message);
+          } finally {
+            this.isTestingSmtp = false;
+          }
         },
 
         async runSalesHunter() {

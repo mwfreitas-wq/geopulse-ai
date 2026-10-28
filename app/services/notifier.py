@@ -1,14 +1,117 @@
-"""E-mails transacionais (Resend), push notifications (ntfy.sh) e webhooks ao proprietário."""
+"""E-mails transacionais (Resend e SMTP HostGator/Titan), push notifications (ntfy.sh) e webhooks ao proprietário."""
+import asyncio
 import html
-from typing import Any, Dict, Optional
+import smtplib
+from email.header import Header
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from typing import Any, Dict, Optional, Tuple
 
 import httpx
 
 from app.config import settings
 
 
-async def send_email(to: str, subject: str, html_body: str, api_key: Optional[str] = None) -> bool:
-    key = (api_key or settings.RESEND_API_KEY or "").strip()
+def _send_smtp_sync(
+    to: str,
+    subject: str,
+    html_body: str,
+    smtp_host: str,
+    smtp_port: int,
+    smtp_user: str,
+    smtp_pass: str,
+    from_name: str = "GeoPulse AI"
+) -> Tuple[bool, str]:
+    """Envio síncrono via SMTP com fallback inteligente (SSL 465 ou STARTTLS 587)."""
+    # Se o usuário digitou o host com .hostgator.com.br, direciona para o host oficial da Titan se necessário
+    target_host = smtp_host.strip()
+    if target_host in ("smtp.titan.hostgator.com.br", "smtp.titan.hostgator.com"):
+        target_host = "smtp.titan.email"
+
+    msg = MIMEMultipart("alternative")
+    sender_header = f"{from_name} <{smtp_user}>"
+    msg["From"] = sender_header
+    msg["To"] = to
+    msg["Subject"] = Header(subject, "utf-8")
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+    # Tentativa na porta informada
+    ports_to_try = [smtp_port]
+    alt_port = 587 if smtp_port == 465 else 465
+    ports_to_try.append(alt_port)
+
+    last_error = ""
+    for port in ports_to_try:
+        try:
+            if port == 465:
+                with smtplib.SMTP_SSL(target_host, port, timeout=12) as server:
+                    server.login(smtp_user, smtp_pass)
+                    server.sendmail(smtp_user, [to], msg.as_string())
+                    return True, "Enviado com sucesso via SSL:465"
+            else:
+                with smtplib.SMTP(target_host, port, timeout=12) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_pass)
+                    server.sendmail(smtp_user, [to], msg.as_string())
+                    return True, f"Enviado com sucesso via TLS:{port}"
+        except Exception as e:
+            last_error = str(e)
+
+    return False, last_error
+
+
+async def send_email_smtp(
+    to: str,
+    subject: str,
+    html_body: str,
+    smtp_host: str,
+    smtp_port: int = 465,
+    smtp_user: str = "",
+    smtp_pass: str = "",
+    from_name: str = "GeoPulse AI"
+) -> Tuple[bool, str]:
+    """Envia e-mail via SMTP em thread separada para não bloquear o loop assíncrono."""
+    if not smtp_host or not smtp_user or not smtp_pass or not to or "@" not in to:
+        return False, "Configurações SMTP ou e-mail de destino incompletos"
+    return await asyncio.to_thread(
+        _send_smtp_sync,
+        to=to,
+        subject=subject,
+        html_body=html_body,
+        smtp_host=smtp_host,
+        smtp_port=smtp_port,
+        smtp_user=smtp_user,
+        smtp_pass=smtp_pass,
+        from_name=from_name
+    )
+
+
+async def send_email(to: str, subject: str, html_body: str, api_key: Optional[str] = None, keys: Optional[Dict[str, Any]] = None) -> bool:
+    """
+    Envia e-mail priorizando SMTP (HostGator/Titan) se configurado; caso contrário, utiliza Resend API.
+    """
+    keys = keys or {}
+    smtp_user = keys.get("smtp_user") or getattr(settings, "SMTP_USER", None)
+    smtp_pass = keys.get("smtp_pass") or getattr(settings, "SMTP_PASS", None)
+    smtp_host = keys.get("smtp_host") or getattr(settings, "SMTP_HOST", "smtp.titan.email")
+    smtp_port = int(keys.get("smtp_port") or getattr(settings, "SMTP_PORT", 465))
+
+    # 1. Se credenciais SMTP estiverem presentes, usa SMTP do HostGator
+    if smtp_user and smtp_pass and smtp_host:
+        ok, err = await send_email_smtp(
+            to=to,
+            subject=subject,
+            html_body=html_body,
+            smtp_host=smtp_host,
+            smtp_port=smtp_port,
+            smtp_user=smtp_user,
+            smtp_pass=smtp_pass
+        )
+        if ok:
+            return True
+
+    # 2. Fallback para Resend API
+    key = (api_key or keys.get("resend_api_key") or settings.RESEND_API_KEY or "").strip()
     if not key or not to or "@" not in to:
         return False
     try:
@@ -31,7 +134,7 @@ async def notify_owner(
 ) -> None:
     """
     Avisa o proprietário a cada novo lead quente ou venda:
-    1) E-mail HTML com botão 1-Clique para chamar o lead no WhatsApp (via Resend, se configurado)
+    1) E-mail HTML com botão 1-Clique para chamar o lead no WhatsApp
     2) Push Notification em tempo real no celular/PC via ntfy.sh (100% gratuito e sem cadastro)
     3) Webhook JSON (Make / n8n / Zapier / Evolution API) com link de abordagem pronto
     """
@@ -39,7 +142,7 @@ async def notify_owner(
     wpp_pitch_url = extra.get("whatsapp_pitch_url", "")
     report_url = extra.get("report_url", "")
 
-    # 1. E-mail HTML Rico (Resend)
+    # 1. E-mail HTML Rico
     if settings.OWNER_EMAIL:
         cta_html = ""
         if wpp_pitch_url:
@@ -65,7 +168,7 @@ async def notify_owner(
         )
         await send_email(settings.OWNER_EMAIL, f"[GeoPulse AI] {title}", html_body)
 
-    # 2. Push Instantâneo Gratuito via ntfy.sh (funciona no navegador e app Android/iOS sem chave)
+    # 2. Push Instantâneo Gratuito via ntfy.sh
     ntfy_topic = getattr(settings, "NTFY_TOPIC", "geopulse_leads_mwfreitas")
     if ntfy_topic:
         try:
@@ -85,7 +188,7 @@ async def notify_owner(
         except Exception:
             pass
 
-    # 3. Webhook Externo (Make / n8n / Zapier / Evolution API)
+    # 3. Webhook Externo
     if spark_webhook:
         try:
             payload = {

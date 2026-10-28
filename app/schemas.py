@@ -148,6 +148,14 @@ class ApiKeysUpdate(BaseModel):
     pix_key: Optional[str] = None
     pix_beneficiary: Optional[str] = None
     plan_price: Optional[str] = None
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[str] = None
+    smtp_user: Optional[str] = None
+    smtp_pass: Optional[str] = None
+    salesbot_active: Optional[str] = None
+    salesbot_niche: Optional[str] = None
+    salesbot_regions: Optional[str] = None
+    salesbot_interval_min: Optional[str] = None
 
 
 class ApiKeysStatus(BaseModel):
@@ -169,6 +177,14 @@ class ApiKeysStatus(BaseModel):
     pix_beneficiary: str = "GeoPulse AI Tecnologia"
     plan_price: float = 197.0
     spark_webhook_url: Optional[str] = None
+    smtp_configured: bool = False
+    smtp_host: Optional[str] = "smtp.titan.email"
+    smtp_port: Optional[int] = 465
+    smtp_user: Optional[str] = None
+    salesbot_active: bool = False
+    salesbot_niche: Optional[str] = "Clínica Odontológica"
+    salesbot_regions: Optional[str] = "br,us,eu"
+    salesbot_interval_min: Optional[int] = 4
     configured_count: int = 0
     active_providers: List[str] = []
     active_mode: str = "simulation"  # "live" ou "simulation"

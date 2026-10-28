@@ -136,15 +136,163 @@ async def _self_keep_alive_loop():
             pass
 
 
+GLOBAL_CITIES_PIPELINE = [
+    # Brasil (pt)
+    {"niche_pt": "Clínica Odontológica", "city": "São Paulo, SP", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Campinas, SP", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Curitiba, PR", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Belo Horizonte, MG", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Rio de Janeiro, RJ", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Porto Alegre, RS", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Brasília, DF", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Salvador, BA", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Odontológica", "city": "Florianópolis, SC", "region": "br", "lang": "pt"},
+    # Estados Unidos (en)
+    {"niche_pt": "Dental Clinic", "city": "Miami, FL", "region": "us", "lang": "en"},
+    {"niche_pt": "Dental Clinic", "city": "Orlando, FL", "region": "us", "lang": "en"},
+    {"niche_pt": "Dental Clinic", "city": "Austin, TX", "region": "us", "lang": "en"},
+    {"niche_pt": "Dental Clinic", "city": "New York, NY", "region": "us", "lang": "en"},
+    {"niche_pt": "Dental Clinic", "city": "Los Angeles, CA", "region": "us", "lang": "en"},
+    {"niche_pt": "Dental Clinic", "city": "Chicago, IL", "region": "us", "lang": "en"},
+    # Europa (es / pt / en)
+    {"niche_pt": "Clínica Dental", "city": "Madrid, España", "region": "eu", "lang": "es"},
+    {"niche_pt": "Clínica Dental", "city": "Barcelona, España", "region": "eu", "lang": "es"},
+    {"niche_pt": "Clínica Dentária", "city": "Lisboa, Portugal", "region": "eu", "lang": "pt"},
+    {"niche_pt": "Clínica Dentária", "city": "Porto, Portugal", "region": "eu", "lang": "pt"},
+    {"niche_pt": "Dental Practice", "city": "London, UK", "region": "eu", "lang": "en"},
+]
+
+async def _salesbot_autonomous_worker():
+    """
+    Loop Contínuo do Robô de Vendas 24/7.
+    Quando ativado pelo admin, percorre infinitamente cidades no Brasil, EUA e Europa,
+    localiza empresas reais, executa auditoria e envia e-mail frio consultivo
+    respeitando o intervalo seguro anti-spam (ex: a cada 3 a 5 minutos).
+    """
+    city_idx = 0
+    await asyncio.sleep(15)  # Aguarda inicialização completa do app
+    while True:
+        try:
+            async with AsyncSessionLocal() as db:
+                keys = await get_all_configured_keys(db)
+                is_active = (keys.get("salesbot_active") == "1")
+                if is_active:
+                    custom_niche = (keys.get("salesbot_niche") or "").strip()
+                    allowed_regions = (keys.get("salesbot_regions") or "br,us,eu").lower().split(",")
+                    interval_min = max(2, int(keys.get("salesbot_interval_min") or 4))
+
+                    # Filtra cidades pelas regiões permitidas
+                    eligible_cities = [c for c in GLOBAL_CITIES_PIPELINE if c["region"] in allowed_regions]
+                    if not eligible_cities:
+                        eligible_cities = GLOBAL_CITIES_PIPELINE
+
+                    target_entry = eligible_cities[city_idx % len(eligible_cities)]
+                    city_idx += 1
+
+                    niche_to_search = custom_niche if custom_niche else target_entry["niche_pt"]
+                    # Traduz para o idioma se for busca em outro país
+                    if target_entry["lang"] == "en" and custom_niche in ("Clínica Odontológica", ""):
+                        niche_to_search = "Dental Clinic"
+                    elif target_entry["lang"] == "es" and custom_niche in ("Clínica Odontológica", ""):
+                        niche_to_search = "Clínica Dental"
+
+                    logger.info(f"🤖 [SalesBot 24/7] Iniciando ciclo autônomo: {niche_to_search} em {target_entry['city']} ({target_entry['region'].upper()})")
+
+                    raw_leads = await SalesBotService.hunt_leads(
+                        niche=niche_to_search,
+                        city_region=target_entry["city"],
+                        quantity=2,
+                        keys=keys
+                    )
+
+                    base_site = settings.SITE_URL.rstrip("/")
+                    for item in raw_leads:
+                        c_name = item["company_name"]
+                        slug_name = re.sub(r"[^a-zA-Z0-9]", "", c_name).lower() or "empresa"
+                        c_url = item.get("url") or f"https://www.{slug_name}.com"
+                        c_email = item.get("email", "")
+                        c_phone = item.get("phone", "")
+
+                        # Localiza ou cadastra
+                        comp_res = await db.execute(select(Company).filter_by(name=c_name, city_region=target_entry["city"]))
+                        company = comp_res.scalars().first()
+                        if not company:
+                            company = Company(
+                                name=c_name,
+                                url=c_url,
+                                niche=niche_to_search,
+                                city_region=target_entry["city"],
+                                whatsapp=c_phone,
+                                email=c_email,
+                                entity_type="company",
+                                is_paid=False
+                            )
+                            db.add(company)
+                            await db.commit()
+                            await db.refresh(company)
+
+                        score_val = 32.5
+                        try:
+                            profile = AuditorService.compute_real_site_profile(c_name, niche_to_search, target_entry["city"], c_url, "", {})
+                            score_val = round(float(profile.get("visibility_score", 32.5)), 1)
+                        except Exception:
+                            pass
+
+                        top_comp = f"Líderes de Referência em {target_entry['city'].split(',')[0]}"
+                        report_url = f"{base_site}/?report={company.id}"
+                        outreach = SalesBotService.build_cold_outreach(
+                            company_name=c_name,
+                            niche=niche_to_search,
+                            city_region=target_entry["city"],
+                            score=score_val,
+                            top_competitor=top_comp,
+                            report_url=report_url,
+                            phone=c_phone
+                        )
+
+                        email_sent = False
+                        if c_email and "@" in c_email and not c_email.endswith("exemplo.com.br"):
+                            email_sent = await send_email(c_email, outreach["email_subject"], outreach["email_html"], keys=keys)
+
+                        status_label = "✉️ E-mail Enviado" if email_sent else ("📱 WhatsApp Extraído" if c_phone else "📄 Relatório Gerado")
+                        lead_cap = LeadCapture(
+                            company_id=company.id,
+                            company_name=c_name,
+                            contact_name=item.get("decision_maker", "Diretoria"),
+                            contact_email=c_email,
+                            contact_phone=c_phone,
+                            niche=niche_to_search,
+                            city_region=target_entry["city"],
+                            score=score_val,
+                            status=status_label,
+                            notes=f"AutoBot 24/7 • {report_url}"
+                        )
+                        db.add(lead_cap)
+                        await db.commit()
+                        logger.info(f"🤖 [SalesBot 24/7] Lead processado: {c_name} ({target_entry['city']}) | Status: {status_label}")
+
+                        if email_sent:
+                            # Aguarda intervalo seguro entre cada envio individual
+                            await asyncio.sleep(interval_min * 60)
+                            break
+        except Exception as e:
+            logger.warning(f"Erro no loop do SalesBot 24/7: {e}")
+
+        # Intervalo entre rodadas do loop
+        await asyncio.sleep(180)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Inicializa tabelas do banco SQLite
     await init_db()
     task = asyncio.create_task(_monitoring_loop())
     keep_alive_task = asyncio.create_task(_self_keep_alive_loop())
+    salesbot_task = asyncio.create_task(_salesbot_autonomous_worker())
     yield
     task.cancel()
     keep_alive_task.cancel()
+    salesbot_task.cancel()
 
 
 app = FastAPI(
@@ -297,7 +445,15 @@ async def get_all_configured_keys(db: AsyncSession) -> dict:
         "mercadopago_public_key",
         "pix_key",
         "pix_beneficiary",
-        "plan_price"
+        "plan_price",
+        "smtp_host",
+        "smtp_port",
+        "smtp_user",
+        "smtp_pass",
+        "salesbot_active",
+        "salesbot_niche",
+        "salesbot_regions",
+        "salesbot_interval_min"
     ]
     res = {}
     for k in key_names:
@@ -429,6 +585,14 @@ async def get_api_keys_status(db: AsyncSession = Depends(get_db)):
         perplexity_configured=bool(keys.get("perplexity_api_key")),
         resend_configured=bool(keys.get("resend_api_key") or settings.RESEND_API_KEY),
         spark_configured=bool(keys.get("spark_webhook_url")),
+        smtp_configured=bool(keys.get("smtp_user") and keys.get("smtp_pass")),
+        smtp_host=keys.get("smtp_host") or "smtp.titan.email",
+        smtp_port=int(keys.get("smtp_port") or 465),
+        smtp_user=keys.get("smtp_user") or "",
+        salesbot_active=(keys.get("salesbot_active") == "1"),
+        salesbot_niche=keys.get("salesbot_niche") or "Clínica Odontológica",
+        salesbot_regions=keys.get("salesbot_regions") or "br,us,eu",
+        salesbot_interval_min=int(keys.get("salesbot_interval_min") or 4),
         mercadopago_configured=bool(keys.get("mercadopago_access_token")),
         mercadopago_public_key=keys.get("mercadopago_public_key"),
         pix_key=keys.get("pix_key") or "contato@geopulse.ai",
@@ -460,7 +624,15 @@ async def update_api_keys(keys_data: ApiKeysUpdate, db: AsyncSession = Depends(g
         "mercadopago_public_key",
         "pix_key",
         "pix_beneficiary",
-        "plan_price"
+        "plan_price",
+        "smtp_host",
+        "smtp_port",
+        "smtp_user",
+        "smtp_pass",
+        "salesbot_active",
+        "salesbot_niche",
+        "salesbot_regions",
+        "salesbot_interval_min"
     ]
     for field in fields:
         val = getattr(keys_data, field, None)
@@ -2596,4 +2768,50 @@ async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(g
         "ok": True,
         "count": len(results),
         "leads": results
+    }
+
+
+class SmtpTestRequest(BaseModel):
+    smtp_host: str
+    smtp_port: int = 465
+    smtp_user: str
+    smtp_pass: str
+    recipient: str
+
+
+@app.post("/api/admin/smtp/test", dependencies=[Depends(verify_admin_password_header)])
+async def test_smtp_connection(data: SmtpTestRequest):
+    """Testa envio de e-mail ao vivo via SMTP do HostGator/Titan."""
+    from app.services.notifier import send_email_smtp
+    html_test = f"""
+    <div style='font-family:Arial,sans-serif;max-width:550px;padding:20px;border:1px solid #10b981;border-radius:12px;'>
+      <h2 style='color:#059669;margin-top:0;'>🎉 Conexão SMTP HostGator Funcionando!</h2>
+      <p>Este é um e-mail de teste disparado pelo motor autônomo do <strong>GeoPulse AI</strong>.</p>
+      <p><strong>Servidor:</strong> {data.smtp_host}:{data.smtp_port}<br>
+      <strong>Remetente:</strong> {data.smtp_user}</p>
+      <p style='color:#64748b;font-size:12px;'>Seu Robô de Vendas está pronto para prospectar e disparar e-mails 24h por dia.</p>
+    </div>
+    """
+    ok, msg = await send_email_smtp(
+        to=data.recipient,
+        subject="[GeoPulse AI] Teste de Conexão SMTP com Sucesso",
+        html_body=html_test,
+        smtp_host=data.smtp_host,
+        smtp_port=data.smtp_port,
+        smtp_user=data.smtp_user,
+        smtp_pass=data.smtp_pass
+    )
+    return {"ok": ok, "message": msg}
+
+
+@app.post("/api/admin/sales-bot/toggle", dependencies=[Depends(verify_admin_password_header)])
+async def toggle_sales_bot_autonomous(db: AsyncSession = Depends(get_db)):
+    """Liga ou Desliga o Robô de Vendas Autônomo 24/7."""
+    curr = await get_system_key(db, "salesbot_active")
+    new_state = "0" if curr == "1" else "1"
+    await set_system_key(db, "salesbot_active", new_state)
+    return {
+        "ok": True,
+        "salesbot_active": (new_state == "1"),
+        "message": "🟢 Robô de Vendas Autônomo 24/7 ATIVADO! Trabalhando continuamente." if new_state == "1" else "🔴 Robô de Vendas Autônomo PAUSADO."
     }

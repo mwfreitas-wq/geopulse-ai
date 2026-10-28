@@ -2778,6 +2778,134 @@ async def delete_admin_lead(
 
 
 # ==========================================
+# BACKUP & RESTAURAÇÃO DE SEGURANÇA (JSON)
+# ==========================================
+
+@app.get("/api/admin/backup/export", dependencies=[Depends(verify_admin_password_header)])
+async def export_system_backup(db: AsyncSession = Depends(get_db)):
+    """Exporta um arquivo JSON de backup contendo todas as chaves de API, empresas cadastradas e leads."""
+    settings_res = await db.execute(select(SystemSetting))
+    settings_data = [{"key": s.key, "value": s.value} for s in settings_res.scalars().all()]
+
+    companies_res = await db.execute(select(Company))
+    companies_data = []
+    for c in companies_res.scalars().all():
+        companies_data.append({
+            "id": c.id,
+            "name": c.name,
+            "url": c.url,
+            "niche": c.niche,
+            "city_region": c.city_region,
+            "entity_type": c.entity_type,
+            "whatsapp": c.whatsapp,
+            "email": c.email,
+            "competitors": c.competitors,
+            "is_paid": c.is_paid,
+            "payment_amount": c.payment_amount,
+            "access_token": c.access_token,
+            "rating_value": c.rating_value,
+            "review_count": c.review_count,
+            "services_list": c.services_list,
+            "created_at": c.created_at.isoformat() if c.created_at else None
+        })
+
+    leads_res = await db.execute(select(LeadCapture))
+    leads_data = []
+    for l in leads_res.scalars().all():
+        leads_data.append({
+            "id": l.id,
+            "company_id": l.company_id,
+            "company_name": l.company_name,
+            "contact_name": l.contact_name,
+            "contact_email": l.contact_email,
+            "contact_phone": l.contact_phone,
+            "niche": l.niche,
+            "city_region": l.city_region,
+            "score": l.score,
+            "status": l.status,
+            "notes": l.notes,
+            "created_at": l.created_at.isoformat() if l.created_at else None
+        })
+
+    backup_payload = {
+        "geopulse_backup_version": "1.0",
+        "exported_at": datetime.utcnow().isoformat(),
+        "system_settings": settings_data,
+        "companies": companies_data,
+        "leads": leads_data
+    }
+    fname = f"geopulse_backup_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+    return JSONResponse(
+        content=backup_payload,
+        headers={"Content-Disposition": f"attachment; filename={fname}"}
+    )
+
+
+@app.post("/api/admin/backup/import", dependencies=[Depends(verify_admin_password_header)])
+async def import_system_backup(data: dict, db: AsyncSession = Depends(get_db)):
+    """Restaura chaves de API, empresas e leads a partir de um JSON de backup."""
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=400, detail="Formato de backup inválido.")
+
+    imported_keys = 0
+    for s in data.get("system_settings", []):
+        k, v = s.get("key"), s.get("value")
+        if k:
+            await set_system_key(db, k, v)
+            imported_keys += 1
+
+    imported_companies = 0
+    for c in data.get("companies", []):
+        c_name = c.get("name")
+        c_city = c.get("city_region", "")
+        if not c_name:
+            continue
+        existing = (await db.execute(select(Company).filter_by(name=c_name, city_region=c_city))).scalars().first()
+        if not existing:
+            new_comp = Company(
+                name=c_name,
+                url=c.get("url", ""),
+                niche=c.get("niche", ""),
+                city_region=c_city,
+                entity_type=c.get("entity_type", "company"),
+                whatsapp=c.get("whatsapp", ""),
+                email=c.get("email", ""),
+                competitors=c.get("competitors", ""),
+                is_paid=c.get("is_paid", False),
+                access_token=c.get("access_token") or secrets.token_urlsafe(24)
+            )
+            db.add(new_comp)
+            imported_companies += 1
+
+    imported_leads = 0
+    for l in data.get("leads", []):
+        l_name = l.get("company_name")
+        if not l_name:
+            continue
+        new_lead = LeadCapture(
+            company_id=l.get("company_id"),
+            company_name=l_name,
+            contact_name=l.get("contact_name", "Diretoria"),
+            contact_email=l.get("contact_email", ""),
+            contact_phone=l.get("contact_phone", ""),
+            niche=l.get("niche", ""),
+            city_region=l.get("city_region", ""),
+            score=l.get("score", 32.5),
+            status=l.get("status", "Novo Lead"),
+            notes=l.get("notes", "Restaurado via Backup")
+        )
+        db.add(new_lead)
+        imported_leads += 1
+
+    await db.commit()
+    return {
+        "ok": True,
+        "message": f"Backup restaurado com sucesso! {imported_keys} chaves, {imported_companies} empresas e {imported_leads} leads salvos no banco."
+    }
+
+
+
+# ==========================================
 # MODO AGÊNCIA: GERADOR DE PROPOSTA COMERCIAL & SCRIPTS DE VENDAS
 # ==========================================
 

@@ -8,10 +8,23 @@ from sqlalchemy import text
 
 from app.config import settings
 
+def normalize_db_url(raw_url: str) -> str:
+    url = (raw_url or "").strip()
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+asyncpg://", 1)
+    if url.startswith("postgresql://") and not url.startswith("postgresql+asyncpg://"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    if url.startswith("mysql://") and not (url.startswith("mysql+aiomysql://") or url.startswith("mysql+asyncmy://")):
+        return url.replace("mysql://", "mysql+aiomysql://", 1)
+    if url.startswith("sqlite://") and not url.startswith("sqlite+aiosqlite://"):
+        return url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+    return url or "sqlite+aiosqlite:///./geopulse.db"
+
+db_url = normalize_db_url(settings.DATABASE_URL)
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    db_url,
     echo=False,
-    connect_args={"check_same_thread": False, "timeout": 30} if "sqlite" in settings.DATABASE_URL else {}
+    connect_args={"check_same_thread": False, "timeout": 30} if "sqlite" in db_url else {}
 )
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
@@ -31,7 +44,7 @@ async def get_db():
 
 async def init_db():
     async with engine.begin() as conn:
-        if "sqlite" in settings.DATABASE_URL:
+        if "sqlite" in db_url:
             await conn.execute(text("PRAGMA journal_mode=WAL"))
             await conn.execute(text("PRAGMA busy_timeout=30000"))
         await conn.run_sync(Base.metadata.create_all)

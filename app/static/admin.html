@@ -104,6 +104,16 @@
             <span :class="loading ? 'animate-spin' : ''">🔄</span> Atualizar
           </button>
 
+          <!-- Backup e Restauração de Dados -->
+          <button @click="downloadBackupJson()" title="Baixa um arquivo JSON com todas as chaves e leads no seu PC" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-700 transition flex items-center gap-1.5 shadow-sm">
+            <span>💾</span> Backup JSON
+          </button>
+
+          <button @click="$refs.backupFileInput.click()" title="Restaura chaves e leads a partir de um backup salvo" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-700 transition flex items-center gap-1.5 shadow-sm">
+            <span>📥</span> Restaurar
+          </button>
+          <input type="file" x-ref="backupFileInput" @change="uploadBackupJson($event)" accept=".json" class="hidden" />
+
           <a href="/diretorio" target="_blank" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-emerald-700 transition shadow-sm">
             🌐 Diretório Público
           </a>
@@ -1828,6 +1838,55 @@
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+        },
+
+        async downloadBackupJson() {
+          try {
+            const res = await fetch('/api/admin/backup/export', {
+              headers: { 'x-admin-password': this.password }
+            });
+            if (!res.ok) throw new Error('Falha ao exportar backup.');
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `geopulse_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            this.toastMessage = '💾 Backup baixado com sucesso no seu computador!';
+            setTimeout(() => { this.toastMessage = ''; }, 3500);
+          } catch (e) {
+            alert('Erro ao exportar backup: ' + e.message);
+          }
+        },
+
+        async uploadBackupJson(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+          try {
+            const text = await file.text();
+            const json = JSON.parse(text);
+            const res = await fetch('/api/admin/backup/import', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-admin-password': this.password
+              },
+              body: JSON.stringify(json)
+            });
+            const data = await res.json();
+            if (res.ok) {
+              alert(data.message || 'Backup restaurado com sucesso!');
+              await this.loadOverview();
+            } else {
+              alert(data.detail || 'Erro ao restaurar backup.');
+            }
+          } catch (e) {
+            alert('Arquivo de backup inválido: ' + e.message);
+          } finally {
+            event.target.value = '';
+          }
         }
       };
     }

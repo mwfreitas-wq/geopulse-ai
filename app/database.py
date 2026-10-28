@@ -9,7 +9,14 @@ from sqlalchemy import text
 from app.config import settings
 
 def normalize_db_url(raw_url: str) -> str:
+    from urllib.parse import quote_plus
     url = (raw_url or "").strip()
+    if url.count("@") > 1 and "://" in url:
+        proto, rest = url.split("://", 1)
+        userinfo, hostinfo = rest.rsplit("@", 1)
+        if ":" in userinfo:
+            user, pwd = userinfo.split(":", 1)
+            url = f"{proto}://{user}:{quote_plus(pwd)}@{hostinfo}"
     if url.startswith("postgres://"):
         return url.replace("postgres://", "postgresql+asyncpg://", 1)
     if url.startswith("postgresql://") and not url.startswith("postgresql+asyncpg://"):

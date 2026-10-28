@@ -7,9 +7,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Any, Dict, Optional, Tuple
 
+import logging
 import httpx
 
 from app.config import settings
+
+logger = logging.getLogger("geopulse")
 
 
 def _send_smtp_sync(
@@ -115,14 +118,19 @@ async def send_email(to: str, subject: str, html_body: str, api_key: Optional[st
     if not key or not to or "@" not in to:
         return False
     try:
+        mail_from = (keys.get("resend_from") or settings.MAIL_FROM or "GeoPulse AI <contato@geopulseai.store>").strip()
         async with httpx.AsyncClient(timeout=12.0) as client:
             res = await client.post(
                 "https://api.resend.com/emails",
                 headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                json={"from": settings.MAIL_FROM, "to": [to], "subject": subject, "html": html_body},
+                json={"from": mail_from, "to": [to], "subject": subject, "html": html_body},
             )
-            return res.status_code in (200, 201, 202)
-    except Exception:
+            if res.status_code in (200, 201, 202):
+                return True
+            logger.warning(f"[Resend] Falha de envio para {to}: {res.status_code} - {res.text}")
+            return False
+    except Exception as e:
+        logger.warning(f"[Resend] Exceção no envio para {to}: {e}")
         return False
 
 

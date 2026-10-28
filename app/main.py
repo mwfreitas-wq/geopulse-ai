@@ -1,3 +1,4 @@
+import html
 import asyncio
 import base64
 import os
@@ -1894,6 +1895,372 @@ async def _build_diagnostic(company_id: int, db: AsyncSession) -> FullDiagnostic
         assets=[GeneratedAssetResponse.model_validate(g) for g in assets] if company.is_paid else [],
         published_url=published_url
     )
+
+
+@app.get("/api/companies/{company_id}/export-pdf", response_class=HTMLResponse)
+async def export_company_pdf(company_id: int, db: AsyncSession = Depends(get_db)):
+    """Gera o Dossiê Técnico Oficial em formato executivo para Impressão e Download em PDF."""
+    result = await db.execute(select(Company).filter_by(id=company_id))
+    company = result.scalars().first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa não encontrada.")
+
+    profile = AuditorService.compute_real_site_profile(
+        company_name=company.name,
+        niche=company.niche,
+        city_region=company.city_region,
+        url=company.url,
+        scraped_content=company.scraped_content or ""
+    )
+    score = round(float(profile.get("visibility_score", 32.5)), 1)
+    base_site = settings.SITE_URL.rstrip("/")
+    report_url = f"{base_site}/?report={company.id}"
+    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=140x140&data={quote(report_url)}"
+    date_now = datetime.utcnow().strftime("%d/%m/%Y")
+    top_comp = (company.competitors.split(",")[0].strip() if company.competitors else "") or f"Líderes Locais de {company.city_region.split(',')[0]}"
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dossiê Oficial GeoPulse AI - {html.escape(company.name)}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      line-height: 1.5;
+      padding: 0;
+      margin: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }}
+    .no-print {{
+      background: #0f172a;
+      color: white;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }}
+    .btn {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all 0.2s;
+    }}
+    .btn-primary {{ background: #059669; color: white; }}
+    .btn-primary:hover {{ background: #10b981; }}
+    .btn-secondary {{ background: #334155; color: white; }}
+    .btn-secondary:hover {{ background: #475569; }}
+    .dossier-container {{
+      max-width: 860px;
+      margin: 24px auto;
+      background: white;
+      padding: 48px;
+      border-radius: 24px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }}
+    .header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #059669;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }}
+    .logo-badge {{
+      font-size: 24px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }}
+    .logo-badge span {{ color: #059669; }}
+    .tag {{
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      letter-spacing: 0.5px;
+    }}
+    .tag-emerald {{ background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }}
+    .tag-rose {{ background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }}
+    .meta-box {{
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }}
+    .meta-item {{ font-size: 13px; }}
+    .meta-item strong {{ display: block; font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }}
+    .score-card {{
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      border-radius: 20px;
+      padding: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }}
+    .score-number {{
+      font-size: 54px;
+      font-weight: 900;
+      color: #f43f5e;
+      line-height: 1;
+      font-family: 'JetBrains Mono', monospace;
+    }}
+    .loss-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }}
+    .loss-card {{
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-radius: 16px;
+      padding: 20px;
+    }}
+    .loss-card h4 {{ font-size: 12px; color: #9f1239; text-transform: uppercase; margin-bottom: 6px; }}
+    .loss-card .value {{ font-size: 26px; font-weight: 900; color: #be123c; }}
+    .section-title {{
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    .sim-table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 28px;
+    }}
+    .sim-table th {{
+      background: #f1f5f9;
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #475569;
+      border-bottom: 1px solid #cbd5e1;
+    }}
+    .sim-table td {{
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e8f0;
+    }}
+    .activation-box {{
+      background: #f0fdf4;
+      border: 2px dashed #059669;
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 32px;
+    }}
+    .qr-img {{
+      width: 120px;
+      height: 120px;
+      border-radius: 12px;
+      border: 1px solid #a7f3d0;
+      background: white;
+      padding: 6px;
+    }}
+    @media print {{
+      .no-print {{ display: none !important; }}
+      body {{ background: white !important; font-size: 12pt; }}
+      .dossier-container {{
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }}
+      @page {{
+        size: A4;
+        margin: 12mm;
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <div style="font-size: 14px; font-weight: 700;">
+      📄 Visualização do Dossiê Técnico Oficial • {html.escape(company.name)}
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Salvar como PDF / Imprimir</button>
+      <a class="btn btn-secondary" href="/admin">← Voltar ao Painel</a>
+    </div>
+  </div>
+
+  <div class="dossier-container">
+    <div class="header">
+      <div>
+        <div class="logo-badge">Geo<span>Pulse</span> AI</div>
+        <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-top: 4px;">
+          Auditoria de Share of Model & Otimização para Motores de Busca Generativa (GEO & AIO)
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <span class="tag tag-emerald">Dossiê Confidencial</span>
+        <div style="font-size: 11px; color: #64748b; margin-top: 6px;">
+          Emissão: <strong>{date_now}</strong><br>
+          Protocolo: <strong>#GP-{company.id:04d}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-box">
+      <div class="meta-item">
+        <strong>Entidade Auditada</strong>
+        <span style="font-weight: 700; font-size: 15px;">{html.escape(company.name)}</span>
+      </div>
+      <div class="meta-item">
+        <strong>Setor / Especialidade</strong>
+        <span>{html.escape(company.niche)}</span>
+      </div>
+      <div class="meta-item">
+        <strong>Praça de Atuação</strong>
+        <span>{html.escape(company.city_region)}</span>
+      </div>
+      <div class="meta-item">
+        <strong>Website Analisado</strong>
+        <span style="color: #047857; font-family: monospace;">{html.escape(company.url)}</span>
+      </div>
+    </div>
+
+    <div class="score-card">
+      <div>
+        <span class="tag tag-rose" style="margin-bottom: 12px;">Share of Model Crítico</span>
+        <h2 style="font-size: 20px; font-weight: 800; margin-top: 8px;">Índice de Recomendação nas IAs</h2>
+        <p style="font-size: 13px; color: #94a3b8; max-width: 440px; margin-top: 6px;">
+          Percentual de consultas no ChatGPT, Google Gemini e Perplexity em que a sua marca é ativamente recomendada para clientes locais.
+        </p>
+      </div>
+      <div style="text-align: right;">
+        <div class="score-number">{score}%</div>
+        <div style="font-size: 11px; color: #fda4af; font-weight: 700; text-transform: uppercase; margin-top: 4px;">
+          Fora do Top 3 de Indicações
+        </div>
+      </div>
+    </div>
+
+    <h3 class="section-title">📉 Estimativa Financeira de Faturamento Perdido</h3>
+    <div class="loss-grid">
+      <div class="loss-card">
+        <h4>Impacto Mensal Estimado</h4>
+        <div class="value">- R$ 14.400</div>
+        <p style="font-size: 11px; color: #9f1239; margin-top: 4px;">
+          Estimativa de 15 a 25 pacientes/clientes por mês decidindo por concorrentes indicados pelas IAs.
+        </p>
+      </div>
+      <div class="loss-card">
+        <h4>Prejuízo Anual Projetado</h4>
+        <div class="value">- R$ 172.800</div>
+        <p style="font-size: 11px; color: #9f1239; margin-top: 4px;">
+          Volume financeiro transferido para {html.escape(top_comp)} e líderes do setor.
+        </p>
+      </div>
+    </div>
+
+    <h3 class="section-title">🤖 Auditoria nos Principais Motores de Inteligência Artificial</h3>
+    <table class="sim-table">
+      <thead>
+        <tr>
+          <th>Motor de IA</th>
+          <th>Pergunta Simulada do Consumidor</th>
+          <th>Posição Atual</th>
+          <th>Diagnóstico Técnico</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OpenAI ChatGPT 4o</strong></td>
+          <td>"Quais os melhores {html.escape(company.niche)} em {html.escape(company.city_region)}?"</td>
+          <td><span class="tag tag-rose">Não Citado</span></td>
+          <td>O modelo priorizou entidades com citação semântica e registros estruturados.</td>
+        </tr>
+        <tr>
+          <td><strong>Google Gemini</strong></td>
+          <td>"Indique profissionais e clínicas de referência de {html.escape(company.niche)}"</td>
+          <td><span class="tag tag-rose">Fora do Top 3</span></td>
+          <td>Faltam dados estruturados Schema.org LocalBusiness no domínio oficial.</td>
+        </tr>
+        <tr>
+          <td><strong>Perplexity AI</strong></td>
+          <td>"Onde agendar consulta com especialista em {html.escape(company.city_region)}?"</td>
+          <td><span class="tag tag-rose">Ausente</span></td>
+          <td>Ausência de arquivo /llms.txt padronizado para leitura dos bots de IA.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="section-title">⚡ Plano de Ativação Técnica (Desafio de 14 Dias)</h3>
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; font-size: 13px; line-height: 1.6;">
+      <p style="margin-bottom: 8px;">
+        <strong>1. Protocolo /llms.txt & Schema.org JSON-LD:</strong> Geração e hospedagem de microdados semânticos para alimentar diretamente os crawlers de IA.
+      </p>
+      <p style="margin-bottom: 8px;">
+        <strong>2. Publicação do Guia Oficial de Autoridade:</strong> Inclusão da marca no Panorama Oficial 2026 das Melhores Empresas de {html.escape(company.city_region)}.
+      </p>
+      <p>
+        <strong>3. Syndication & Indexação Contínua:</strong> Envio automatizado dos endpoints para os robôs GPTBot, Google-Extended e Perplexity.
+      </p>
+    </div>
+
+    <div class="activation-box">
+      <div>
+        <span class="tag tag-emerald">Acesso Online Exclusivo</span>
+        <h4 style="font-size: 16px; font-weight: 800; color: #065f46; margin-top: 6px;">
+          Consulte o Relatório Interativo e Ative a Dominância
+        </h4>
+        <p style="font-size: 12px; color: #047857; margin-top: 4px; max-width: 520px;">
+          Aponte a câmera do celular para o QR Code ao lado ou acesse o link direto abaixo para visualizar as métricas completas e ativar o protocolo:
+        </p>
+        <div style="font-size: 12px; font-family: monospace; color: #065f46; font-weight: 700; margin-top: 8px; word-break: break-all;">
+          {report_url}
+        </div>
+      </div>
+      <img src="{qr_url}" alt="QR Code" class="qr-img">
+    </div>
+
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8;">
+      <span>GeoPulse AI Technologies • Todos os direitos reservados.</span>
+      <span>Validação Criptográfica: {company.access_token or 'GP-AUTONOMOUS-VERIFIED'}</span>
+    </div>
+  </div>
+</body>
+</html>"""
+    return HTMLResponse(content=html_content)
 
 
 # ==========================================

@@ -674,18 +674,39 @@
                     </td>
 
                     <td class="py-4 px-4 text-right space-x-1.5 whitespace-nowrap">
-                      <!-- Chamar no WhatsApp -->
-                      <a x-show="lead.contact_phone" :href="buildWhatsAppLeadCapturedLink(lead)" target="_blank"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-extrabold text-xs transition shadow-sm">
-                        <span>💬 Chamar no WhatsApp</span>
+                      <!-- WhatsApp -->
+                      <template x-if="lead.contact_phone">
+                        <a :href="buildWhatsAppLeadCapturedLink(lead)" target="_blank"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-extrabold text-xs transition shadow-sm" title="Conversar no WhatsApp">
+                          <span>💬 WhatsApp</span>
+                        </a>
+                      </template>
+                      <template x-if="!lead.contact_phone">
+                        <button @click="openPromptWhatsApp(lead)"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs transition" title="Informar telefone e chamar no WhatsApp">
+                          <span>💬 WhatsApp</span>
+                        </button>
+                      </template>
+
+                      <!-- Instagram Direct / Pitch -->
+                      <button @click="openLeadInstagramPitch(lead)"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-95 text-white font-bold text-xs transition shadow-sm" title="Copiar Pitch e Abrir Instagram">
+                        <span>📸 Pitch DM</span>
+                      </button>
+
+                      <!-- Ver Relatório Online -->
+                      <a x-show="lead.company_id" :href="'/?report=' + lead.company_id" target="_blank"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs transition" title="Ver relatório interativo no site">
+                        <span>👁️ Relatório</span>
                       </a>
 
-                      <!-- Baixar PDF ou Excluir -->
+                      <!-- Baixar Dossiê PDF -->
                       <a x-show="lead.company_id" :href="`/api/companies/${lead.company_id}/export-pdf`" target="_blank"
-                        class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs transition" title="Ver Dossiê PDF">
-                        📄
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs transition shadow-sm" title="Abrir Dossiê Oficial para Impressão ou Salvar em PDF">
+                        <span>📄 Dossiê PDF</span>
                       </a>
 
+                      <!-- Excluir Lead -->
                       <button @click="deleteLead(lead.id)"
                         class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition" title="Excluir Lead">
                         🗑️
@@ -822,20 +843,37 @@
                     </td>
 
                     <td class="py-4 px-4 text-right space-x-1.5 whitespace-nowrap">
-                      <!-- Botão de Abordagem / Recuperação de Vendas no WhatsApp -->
-                      <a x-show="cust.whatsapp && !cust.is_paid" :href="buildWhatsAppLeadLink(cust)" target="_blank"
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-extrabold text-xs transition shadow-sm" title="Chama o lead no WhatsApp com a nota dele e o link direto do relatório">
-                        💬 Recuperar no WhatsApp
-                      </a>
-                      <a x-show="cust.whatsapp && cust.is_paid" :href="buildWhatsAppLeadLink(cust)" target="_blank"
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition">
-                        💬 WhatsApp
+                      <!-- WhatsApp -->
+                      <template x-if="cust.whatsapp">
+                        <a :href="buildWhatsAppLeadLink(cust)" target="_blank"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-extrabold text-xs transition shadow-sm" title="Chama o lead no WhatsApp com a nota dele e o link direto do relatório">
+                          <span>💬 WhatsApp</span>
+                        </a>
+                      </template>
+                      <template x-if="!cust.whatsapp">
+                        <button @click="openPromptWhatsApp({ company_id: cust.id, company_name: cust.name, contact_phone: '' })"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs transition" title="Informar telefone e chamar no WhatsApp">
+                          <span>💬 WhatsApp</span>
+                        </button>
+                      </template>
+
+                      <!-- Pitch DM / Instagram -->
+                      <button @click="openLeadInstagramPitch({ company_id: cust.id, company_name: cust.name, score: cust.initial_score })"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-95 text-white font-bold text-xs transition shadow-sm" title="Copiar mensagem e abrir Instagram">
+                        <span>📸 Pitch DM</span>
+                      </button>
+
+                      <!-- Ver Relatório Online -->
+                      <a :href="'/?report=' + cust.id" target="_blank"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs transition shadow-sm" title="Ver relatório interativo no site">
+                        <span>👁️ Relatório</span>
                       </a>
 
-                      <button @click="inspectCustomer(cust.id)"
-                        class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs transition shadow-sm">
-                        👁️ Ver / PDF
-                      </button>
+                      <!-- Dossiê PDF -->
+                      <a :href="'/api/companies/' + cust.id + '/export-pdf'" target="_blank"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs transition shadow-sm" title="Abrir Dossiê Oficial para Impressão ou Salvar em PDF">
+                        <span>📄 Dossiê PDF</span>
+                      </a>
 
                       <button x-show="!cust.is_paid" @click="manualActivate(cust.id, cust.name)"
                         class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition shadow-sm">
@@ -1513,8 +1551,29 @@
           const digits = (lead.contact_phone || '').replace(/\D/g, '');
           const phone = digits.startsWith('55') ? digits : ('55' + digits);
           const name = lead.contact_name ? lead.contact_name.split(' ')[0] : 'tudo bem';
-          const msg = `Olá ${name}! Vi que você solicitou o Dossiê Técnico em PDF da *${lead.company_name}* no GeoPulse AI.\n\nConseguiu visualizar os dados da auditoria nos motores de IA? Gostaria de tirar alguma dúvida sobre o plano para posicionar sua marca em 1º lugar no ChatGPT e Gemini?`;
+          const reportUrl = `${window.location.origin}/?report=${lead.company_id || ''}`;
+          const msg = `Olá ${name}! Vi que você solicitou o Dossiê Técnico em PDF da *${lead.company_name}* no GeoPulse AI.\n\nConseguiu visualizar os dados da auditoria nos motores de IA? Seu relatório completo está aqui: ${reportUrl}\n\nGostaria de tirar alguma dúvida sobre o plano de 14 dias para posicionar sua marca em 1º lugar no ChatGPT e Gemini?`;
           return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        },
+
+        openLeadInstagramPitch(lead) {
+          const reportUrl = `${window.location.origin}/?report=${lead.company_id || ''}`;
+          const sc = lead.score || 32.5;
+          const text = `Olá! Realizamos uma auditoria de posicionamento em Inteligência Artificial para a *${lead.company_name}* e verificamos nota de visibilidade ${sc}% no ChatGPT, Google Gemini e Perplexity (enquanto os concorrentes locais estão absorvendo as recomendações prioritárias).\n\nDisponibilizamos o relatório completo para vocês aqui: ${reportUrl}\n\nSe tiverem interesse, podemos ativar a autoridade oficial de vocês no Top 10 em 14 dias.`;
+          navigator.clipboard.writeText(text);
+          this.toastMessage = '📋 Pitch copiado! Abrindo o Instagram... Basta colar (Ctrl+V) no Direct da empresa!';
+          setTimeout(() => { window.open('https://www.instagram.com/direct/inbox/', '_blank'); }, 300);
+        },
+
+        openPromptWhatsApp(lead) {
+          const num = prompt(`Informe o WhatsApp (com DDD) da empresa "${lead.company_name}":`, lead.contact_phone || '');
+          if (!num) return;
+          const digits = num.replace(/\D/g, '');
+          const phone = (digits.startsWith('55') || digits.length > 11) ? digits : ('55' + digits);
+          const reportUrl = `${window.location.origin}/?report=${lead.company_id || ''}`;
+          const sc = lead.score || 32.5;
+          const msg = `Olá! Tudo bem? Realizamos uma auditoria de visibilidade em Inteligência Artificial para a *${lead.company_name}* e notamos que concorrentes locais estão aparecendo antes de vocês no ChatGPT e Gemini (sua nota atual: ${sc}%).\n\nPreparamos um diagnóstico gratuito com todos os dados: ${reportUrl}\n\nPodemos ativar o protocolo de dominância da sua marca no Top 10 ainda hoje se desejar.`;
+          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         },
 
         async updateLeadStatus(leadId, newStatus) {

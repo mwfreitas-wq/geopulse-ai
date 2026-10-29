@@ -233,14 +233,42 @@ async def _salesbot_autonomous_worker():
                             await db.commit()
                             await db.refresh(company)
 
+                        other_names = [x["company_name"] for x in raw_leads if x["company_name"] != c_name]
+                        top_comp = other_names[0] if other_names else f"Líderes de Referência em {target_entry['city'].split(',')[0]}"
                         score_val = 32.5
                         try:
                             profile = AuditorService.compute_real_site_profile(c_name, niche_to_search, target_entry["city"], c_url, "", {})
                             score_val = round(float(profile.get("visibility_score", 32.5)), 1)
+                            existing_audits = (await db.execute(select(AuditRun).filter_by(company_id=company.id))).scalars().all()
+                            if not existing_audits:
+                                audit_items = await AuditorService.run_audit_suite(
+                                    company_name=c_name,
+                                    niche=niche_to_search,
+                                    city_region=target_entry["city"],
+                                    competitors=top_comp,
+                                    url=c_url,
+                                    api_keys={},
+                                    is_paid=False,
+                                    scraped_content="",
+                                    entity_type="company",
+                                    professional_registry=""
+                                )
+                                for a_item in audit_items:
+                                    db.add(AuditRun(
+                                        company_id=company.id,
+                                        model_provider=a_item["model_provider"],
+                                        prompt_category=a_item["prompt_category"],
+                                        prompt_text=a_item["prompt_text"],
+                                        response_text=a_item["response_text"],
+                                        is_cited=a_item["is_cited"],
+                                        rank_position=a_item["rank_position"],
+                                        sentiment=a_item["sentiment"],
+                                        sources=a_item["sources"]
+                                    ))
+                                await db.commit()
                         except Exception:
                             pass
 
-                        top_comp = f"Líderes de Referência em {target_entry['city'].split(',')[0]}"
                         report_url = f"{base_site}/?report={company.id}"
                         outreach = SalesBotService.build_cold_outreach(
                             company_name=c_name,
@@ -258,20 +286,23 @@ async def _salesbot_autonomous_worker():
                             email_sent = await send_email(c_email, outreach["email_subject"], outreach["email_html"], keys=keys)
 
                         status_label = "✉️ E-mail Enviado" if email_sent else ("📱 WhatsApp Extraído" if c_phone else "📄 Relatório Gerado")
-                        lead_cap = LeadCapture(
-                            company_id=company.id,
-                            company_name=c_name,
-                            contact_name=item.get("decision_maker", "Diretoria"),
-                            contact_email=c_email,
-                            contact_phone=c_phone,
-                            niche=niche_to_search,
-                            city_region=target_entry["city"],
-                            score=score_val,
-                            status=status_label,
-                            notes=f"AutoBot 24/7 • {report_url}"
-                        )
-                        db.add(lead_cap)
-                        await db.commit()
+                        notes_str = f"IG:@{c_instagram} • {report_url}" if c_instagram else f"AutoBot 24/7 • {report_url}"
+                        existing_lead = (await db.execute(select(LeadCapture).filter_by(company_id=company.id))).scalars().first()
+                        if not existing_lead:
+                            lead_cap = LeadCapture(
+                                company_id=company.id,
+                                company_name=c_name,
+                                contact_name=item.get("decision_maker", "Diretoria"),
+                                contact_email=c_email,
+                                contact_phone=c_phone,
+                                niche=niche_to_search,
+                                city_region=target_entry["city"],
+                                score=score_val,
+                                status=status_label,
+                                notes=notes_str
+                            )
+                            db.add(lead_cap)
+                            await db.commit()
                         logger.info(f"🤖 [SalesBot 24/7] Lead processado: {c_name} ({target_entry['city']}) | Status: {status_label}")
 
                         if email_sent:
@@ -3241,7 +3272,7 @@ async def sales_bot_hunt(data: SalesBotHuntRequest, db: AsyncSession = Depends(g
             city_region=c_city,
             score=score_val,
             status=status_label,
-            notes=f"Relatório: {report_url}"
+            notes=(f"IG:@{c_instagram} • {report_url}" if c_instagram else f"Relatório: {report_url}")
         )
         db.add(lead_cap)
         await db.commit()

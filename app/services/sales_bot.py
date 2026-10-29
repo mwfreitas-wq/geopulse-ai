@@ -38,7 +38,7 @@ class SalesBotService:
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
             payload = {
-                "model": "openai/gpt-oss-120b",
+                "model": "llama-3.3-70b-versatile",
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -303,27 +303,34 @@ class SalesBotService:
 
     @classmethod
     async def _scrape_site_contacts(cls, client: httpx.AsyncClient, url: str) -> Dict[str, str]:
-        """Visita o site real da empresa (em <4.5s) e extrai WhatsApp, Telefone com DDD e E-mail."""
+        """Visita o site real da empresa (em <5.5s) e extrai WhatsApp, Telefone com DDD, E-mail e Instagram."""
         phone = ""
         email = ""
         instagram = ""
         try:
-            r = await client.get(url, timeout=4.5)
+            r = await client.get(url, timeout=5.5)
             html = r.text
             # 1. Procura links diretos de WhatsApp (wa.me/55... ou api.whatsapp.com/send?phone=...)
             wpp_matches = re.findall(r"(?:wa\.me/|phone=)(\d{10,14})", html)
             if wpp_matches:
                 phone = wpp_matches[0]
             else:
-                # 2. Procura telefones brasileiros com DDD: (19) 99999-9999 ou (11) 3333-4444
-                br_phones = re.findall(r"\([1-9]{2}\)\s*9?\d{4}[-\s]\d{4}", html)
-                if br_phones:
-                    digits = re.sub(r"\D", "", br_phones[0])
-                    phone = f"55{digits}" if len(digits) in (10, 11) else digits
+                # 2. Procura links tel: ou telefones brasileiros com DDD: (19) 99999-9999 ou 11 98888-7777
+                tel_links = re.findall(r"tel:[\+\s]*([0-9\-\(\)\s]{10,16})", html)
+                br_phones = re.findall(r"(?:\(?[1-9]{2}\)?\s*9?\d{4}[-\s]\d{4})", html)
+                raw_phone_list = tel_links + br_phones
+                for rp in raw_phone_list:
+                    digits = re.sub(r"\D", "", rp)
+                    if len(digits) in (10, 11):
+                        phone = f"55{digits}"
+                        break
+                    elif len(digits) in (12, 13) and digits.startswith("55"):
+                        phone = digits
+                        break
 
             # 3. Procura e-mails reais na página
             email_matches = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", html)
-            blocked_ext = (".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".css", ".js", "sentry.io", "wixpress.com", "example.com")
+            blocked_ext = (".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".css", ".js", "sentry.io", "wixpress.com", "example.com", "yourdomain", "email.com", "dominio.com")
             for em in email_matches:
                 em_low = em.lower()
                 if not any(em_low.endswith(ext) or ext in em_low for ext in blocked_ext):
@@ -332,7 +339,7 @@ class SalesBotService:
 
             # 4. Procura perfil oficial do Instagram (instagram.com/perfil)
             ig_matches = re.findall(r"instagram\.com/([a-zA-Z0-9._-]+)", html)
-            blocked_ig = ("p", "reel", "reels", "tv", "explore", "stories", "share", "accounts", "legal", "about")
+            blocked_ig = ("p", "reel", "reels", "tv", "explore", "stories", "share", "accounts", "legal", "about", "developer")
             for ig in ig_matches:
                 clean_ig = ig.strip().strip("/").split("?")[0]
                 if clean_ig and clean_ig.lower() not in blocked_ig and len(clean_ig) >= 3:
@@ -349,7 +356,11 @@ class SalesBotService:
             "duckduckgo.com", "yahoo.com", "bing.com", "google.com", "doctoralia", "guiamais",
             "apontador", "solutudo", "reclameaqui", "facebook.com", "instagram.com", "linkedin.com",
             "youtube.com", "wikipedia.org", "tiktok.com", "yelp.com", "tripadvisor", "yellowpages",
-            "mapquest", "expertise.com", "healthgrades", "zocdoc", "threebestrated"
+            "mapquest", "expertise.com", "healthgrades", "zocdoc", "threebestrated",
+            "listamais", "applocal", "acheioprofissional", "telelistas", "hagah", "encontra",
+            "econodata", "cnpj.biz", "casadosdados", "jusbrasil", "cylex", "infobel", "hotfrog",
+            "kekanto", "catalogo", "guiadelocalizacao", "melhores", "top10", "gov.br", "crosp", "cfo.org",
+            "odontoblog", "blog", "revista", "noticias", "g1.globo", "uol.com.br", "terra.com.br"
         )
         candidates = []
         seen = set()
@@ -358,11 +369,9 @@ class SalesBotService:
             soup = BeautifulSoup(r.text, "html.parser")
             for res_div in soup.select("div.result"):
                 a_title = res_div.select_one("a.result__a")
-                a_snippet = res_div.select_one("a.result__url")
                 if not a_title:
                     continue
                 href = a_title.get("href", "")
-                # DuckDuckGo wraps URLs in /l/?kh=-1&uddg=https%3A%2F%2F...
                 m = re.search(r"uddg=([^&]+)", href)
                 raw_url = unquote(m.group(1)) if m else href
                 if not raw_url.startswith("http"):
@@ -383,18 +392,19 @@ class SalesBotService:
     @classmethod
     async def _search_real_web_leads(cls, niche: str, city_region: str, qty: int) -> List[Dict[str, Any]]:
         """
-        Faz busca orgânica ao vivo no Yahoo Search / Bing por empresas reais de `niche` em `city_region`,
-        filtra diretórios genéricos (Doctoralia, GuiaMais, etc.) e extrai telefone/WhatsApp/e-mail de cada site!
+        Faz busca orgânica ao vivo no DuckDuckGo / Yahoo / Bing por empresas reais de `niche` em `city_region`,
+        filtra diretórios genéricos e extrai WhatsApp, Telefone, E-mail e Instagram reais do site!
         """
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
         }
         blocked_domains = (
-            "yahoo.com", "bing.com", "google.com", "doctoralia.com", "guiamais.com",
-            "apontador.com", "solutudo.com", "reclameaqui.com", "facebook.com",
+            "yahoo.com", "bing.com", "google.com", "doctoralia", "guiamais",
+            "apontador", "solutudo", "reclameaqui", "facebook.com",
             "instagram.com", "linkedin.com", "youtube.com", "wikipedia.org",
-            "tiktok.com", "yelp.com", "tripadvisor.com", "jusbrasil.com.br", "econodata.com.br"
+            "tiktok.com", "yelp.com", "tripadvisor", "jusbrasil", "econodata",
+            "listamais", "applocal", "acheioprofissional", "telelistas", "hagah", "encontra"
         )
         candidates: List[Dict[str, str]] = []
         seen_domains = set()
@@ -402,10 +412,13 @@ class SalesBotService:
         is_international = any(k in city_region.lower() for k in ["usa", "fl", "ny", "ca", "tx", "espan", "madrid", "barcelona", "portugal", "lisboa", "porto", "london", "uk", "france", "paris", "germany", "berlin"]) or any(k in niche.lower() for k in ["dentist", "lawyer", "attorney", "clinic", "realtor", "abogado"])
 
         async with httpx.AsyncClient(verify=False, timeout=9.0, follow_redirects=True, headers=headers) as client:
-            # 0. Se for internacional (EUA/Europa), usa DuckDuckGo prioritariamente
-            if is_international:
-                q_ddg = f"{niche} in {city_region} official website contact"
-                candidates = await cls._search_duckduckgo_leads(client, q_ddg, niche, city_region, qty + 2)
+            # 0. Usa DuckDuckGo HTML SEMPRE (Brasil + Internacional) pois não sofre bloqueio de IP em Cloud
+            q_ddg = f"{niche} in {city_region} official website contact" if is_international else f"{niche} em {city_region} contato whatsapp"
+            ddg_list = await cls._search_duckduckgo_leads(client, q_ddg, niche, city_region, qty * 2 + 2)
+            for item in ddg_list:
+                if item["domain"] not in seen_domains:
+                    seen_domains.add(item["domain"])
+                    candidates.append(item)
 
             # 1. Se for Brasil (ou DDG não retornou), busca no Yahoo Brasil
             if len(candidates) < qty:
@@ -458,8 +471,8 @@ class SalesBotService:
                 except Exception as e:
                     logger.warning(f"Bing search warning: {e}")
 
-            # 3. Visita em paralelo os sites candidatos para extrair WhatsApp, Telefone e E-mail reais
-            selected = candidates[:qty]
+            # 3. Visita em paralelo os sites candidatos para extrair WhatsApp, Telefone, E-mail e Instagram reais
+            selected = candidates[:max(qty * 2, 8)]
             tasks = [cls._scrape_site_contacts(client, c["url"]) for c in selected]
             scraped_contacts = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -483,7 +496,9 @@ class SalesBotService:
                     "decision_maker": "Diretoria / Atendimento",
                 })
 
-            return final_leads
+            # Ordena priorizando empresas que possuem WhatsApp/Telefone, Instagram ou E-mail reais extraídos
+            final_leads.sort(key=lambda x: (bool(x.get("phone")), bool(x.get("instagram")), bool(x.get("email"))), reverse=True)
+            return final_leads[:qty]
 
     @classmethod
     async def hunt_leads(

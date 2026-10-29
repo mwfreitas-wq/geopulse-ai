@@ -1571,8 +1571,11 @@
           const sc = lead.score || 32.5;
           const text = `Olá! Realizamos uma auditoria de posicionamento em Inteligência Artificial para a *${lead.company_name}* e verificamos nota de visibilidade ${sc}% no ChatGPT, Google Gemini e Perplexity (enquanto os concorrentes locais estão absorvendo as recomendações prioritárias).\n\nDisponibilizamos o relatório completo para vocês aqui: ${reportUrl}\n\nSe tiverem interesse, podemos ativar a autoridade oficial de vocês no Top 10 em 14 dias.`;
           navigator.clipboard.writeText(text);
-          this.toastMessage = '📋 Pitch copiado! Abrindo o Instagram... Basta colar (Ctrl+V) no Direct da empresa!';
-          setTimeout(() => { window.open('https://www.instagram.com/direct/inbox/', '_blank'); }, 300);
+          const igMatch = (lead.notes || '').match(/IG:@([a-zA-Z0-9._-]+)/);
+          const igHandle = lead.instagram || (igMatch ? igMatch[1] : '');
+          const igUrl = igHandle ? `https://ig.me/m/${igHandle}` : 'https://www.instagram.com/direct/inbox/';
+          this.toastMessage = igHandle ? `📋 Pitch copiado! Abrindo Direct de @${igHandle}... Basta colar (Ctrl+V)!` : '📋 Pitch copiado! Abrindo o Instagram... Basta colar (Ctrl+V) no Direct da empresa!';
+          setTimeout(() => { window.open(igUrl, '_blank'); }, 300);
         },
 
         openPromptWhatsApp(lead) {

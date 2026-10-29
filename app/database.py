@@ -31,6 +31,7 @@ db_url = normalize_db_url(settings.DATABASE_URL)
 engine = create_async_engine(
     db_url,
     echo=False,
+    pool_recycle=240,
     connect_args={"check_same_thread": False, "timeout": 30} if "sqlite" in db_url else {}
 )
 AsyncSessionLocal = async_sessionmaker(

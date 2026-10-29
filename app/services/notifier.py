@@ -113,22 +113,28 @@ async def send_email(to: str, subject: str, html_body: str, api_key: Optional[st
         if ok:
             return True
 
-    # 2. Fallback para Resend API
-    key = (api_key or keys.get("resend_api_key") or settings.RESEND_API_KEY or "").strip()
-    if not key or not to or "@" not in to:
+    # 2. Fallback para Resend API (com rotação de múltiplas chaves e domínio verificado)
+    raw_keys = (api_key or keys.get("resend_api_key") or settings.RESEND_API_KEY or "").strip()
+    key_list = [k.strip() for k in raw_keys.split(",") if k.strip()]
+    if not key_list or not to or "@" not in to:
         return False
+    custom_from = (keys.get("resend_from") or "GeoPulse AI <contato@geopulseai.store>").strip()
+    from_candidates = [custom_from]
+    if "onboarding@resend.dev" not in custom_from:
+        from_candidates.append("GeoPulse AI <onboarding@resend.dev>")
     try:
-        mail_from = (keys.get("resend_from") or settings.MAIL_FROM or "GeoPulse AI <contato@geopulseai.store>").strip()
         async with httpx.AsyncClient(timeout=12.0) as client:
-            res = await client.post(
-                "https://api.resend.com/emails",
-                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                json={"from": mail_from, "to": [to], "subject": subject, "html": html_body},
-            )
-            if res.status_code in (200, 201, 202):
-                return True
-            logger.warning(f"[Resend] Falha de envio para {to}: {res.status_code} - {res.text}")
-            return False
+            for k in key_list:
+                for sender in from_candidates:
+                    res = await client.post(
+                        "https://api.resend.com/emails",
+                        headers={"Authorization": f"Bearer {k}", "Content-Type": "application/json"},
+                        json={"from": sender, "to": [to], "subject": subject, "html": html_body},
+                    )
+                    if res.status_code in (200, 201, 202):
+                        return True
+                    logger.warning(f"[Resend] Tentativa ({sender}) para {to}: {res.status_code} - {res.text}")
+        return False
     except Exception as e:
         logger.warning(f"[Resend] Exceção no envio para {to}: {e}")
         return False

@@ -1,3 +1,4 @@
+from pathlib import Path
 import html
 import asyncio
 import base64
@@ -2456,7 +2457,7 @@ async def dynamic_sitemap_xml(request: Request, db: AsyncSession = Depends(get_d
   </url>"""
 
     # Inclui todos os artigos e guias educativos publicados no diretório físico
-    articles_dir = STATIC_DIR / "published_articles"
+    articles_dir = Path("app/static/published_articles")
     if articles_dir.exists():
         for html_file in sorted(articles_dir.glob("*.html")):
             file_url = f"{base_url}/static/published_articles/{html_file.name}"

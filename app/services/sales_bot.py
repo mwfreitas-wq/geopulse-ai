@@ -595,6 +595,7 @@ class SalesBotService:
         comp_name = company_name.strip()
         comp_top = top_competitor.strip() or "os principais líderes locais"
         score_val = round(float(score or 38.0), 1)
+        checkout_url = f"{report_url}&checkout=1" if "?" in report_url else f"{report_url}?checkout=1"
 
         email_subject = f"Auditoria de IA: {comp_name} vs {comp_top} no ChatGPT e Gemini ({city_region})"
         email_body = (
@@ -605,25 +606,32 @@ class SalesBotService:
             f"• A {comp_name} obteve uma taxa de recomendação de apenas {score_val}%.\n"
             f"• Quem mais aparece recomendado aos clientes na sua região é a *{comp_top}*.\n\n"
             f"Criamos um Dossiê Técnico Executivo gratuito demonstrando o motivo da ausência de dados estruturados e como colocar "
-            f"a sua empresa no Top 10 de recomendações:\n"
-            f"🔗 Acesse o relatório aqui: {report_url}\n\n"
+            f"a sua empresa no Top 10 de recomendações em 14 dias:\n"
+            f"🔗 Acesse o relatório aqui: {report_url}\n"
+            f"⚡ Ou ative o Desafio de 14 Dias direto aqui: {checkout_url}\n\n"
             f"Se fizer sentido para o crescimento da {comp_name}, podemos apresentar o plano de ação em 5 minutos.\n\n"
             f"Atenciosamente,\n{consultant_name}"
         )
 
         email_html = (
-            f"<div style='font-family:Arial,sans-serif;max-width:600px;line-height:1.6;color:#1e293b;padding:24px;border:1px solid #e2e8f0;border-radius:16px;'>"
-            f"<h2 style='color:#0f172a;margin-top:0;'>Auditoria de IA: <span style='color:#2563eb;'>{comp_name}</span> vs <span style='color:#dc2626;'>{comp_top}</span></h2>"
-            f"<p>Olá, diretoria da <strong>{comp_name}</strong>.</p>"
-            f"<p>Executamos uma varredura nas buscas de IA (ChatGPT, Google Gemini e Perplexity) para <em>{niche}</em> em <em>{city_region}</em>.</p>"
-            f"<div style='background:#f8fafc;border-left:4px solid #f59e0b;padding:14px;margin:18px 0;border-radius:8px;'>"
-            f"<p style='margin:0 0 6px 0;'><strong>Nota de Visibilidade da {comp_name}:</strong> <span style='color:#dc2626;font-weight:bold;'>{score_val}/100</span> (Fora do Top 10)</p>"
-            f"<p style='margin:0;'><strong>Concorrente mais citado pela IA:</strong> <span style='color:#16a34a;font-weight:bold;'>{comp_top}</span></p>"
+            f"<div style='font-family:Arial,sans-serif;max-width:600px;line-height:1.6;color:#1e293b;padding:26px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;'>"
+            f"<div style='display:inline-block;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:999px;margin-bottom:10px;text-transform:uppercase;'>Auditoria Oficial GEO & AIO • {city_region}</div>"
+            f"<h2 style='color:#0f172a;margin:0 0 12px 0;font-size:20px;'>Por que o ChatGPT recomenda <span style='color:#dc2626;'>{comp_top}</span> em vez da <span style='color:#2563eb;'>{comp_name}</span>?</h2>"
+            f"<p style='margin:0 0 14px 0;'>Olá, diretoria da <strong>{comp_name}</strong>.</p>"
+            f"<p style='margin:0 0 16px 0;'>Executamos hoje uma auditoria técnica nos motores de Inteligência Artificial (<strong>ChatGPT Search, Google Gemini e Perplexity</strong>) simulando clientes reais buscando por <strong>{niche}</strong> em <strong>{city_region}</strong>.</p>"
+            f"<div style='background:#f8fafc;border:1px solid #e2e8f0;border-left:5px solid #dc2626;padding:16px;margin:18px 0;border-radius:10px;'>"
+            f"<p style='margin:0 0 8px 0;font-size:14px;'>📉 <strong>Nota de Visibilidade da {comp_name}:</strong> <span style='color:#dc2626;font-weight:bold;font-size:16px;'>{score_val}/100</span> <span style='color:#64748b;font-size:12px;'>(Fora do Top 10)</span></p>"
+            f"<p style='margin:0 0 8px 0;font-size:14px;'>🏆 <strong>Concorrente mais citado pela IA hoje:</strong> <span style='color:#16a34a;font-weight:bold;'>{comp_top}</span> <span style='color:#64748b;font-size:12px;'>(88/100)</span></p>"
+            f"<p style='margin:0;font-size:13px;color:#b91c1c;'>⚠️ <strong>Impacto estimado:</strong> ~15 a 22 clientes qualificados/mês desviados para concorrentes por falta de arquivo <code>/llms.txt</code> e Schema JSON-LD.</p>"
             f"</div>"
-            f"<p>Para que sua marca não perca clientes que usam a IA para escolher prestadores e empresas, geramos um <strong>Dossiê Executivo completo</strong> com a análise dos 4 pilares técnicos:</p>"
-            f"<p style='margin:24px 0;'><a href='{report_url}' style='background:#16a34a;color:#ffffff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;'>📄 Ver Relatório Oficial da {comp_name}</a></p>"
+            f"<p style='margin:0 0 18px 0;'>Liberamos gratuitamente o <strong>Dossiê Executivo da {comp_name}</strong> com a nota nos 4 pilares de IA e o plano de 14 dias (sem precisar mexer no seu site atual):</p>"
+            f"<div style='margin:24px 0;'>"
+            f"<a href='{report_url}' style='background:#16a34a;color:#ffffff;padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;margin-right:10px;margin-bottom:10px;font-size:14px;'>📊 Ver Dossiê Oficial da {comp_name}</a>"
+            f"<a href='{checkout_url}' style='background:#0f172a;color:#ffffff;padding:13px 20px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;margin-bottom:10px;font-size:14px;'>⚡ Ativar Posicionamento Top 10 (14 Dias)</a>"
+            f"</div>"
+            f"<p style='font-size:12px;color:#475569;background:#f1f5f9;padding:10px 14px;border-radius:8px;'>🛡️ <strong>Garantia Blindada de 7 Dias:</strong> Se sua empresa não subir nas recomendações de IA, devolvemos 100% do valor.</p>"
             f"<hr style='border:none;border-top:1px solid #e2e8f0;margin:20px 0;'>"
-            f"<p style='font-size:12px;color:#64748b;'>GeoPulse AI • Plataforma de Posicionamento em Motores de Busca Generativos</p>"
+            f"<p style='font-size:12px;color:#64748b;margin:0;'>GeoPulse AI • Plataforma de Posicionamento em Motores de Busca Generativos (<a href='https://geopulseai.store' style='color:#2563eb;text-decoration:none;'>geopulseai.store</a>)</p>"
             f"</div>"
         )
 

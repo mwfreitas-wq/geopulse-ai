@@ -91,15 +91,42 @@ async def send_email_smtp(
 
 async def send_email(to: str, subject: str, html_body: str, api_key: Optional[str] = None, keys: Optional[Dict[str, Any]] = None) -> bool:
     """
-    Envia e-mail priorizando SMTP (HostGator/Titan) se configurado; caso contrário, utiliza Resend API.
+    Envia e-mail priorizando a API HTTPS do Resend (domínio verificado geopulseai.store, disparo em 0.3s sem bloqueio de portas cloud).
+    Caso falhe ou não haja chave Resend, faz fallback para SMTP (HostGator/Titan).
     """
     keys = keys or {}
+    if not to or "@" not in to:
+        return False
+
+    # 1. Prioridade Máxima: Resend HTTPS API (com rotação de múltiplas chaves e domínio verificado geopulseai.store)
+    raw_keys = (api_key or keys.get("resend_api_key") or settings.RESEND_API_KEY or "").strip()
+    key_list = [k.strip() for k in raw_keys.split(",") if k.strip()]
+    if key_list:
+        custom_from = (keys.get("resend_from") or "GeoPulse AI <contato@geopulseai.store>").strip()
+        from_candidates = [custom_from]
+        if "onboarding@resend.dev" not in custom_from:
+            from_candidates.append("GeoPulse AI <onboarding@resend.dev>")
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                for k in key_list:
+                    for sender in from_candidates:
+                        res = await client.post(
+                            "https://api.resend.com/emails",
+                            headers={"Authorization": f"Bearer {k}", "Content-Type": "application/json"},
+                            json={"from": sender, "to": [to], "subject": subject, "html": html_body},
+                        )
+                        if res.status_code in (200, 201, 202):
+                            return True
+                        logger.warning(f"[Resend] Tentativa ({sender}) para {to}: {res.status_code} - {res.text}")
+        except Exception as e:
+            logger.warning(f"[Resend] Exceção no envio para {to}: {e}")
+
+    # 2. Fallback: Se credenciais SMTP estiverem presentes, tenta SMTP (útil fora do Render Free)
     smtp_user = keys.get("smtp_user") or getattr(settings, "SMTP_USER", None)
     smtp_pass = keys.get("smtp_pass") or getattr(settings, "SMTP_PASS", None)
     smtp_host = keys.get("smtp_host") or getattr(settings, "SMTP_HOST", "smtp.titan.email")
     smtp_port = int(keys.get("smtp_port") or getattr(settings, "SMTP_PORT", 465))
 
-    # 1. Se credenciais SMTP estiverem presentes, usa SMTP do HostGator
     if smtp_user and smtp_pass and smtp_host:
         ok, err = await send_email_smtp(
             to=to,
@@ -113,31 +140,7 @@ async def send_email(to: str, subject: str, html_body: str, api_key: Optional[st
         if ok:
             return True
 
-    # 2. Fallback para Resend API (com rotação de múltiplas chaves e domínio verificado)
-    raw_keys = (api_key or keys.get("resend_api_key") or settings.RESEND_API_KEY or "").strip()
-    key_list = [k.strip() for k in raw_keys.split(",") if k.strip()]
-    if not key_list or not to or "@" not in to:
-        return False
-    custom_from = (keys.get("resend_from") or "GeoPulse AI <contato@geopulseai.store>").strip()
-    from_candidates = [custom_from]
-    if "onboarding@resend.dev" not in custom_from:
-        from_candidates.append("GeoPulse AI <onboarding@resend.dev>")
-    try:
-        async with httpx.AsyncClient(timeout=12.0) as client:
-            for k in key_list:
-                for sender in from_candidates:
-                    res = await client.post(
-                        "https://api.resend.com/emails",
-                        headers={"Authorization": f"Bearer {k}", "Content-Type": "application/json"},
-                        json={"from": sender, "to": [to], "subject": subject, "html": html_body},
-                    )
-                    if res.status_code in (200, 201, 202):
-                        return True
-                    logger.warning(f"[Resend] Tentativa ({sender}) para {to}: {res.status_code} - {res.text}")
-        return False
-    except Exception as e:
-        logger.warning(f"[Resend] Exceção no envio para {to}: {e}")
-        return False
+    return False
 
 
 async def notify_owner(

@@ -139,28 +139,31 @@ async def _self_keep_alive_loop():
 
 
 GLOBAL_CITIES_PIPELINE = [
-    # Brasil (pt)
+    # Brasil (pt) — Rotação multi-nicho de alto ticket
     {"niche_pt": "Clínica Odontológica", "city": "São Paulo, SP", "region": "br", "lang": "pt"},
-    {"niche_pt": "Clínica Odontológica", "city": "Campinas, SP", "region": "br", "lang": "pt"},
+    {"niche_pt": "Escritório de Advocacia", "city": "São Paulo, SP", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica de Estética", "city": "Campinas, SP", "region": "br", "lang": "pt"},
     {"niche_pt": "Clínica Odontológica", "city": "Curitiba, PR", "region": "br", "lang": "pt"},
-    {"niche_pt": "Clínica Odontológica", "city": "Belo Horizonte, MG", "region": "br", "lang": "pt"},
-    {"niche_pt": "Clínica Odontológica", "city": "Rio de Janeiro, RJ", "region": "br", "lang": "pt"},
-    {"niche_pt": "Clínica Odontológica", "city": "Porto Alegre, RS", "region": "br", "lang": "pt"},
-    {"niche_pt": "Clínica Odontológica", "city": "Brasília, DF", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica Médica", "city": "Belo Horizonte, MG", "region": "br", "lang": "pt"},
+    {"niche_pt": "Imobiliária de Alto Padrão", "city": "Rio de Janeiro, RJ", "region": "br", "lang": "pt"},
+    {"niche_pt": "Escritório de Contabilidade", "city": "Porto Alegre, RS", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica de Harmonização Facial", "city": "Brasília, DF", "region": "br", "lang": "pt"},
     {"niche_pt": "Clínica Odontológica", "city": "Salvador, BA", "region": "br", "lang": "pt"},
-    {"niche_pt": "Clínica Odontológica", "city": "Florianópolis, SC", "region": "br", "lang": "pt"},
+    {"niche_pt": "Energia Solar", "city": "Florianópolis, SC", "region": "br", "lang": "pt"},
+    {"niche_pt": "Clínica de Dermatologia", "city": "Goiânia, GO", "region": "br", "lang": "pt"},
+    {"niche_pt": "Escritório de Arquitetura", "city": "Recife, PE", "region": "br", "lang": "pt"},
     # Estados Unidos (en)
     {"niche_pt": "Dental Clinic", "city": "Miami, FL", "region": "us", "lang": "en"},
-    {"niche_pt": "Dental Clinic", "city": "Orlando, FL", "region": "us", "lang": "en"},
-    {"niche_pt": "Dental Clinic", "city": "Austin, TX", "region": "us", "lang": "en"},
-    {"niche_pt": "Dental Clinic", "city": "New York, NY", "region": "us", "lang": "en"},
-    {"niche_pt": "Dental Clinic", "city": "Los Angeles, CA", "region": "us", "lang": "en"},
+    {"niche_pt": "Medical Spa", "city": "Orlando, FL", "region": "us", "lang": "en"},
+    {"niche_pt": "Personal Injury Law Firm", "city": "Austin, TX", "region": "us", "lang": "en"},
+    {"niche_pt": "Cosmetic Dentistry", "city": "New York, NY", "region": "us", "lang": "en"},
+    {"niche_pt": "Plastic Surgery Clinic", "city": "Los Angeles, CA", "region": "us", "lang": "en"},
     {"niche_pt": "Dental Clinic", "city": "Chicago, IL", "region": "us", "lang": "en"},
     # Europa (es / pt / en)
     {"niche_pt": "Clínica Dental", "city": "Madrid, España", "region": "eu", "lang": "es"},
-    {"niche_pt": "Clínica Dental", "city": "Barcelona, España", "region": "eu", "lang": "es"},
+    {"niche_pt": "Clínica Estética", "city": "Barcelona, España", "region": "eu", "lang": "es"},
     {"niche_pt": "Clínica Dentária", "city": "Lisboa, Portugal", "region": "eu", "lang": "pt"},
-    {"niche_pt": "Clínica Dentária", "city": "Porto, Portugal", "region": "eu", "lang": "pt"},
+    {"niche_pt": "Sociedade de Advogados", "city": "Porto, Portugal", "region": "eu", "lang": "pt"},
     {"niche_pt": "Dental Practice", "city": "London, UK", "region": "eu", "lang": "en"},
 ]
 
@@ -168,7 +171,7 @@ async def _salesbot_autonomous_worker():
     """
     Loop Contínuo do Robô de Vendas 24/7.
     Quando ativado pelo admin, percorre infinitamente cidades no Brasil, EUA e Europa,
-    localiza empresas reais, executa auditoria e envia e-mail frio consultivo
+    localiza empresas reais, executa auditoria e envia e-mail frio consultivo + follow-up automático
     respeitando o intervalo seguro anti-spam (ex: a cada 3 a 5 minutos).
     """
     city_idx = 0
@@ -191,12 +194,11 @@ async def _salesbot_autonomous_worker():
                     target_entry = eligible_cities[city_idx % len(eligible_cities)]
                     city_idx += 1
 
-                    niche_to_search = custom_niche if custom_niche else target_entry["niche_pt"]
-                    # Traduz para o idioma se for busca em outro país
-                    if target_entry["lang"] == "en" and custom_niche in ("Clínica Odontológica", ""):
-                        niche_to_search = "Dental Clinic"
-                    elif target_entry["lang"] == "es" and custom_niche in ("Clínica Odontológica", ""):
-                        niche_to_search = "Clínica Dental"
+                    # Se custom_niche for o padrão genérico "Clínica Odontológica", usa a rotação multi-nicho da lista
+                    if not custom_niche or custom_niche == "Clínica Odontológica":
+                        niche_to_search = target_entry["niche_pt"]
+                    else:
+                        niche_to_search = custom_niche
 
                     logger.info(f"🤖 [SalesBot 24/7] Iniciando ciclo autônomo: {niche_to_search} em {target_entry['city']} ({target_entry['region'].upper()})")
 
@@ -310,6 +312,60 @@ async def _salesbot_autonomous_worker():
                             # Aguarda intervalo seguro entre cada envio individual
                             await asyncio.sleep(interval_min * 60)
                             break
+
+                    # 2. Cadência Automática (2º Toque / Follow-up) para leads que ainda não receberam ou abriram e-mail
+                    pending_leads = (await db.execute(
+                        select(LeadCapture).where(
+                            LeadCapture.contact_email.isnot(None),
+                            LeadCapture.contact_email != "",
+                            LeadCapture.status.in_(["📱 WhatsApp Extraído", "📄 Relatório Gerado", "✉️ E-mail Enviado"])
+                        ).order_by(LeadCapture.id.asc()).limit(5)
+                    )).scalars().all()
+
+                    for p_lead in pending_leads:
+                        if not p_lead.contact_email or "@" not in p_lead.contact_email or p_lead.contact_email.endswith("exemplo.com.br"):
+                            continue
+                        # Se ainda não recebeu o 1º e-mail (estava com WhatsApp Extraído), envia agora pelo domínio verificado!
+                        if p_lead.status in ("📱 WhatsApp Extraído", "📄 Relatório Gerado"):
+                            rep_url = f"{base_site}/?report={p_lead.company_id}" if p_lead.company_id else base_site
+                            outreach_p = SalesBotService.build_cold_outreach(
+                                company_name=p_lead.company_name,
+                                niche=p_lead.niche or "Especialidades",
+                                city_region=p_lead.city_region or "Brasil",
+                                score=p_lead.score or 35.0,
+                                top_competitor=f"Líderes locais em {(p_lead.city_region or 'sua cidade').split(',')[0]}",
+                                report_url=rep_url,
+                                phone=p_lead.contact_phone or ""
+                            )
+                            ok_p = await send_email(p_lead.contact_email, outreach_p["email_subject"], outreach_p["email_html"], keys=keys)
+                            if ok_p:
+                                p_lead.status = "✉️ E-mail Enviado"
+                                await db.commit()
+                                logger.info(f"🤖 [SalesBot Follow-up] 1º E-mail disparado para {p_lead.company_name} ({p_lead.contact_email})")
+                                break
+                        # Se já recebeu o 1º e-mail há mais de 24h e ainda não abriu o relatório, envia o 2º Toque (Follow-up de Escassez)
+                        elif p_lead.status == "✉️ E-mail Enviado" and p_lead.created_at and (datetime.utcnow() - p_lead.created_at).total_seconds() > 86400:
+                            rep_url = f"{base_site}/?report={p_lead.company_id}" if p_lead.company_id else base_site
+                            chk_url = f"{rep_url}&checkout=1" if "?" in rep_url else f"{rep_url}?checkout=1"
+                            subj_2 = f"Re: Dossiê de IA da {p_lead.company_name} ({p_lead.city_region or 'Sua Região'}) — Último aviso"
+                            html_2 = (
+                                f"<div style='font-family:Arial,sans-serif;max-width:600px;line-height:1.6;color:#1e293b;padding:24px;border:1px solid #e2e8f0;border-radius:16px;'>"
+                                f"<p>Olá, diretoria da <strong>{p_lead.company_name}</strong>!</p>"
+                                f"<p>Enviei ontem o diagnóstico de visibilidade da sua empresa no <strong>ChatGPT e Google Gemini</strong> para <em>{p_lead.niche}</em> em <em>{p_lead.city_region}</em> (Nota atual: <strong style='color:#dc2626;'>{round(float(p_lead.score or 35.0), 1)}/100</strong>).</p>"
+                                f"<p>Como limitamos o <strong>Desafio de 14 Dias (Top 10 nas IAs)</strong> a poucas empresas por cidade para garantir exclusividade semântica, estou passando para confirmar se vocês conseguiram abrir o dossiê:</p>"
+                                f"<div style='margin:22px 0;'>"
+                                f"<a href='{rep_url}' style='background:#16a34a;color:#ffffff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;margin-right:10px;'>📄 Abrir Dossiê da {p_lead.company_name}</a>"
+                                f"<a href='{chk_url}' style='background:#0f172a;color:#ffffff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;'>⚡ Garantir Vaga no Top 10</a>"
+                                f"</div>"
+                                f"<p style='font-size:12px;color:#64748b;'>Atenciosamente,<br>Equipe GeoPulse AI (<a href='https://geopulseai.store'>geopulseai.store</a>)</p>"
+                                f"</div>"
+                            )
+                            ok_2 = await send_email(p_lead.contact_email, subj_2, html_2, keys=keys)
+                            if ok_2:
+                                p_lead.status = "🔁 2º E-mail (Follow-up)"
+                                await db.commit()
+                                logger.info(f"🤖 [SalesBot Follow-up] 2º Toque enviado para {p_lead.company_name} ({p_lead.contact_email})")
+                                break
         except Exception as e:
             logger.warning(f"Erro no loop do SalesBot 24/7: {e}")
 
@@ -475,6 +531,7 @@ async def get_all_configured_keys(db: AsyncSession) -> dict:
         "openai_api_key",
         "perplexity_api_key",
         "resend_api_key",
+        "resend_from",
         "spark_webhook_url",
         "mercadopago_access_token",
         "mercadopago_public_key",
@@ -490,9 +547,15 @@ async def get_all_configured_keys(db: AsyncSession) -> dict:
         "salesbot_regions",
         "salesbot_interval_min"
     ]
+    rows = (await db.execute(select(SystemSetting))).scalars().all()
+    db_map = {r.key: r.value for r in rows if r.value}
     res = {}
     for k in key_names:
-        res[k] = await get_system_key(db, k)
+        if k in db_map:
+            res[k] = db_map[k]
+        else:
+            val = getattr(settings, k.upper(), None)
+            res[k] = str(val) if val is not None else None
     return res
 
 
@@ -846,8 +909,8 @@ async def run_geo_diagnostic(data: CompanyCreate, db: AsyncSession = Depends(get
     await db.commit()
     # Extrai o concorrente #1 citado para enriquecer o alerta de Lead Quente
     top_comp_name = (company.competitors or "").split(",")[0].strip() if company.competitors else ""
-    if not top_comp_name and audit_responses:
-        first_txt = audit_responses[0].response_text or ""
+    if not top_comp_name and created_audits:
+        first_txt = created_audits[0].response_text or ""
         m_comp = re.search(r"1\.\s*\*\*?([^\*\n\(\–\—\:]+?)\*\*?(?:$|\s*\(|\s*–|\s*—|\s*\:|\n)", first_txt)
         if m_comp and m_comp.group(1).strip().lower() != company.name.lower():
             top_comp_name = m_comp.group(1).strip()
@@ -867,6 +930,36 @@ async def run_geo_diagnostic(data: CompanyCreate, db: AsyncSession = Depends(get
     )
     from urllib.parse import quote
     wpp_pitch_url = f"https://wa.me/{wpp_phone}?text={quote(pitch_msg)}" if wpp_digits else ""
+
+    # Registra no CRM do Painel Admin e dispara o Dossiê por E-mail automaticamente para o visitante!
+    try:
+        outreach_inbound = SalesBotService.build_cold_outreach(
+            company_name=company.name,
+            niche=company.niche,
+            city_region=company.city_region,
+            score=visibility_score,
+            top_competitor=top_comp_name,
+            report_url=report_url,
+            phone=company.whatsapp or ""
+        )
+        inbound_lead = LeadCapture(
+            company_id=company.id,
+            company_name=company.name,
+            contact_name="Lead Inbound (Site)",
+            contact_email=company.email or "",
+            contact_phone=company.whatsapp or "",
+            niche=company.niche,
+            city_region=company.city_region,
+            score=visibility_score,
+            status="🔥 Lead Quente (Site)",
+            notes=f"Preencheu Diagnóstico no Site • {report_url}"
+        )
+        db.add(inbound_lead)
+        await db.commit()
+        if company.email and "@" in company.email:
+            asyncio.create_task(send_email(company.email, outreach_inbound["email_subject"], outreach_inbound["email_html"], keys=keys))
+    except Exception:
+        pass
 
     asyncio.create_task(notify_owner(
         f"🔥 Lead Quente: {company.name} ({visibility_score}%)",

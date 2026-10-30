@@ -2328,12 +2328,28 @@ function extractTopCompetitor(data) {
       // 3. Verifica se veio com parâmetro de relatório compartilhado (?report=ID ou ?relatorio=ID ou ?diag=ID)
       const urlParams = new URLSearchParams(window.location.search);
       const reportId = urlParams.get('report') || urlParams.get('relatorio') || urlParams.get('diag');
+      const autoCheckout = urlParams.get('checkout');
       if (reportId) {
         try {
           const repRes = await fetch(`/api/companies/${reportId}/diagnostic?viewed=1`);
           if (repRes.ok) {
             const repData = await repRes.json();
             renderDiagnosticResults(repData);
+            // Se veio do botão de checkout direto do e-mail (?report=ID&checkout=1), abre o modal de pagamento automaticamente!
+            if (autoCheckout === '1') {
+              setTimeout(() => {
+                if (typeof openCheckoutModal === 'function') openCheckoutModal();
+              }, 700);
+            } else if (!repData.company?.is_paid) {
+              // Se o cliente está lendo o relatório, abre o Consultor Closer IA automaticamente após 5 segundos para quebrar objeções e fechar a venda!
+              setTimeout(() => {
+                const chatPanel = document.getElementById('ai-chat-panel');
+                const checkoutModal = document.getElementById('checkout-modal');
+                if (chatPanel && chatPanel.classList.contains('hidden') && (!checkoutModal || checkoutModal.classList.contains('hidden'))) {
+                  chatPanel.classList.remove('hidden');
+                }
+              }, 5000);
+            }
           }
         } catch (e) {
           console.error('Erro ao carregar relatório compartilhado:', e);

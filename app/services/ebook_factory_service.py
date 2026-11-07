@@ -1875,6 +1875,19 @@ class EbookFactoryService:
                     ebook_data["gumroad_product_id"] = res.get("product_id")
                     ebook_data["gumroad_published"] = True
                     published_count += 1
+                    # Envia a Capa 3D de Alta Resolução para a seção 'Cobrir' do Gumroad
+                    pid = res.get("product_id")
+                    if pid:
+                        try:
+                            cov_bytes = cls.generate_ebook_image_png(niche_item, img_type="cover")
+                            await GumroadService.upload_product_cover(
+                                access_token=access_token,
+                                product_id=pid,
+                                image_url=ebook_data["cover_img_url"],
+                                image_bytes=cov_bytes,
+                            )
+                        except Exception as cov_err:
+                            logger.warning(f"Aviso upload capa Gumroad ({ebook_data['title']}): {cov_err}")
                 else:
                     ebook_data["gumroad_url"] = ""
                     ebook_data["gumroad_published"] = False
@@ -1946,6 +1959,18 @@ class EbookFactoryService:
                 if up.get("success"):
                     updated_count += 1
                     updated_items.append(pname)
+                # Envia capa do produto principal
+                try:
+                    m_niche = NICHE_CATALOG[0]
+                    m_bytes = cls.generate_ebook_image_png(m_niche, img_type="cover")
+                    await GumroadService.upload_product_cover(
+                        access_token=access_token,
+                        product_id=pid,
+                        image_url=f"{site_url.rstrip('/')}/api/ebooks/image/{m_niche['slug']}/cover.png",
+                        image_bytes=m_bytes,
+                    )
+                except Exception as m_cov_err:
+                    logger.warning(f"Aviso capa produto principal Gumroad: {m_cov_err}")
                 await asyncio.sleep(0.4)
                 continue
 
@@ -1977,6 +2002,17 @@ class EbookFactoryService:
                 if up.get("success"):
                     updated_count += 1
                     updated_items.append(eb_rec["title"])
+                # Envia a Capa 3D HD para a seção 'Cobrir' do Gumroad
+                try:
+                    cov_bytes = cls.generate_ebook_image_png(matched_niche, img_type="cover")
+                    await GumroadService.upload_product_cover(
+                        access_token=access_token,
+                        product_id=pid,
+                        image_url=eb_rec["cover_img_url"],
+                        image_bytes=cov_bytes,
+                    )
+                except Exception as cov_err:
+                    logger.warning(f"Aviso upload capa nicho ({eb_rec['title']}): {cov_err}")
                 await asyncio.sleep(0.4)
 
         return {

@@ -142,6 +142,8 @@ class ApiKeysUpdate(BaseModel):
     openai_api_key: Optional[str] = None
     perplexity_api_key: Optional[str] = None
     resend_api_key: Optional[str] = None
+    gumroad_access_token: Optional[str] = None
+    gumroad_product_url: Optional[str] = None
     spark_webhook_url: Optional[str] = None
     mercadopago_access_token: Optional[str] = None
     mercadopago_public_key: Optional[str] = None
@@ -171,6 +173,8 @@ class ApiKeysStatus(BaseModel):
     perplexity_configured: bool = False
     resend_configured: bool = False
     spark_configured: bool = False
+    gumroad_configured: bool = False
+    gumroad_product_url: Optional[str] = None
     mercadopago_configured: bool = False
     mercadopago_public_key: Optional[str] = None
     pix_key: str = "contato@geopulse.ai"

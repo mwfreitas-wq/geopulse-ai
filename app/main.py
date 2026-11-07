@@ -48,6 +48,7 @@ from app.services.scraper import JinaScraperService
 from app.services.auditor import AuditorService
 from app.services.generator import ArtifactGeneratorService
 from app.services.spark_bridge import SparkSyndicatorBridge
+from app.services.gumroad_service import GumroadService
 from app.services.security import (
     SecurityHeadersMiddleware, rate_limit, audit_slot, detect_image_ext, client_ip
 )
@@ -596,6 +597,8 @@ async def get_all_configured_keys(db: AsyncSession) -> dict:
         "perplexity_api_key",
         "resend_api_key",
         "resend_from",
+        "gumroad_access_token",
+        "gumroad_product_url",
         "spark_webhook_url",
         "mercadopago_access_token",
         "mercadopago_public_key",
@@ -747,6 +750,8 @@ async def get_api_keys_status(db: AsyncSession = Depends(get_db)):
         perplexity_configured=bool(keys.get("perplexity_api_key")),
         resend_configured=bool(keys.get("resend_api_key") or settings.RESEND_API_KEY),
         spark_configured=bool(keys.get("spark_webhook_url")),
+        gumroad_configured=bool(keys.get("gumroad_access_token")),
+        gumroad_product_url=keys.get("gumroad_product_url"),
         smtp_configured=bool(keys.get("smtp_user") and keys.get("smtp_pass")),
         smtp_host=keys.get("smtp_host") or "smtp.titan.email",
         smtp_port=int(keys.get("smtp_port") or 465),
@@ -781,6 +786,8 @@ async def update_api_keys(keys_data: ApiKeysUpdate, db: AsyncSession = Depends(g
         "openai_api_key",
         "perplexity_api_key",
         "resend_api_key",
+        "gumroad_access_token",
+        "gumroad_product_url",
         "spark_webhook_url",
         "mercadopago_access_token",
         "mercadopago_public_key",
@@ -1990,6 +1997,135 @@ async def infoproduct_platform_webhook(request: Request, db: AsyncSession = Depe
         await activate_paid_geo_engine(company_id=comp.id, checkout=checkout_req, db=db)
 
     return {"status": "activated", "company_id": comp.id}
+
+
+@app.post("/api/admin/gumroad/create-product", dependencies=[Depends(verify_admin_password_header)])
+async def admin_create_gumroad_product(request: Request, db: AsyncSession = Depends(get_db)):
+    """
+    Cria automaticamente o produto na conta Gumroad do usuário via API.
+    Salva o link de checkout gerado no sistema para uso imediato pelo robô de vendas.
+    """
+    keys = await get_all_configured_keys(db)
+    token = keys.get("gumroad_access_token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Token de Acesso do Gumroad (gumroad_access_token) não configurado nas Configurações.")
+
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    name = str(body.get("name") or "GeoPulse AI — Desafio 14 Dias Rumo ao Top 10 nas IAs").strip()
+    price_val = float(body.get("price") or 47.0)
+    currency = str(body.get("currency") or "usd").strip().lower()
+    price_cents = int(price_val * 100)
+
+    res = await GumroadService.create_product(
+        access_token=token,
+        name=name,
+        price_cents=price_cents,
+        currency=currency
+    )
+
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=f"Erro ao criar produto no Gumroad: {res.get('error')}")
+
+    short_url = res.get("short_url")
+    if short_url:
+        await set_system_key(db, "gumroad_product_url", short_url)
+
+    return {
+        "success": True,
+        "message": "Produto criado e publicado com sucesso no Gumroad!",
+        "product_id": res.get("product_id"),
+        "name": res.get("name"),
+        "short_url": short_url,
+    }
+
+
+@app.post("/api/webhooks/gumroad")
+async def gumroad_webhook_ping(request: Request, db: AsyncSession = Depends(get_db)):
+    """
+    Webhook oficial (Ping) do Gumroad:
+    Quando um cliente compra no checkout do Gumroad, processa o pagamento instantaneamente,
+    ativa a empresa (is_paid = True), aciona os 7 artefatos técnicos de IA e notifica o proprietário.
+    """
+    from urllib.parse import parse_qs
+    form_data = {}
+    try:
+        content_type = request.headers.get("content-type", "")
+        if "application/json" in content_type:
+            form_data = await request.json()
+        else:
+            raw_body = await request.body()
+            parsed = parse_qs(raw_body.decode("utf-8", errors="ignore"))
+            form_data = {k: v[0] if len(v) == 1 else v for k, v in parsed.items()}
+    except Exception as e:
+        logger.warning(f"[Gumroad Webhook] Erro ao parsear payload: {e}")
+        form_data = {}
+
+    if not form_data:
+        return {"status": "empty_payload"}
+
+    sale_id = str(form_data.get("sale_id") or form_data.get("order_number") or "").strip()
+    buyer_email = str(form_data.get("email") or form_data.get("buyer_email") or "").strip().lower()
+    buyer_name = str(form_data.get("full_name") or form_data.get("name") or "Cliente Gumroad").strip()
+    price_cents = float(form_data.get("price") or 4700)
+    price_paid = round(price_cents / 100.0, 2)
+    currency = str(form_data.get("currency") or "usd").upper()
+
+    # Previne duplicidade caso o Gumroad retente o envio
+    if sale_id:
+        existing_pay = await db.execute(select(Company).where(Company.payment_ref == sale_id))
+        if existing_pay.scalars().first():
+            return {"status": "already_processed", "sale_id": sale_id}
+
+    # Procura company_id passado na URL do checkout (ex: gumroad.com/l/xxx?company_id=123 ou sck=123)
+    comp_id_str = (
+        form_data.get("company_id")
+        or form_data.get("url_params[company_id]")
+        or form_data.get("url_params[sck]")
+        or form_data.get("custom_fields[company_id]")
+        or ""
+    )
+    comp = None
+    if comp_id_str and str(comp_id_str).isdigit():
+        comp_res = await db.execute(select(Company).filter_by(id=int(comp_id_str)))
+        comp = comp_res.scalars().first()
+
+    if not comp and buyer_email:
+        comp_res_e = await db.execute(select(Company).where(Company.email == buyer_email).order_by(Company.id.desc()))
+        comp = comp_res_e.scalars().first()
+
+    if not comp:
+        # Cria a empresa para o comprador avulso
+        comp = Company(
+            name=buyer_name,
+            url=f"https://www.{re.sub(r'[^a-z0-9]', '', buyer_name.lower()) or 'empresa'}.com",
+            niche="Especialidades",
+            city_region="Internacional",
+            email=buyer_email,
+            entity_type="company",
+            is_paid=False,
+            access_token=secrets.token_urlsafe(24),
+        )
+        db.add(comp)
+        await db.commit()
+        await db.refresh(comp)
+
+    comp.payment_ref = sale_id or f"gumroad_{comp.id}"
+    await db.commit()
+
+    if not comp.is_paid:
+        checkout_req = CheckoutRequest(
+            plan_name=f"Plano Dominância IA (Gumroad {currency} {price_paid})",
+            payment_method="gumroad",
+            amount=price_paid,
+        )
+        await activate_paid_geo_engine(company_id=comp.id, checkout=checkout_req, db=db)
+
+    return {"status": "activated", "company_id": comp.id, "sale_id": sale_id}
 
 
 @app.post("/api/admin/companies/{company_id}/activate", dependencies=[Depends(verify_admin_password_header)])

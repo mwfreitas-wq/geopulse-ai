@@ -1296,6 +1296,11 @@
                 <span class="text-xl" x-text="ebookStatus.is_running ? '⏳' : '🚀'">🚀</span>
                 <span x-text="ebookStatus.is_running ? ('Gerando Lote (' + ebookStatus.progress_current + '/20)...') : 'Gerar 20 E-books & Postar no Gumroad Agora'">Gerar 20 E-books & Postar no Gumroad Agora</span>
               </button>
+              <button type="button" @click="repairGumroadProducts()" :disabled="isRepairingGumroad"
+                class="px-5 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 font-extrabold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
+                <span x-text="isRepairingGumroad ? '⏳' : '🛠️'">🛠️</span>
+                <span x-text="isRepairingGumroad ? 'Atualizando Produtos no Gumroad...' : 'Inserir Imagens HD & HTML nos Produtos Já Criados'">Inserir Imagens HD & HTML nos Produtos Já Criados</span>
+              </button>
               <span class="text-[11px] text-pink-200 text-center sm:text-right">
                 Catálogo rotativo de <strong x-text="ebookStatus.total_niches_available || 60">60</strong> nichos de alto ticket • Nunca repete o mesmo lote
               </span>
@@ -1424,7 +1429,10 @@
           <div x-show="ebookStatus.ebooks && ebookStatus.ebooks.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <template x-for="eb in ebookStatus.ebooks" :key="eb.slug + '_' + eb.created_at">
               <div class="p-5 rounded-2xl border border-slate-200 hover:border-pink-400 bg-slate-50/60 hover:bg-white transition flex flex-col justify-between gap-4 shadow-2xs">
-                <div class="space-y-2">
+                <div class="space-y-3">
+                  <a :href="'/ebook/' + eb.slug + '?lang=' + (eb.language || 'en')" target="_blank" class="block rounded-xl overflow-hidden border border-slate-200 shadow-xs">
+                    <img :src="'/api/ebooks/image/' + (eb.base_slug || eb.slug.split('-vol-')[0]) + '/cover.png'" :alt="eb.title" class="w-full h-40 object-cover hover:scale-102 transition duration-300" loading="lazy" />
+                  </a>
                   <div class="flex items-center justify-between gap-2">
                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white" x-text="eb.icon + ' ' + eb.niche_display"></span>
                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold"
@@ -1578,6 +1586,7 @@
         lastMaxCustomerId: null,
         pollTimer: null,
         ebookPollTimer: null,
+        isRepairingGumroad: false,
         ebookStatus: {
           is_running: false,
           progress_current: 0,
@@ -1951,6 +1960,25 @@
             alert('⚠️ Falha de comunicação com o servidor: ' + e.message);
           } finally {
             this.savingKeys = false;
+            this.toastMessage = '';
+          }
+        },
+
+        async repairGumroadProducts() {
+          this.isRepairingGumroad = true;
+          this.toastMessage = '🛠️ Formatando HTML, Resumo e inserindo 3 Imagens PNG HD em todos os produtos do Gumroad...';
+          try {
+            const res = await fetch('/api/admin/ebooks/repair-gumroad', { method: 'POST' });
+            const data = await res.json();
+            if (res.ok && data.success) {
+              alert('✅ Sucesso! ' + data.updated_count + ' produtos no seu Gumroad foram atualizados com HTML formatado, Resumo (Summary) e 3 Imagens HD em Inglês!');
+            } else {
+              alert('Erro ao atualizar: ' + (data.detail || data.error || 'Verifique o token'));
+            }
+          } catch (e) {
+            alert('Falha de comunicação: ' + e.message);
+          } finally {
+            this.isRepairingGumroad = false;
             this.toastMessage = '';
           }
         },

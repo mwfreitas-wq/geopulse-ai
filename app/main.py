@@ -15,7 +15,7 @@ from pydantic import BaseModel
 import httpx
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc, delete, func
@@ -3834,8 +3834,25 @@ async def _ebook_scheduler_worker():
     """
     Worker autônomo que verifica se o agendamento automático de E-books está ativo
     (2x, 3x ou 4x por semana) e dispara lotes de 20 e-books + publicação no Gumroad.
+    Ao iniciar, também repara automaticamente quaisquer produtos existentes no Gumroad com HTML rico + Imagens HD.
     """
-    await asyncio.sleep(45)
+    await asyncio.sleep(12)
+    try:
+        async with AsyncSessionLocal() as db:
+            keys = await get_all_configured_keys(db)
+            token = keys.get("gumroad_access_token") or ""
+            main_url = keys.get("gumroad_product_url") or settings.SITE_URL or "https://geopulseai.store"
+            if token and len(token.strip()) >= 10:
+                rep_res = await EbookFactoryService.repair_existing_gumroad_products(
+                    access_token=token,
+                    site_url=settings.SITE_URL or "https://geopulseai.store",
+                    main_product_url=main_url,
+                )
+                logger.info(f"🛠️ [Gumroad Auto-Repair] Produtos atualizados com HTML Rico + Imagens HD: {rep_res.get('updated_count', 0)}")
+    except Exception as rep_e:
+        logger.warning(f"Aviso no auto-repair Gumroad: {rep_e}")
+
+    await asyncio.sleep(30)
     schedule_intervals = {
         "2x": 3.5 * 86400,   # A cada 84 horas (2x por semana)
         "3x": 2.33 * 86400,  # A cada 56 horas (3x por semana)
@@ -4002,3 +4019,42 @@ async def admin_update_ebook_schedule(request: Request, db: AsyncSession = Depen
         "schedule": sched,
         "message": f"✅ Configuração salva: {labels.get(sched, sched)}",
     }
+
+
+@app.get("/api/ebooks/image/{slug}/{img_type}.png")
+async def serve_ebook_hd_image(slug: str, img_type: str = "cover"):
+    """
+    Gera e entrega em tempo real as imagens PNG de alta resolução (Capa 3D 1280x720,
+    Gráfico de Mercado 1200x650 e Arquitetura GEO 1200x650) para o Gumroad e para o E-book.
+    """
+    base_slug = slug.strip().lower().split("-vol-")[0]
+    matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == base_slug), NICHE_CATALOG[0])
+    clean_type = img_type.strip().lower()
+    if clean_type not in ("cover", "chart", "architecture"):
+        clean_type = "cover"
+    png_bytes = EbookFactoryService.generate_ebook_image_png(matched_niche, img_type=clean_type)
+    return Response(
+        content=png_bytes,
+        media_type="image/png",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
+@app.post("/api/admin/ebooks/repair-gumroad", dependencies=[Depends(verify_admin_password_header)])
+async def admin_repair_gumroad_products(db: AsyncSession = Depends(get_db)):
+    """
+    Atualiza todos os produtos existentes na conta Gumroad do usuário, substituindo textos antigos
+    por HTML Rico formatado, 3 Imagens PNG de Alta Resolução e Resumo (custom_summary) em Inglês.
+    """
+    keys = await get_all_configured_keys(db)
+    token = keys.get("gumroad_access_token") or ""
+    if not token:
+        raise HTTPException(status_code=400, detail="Token do Gumroad não configurado.")
+
+    main_url = keys.get("gumroad_product_url") or settings.SITE_URL or "https://geopulseai.store"
+    res = await EbookFactoryService.repair_existing_gumroad_products(
+        access_token=token,
+        site_url=settings.SITE_URL or "https://geopulseai.store",
+        main_product_url=main_url,
+    )
+    return res

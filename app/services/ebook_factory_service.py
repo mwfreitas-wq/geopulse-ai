@@ -1107,9 +1107,21 @@ NICHE_CATALOG: List[Dict[str, Any]] = [
 ]
 
 
+import io
+import textwrap
+from PIL import Image, ImageDraw, ImageFont
+
+
+def _hex_to_rgb(hex_str: str):
+    h = hex_str.lstrip("#")
+    if len(h) == 6:
+        return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    return (13, 148, 136)
+
+
 class EbookFactoryService:
     """
-    Motor Gerador de Lotes de 20 E-books Best-Seller por Nicho + Publicação Gumroad.
+    Motor Gerador de Lotes de 20 E-books Best-Seller por Nicho + Imagens HD (PNG) + Publicação Gumroad.
     """
 
     @classmethod
@@ -1128,6 +1140,194 @@ class EbookFactoryService:
         return batch
 
     @classmethod
+    def generate_ebook_image_png(cls, niche_item: Dict[str, Any], img_type: str = "cover") -> bytes:
+        """
+        Gera imagens PNG de alta resolução (1280x720 para capa 3D, 1200x650 para gráficos e diagramas)
+        para uso tanto nas páginas de produto do Gumroad quanto dentro do E-book em PDF.
+        """
+        niche_en = niche_item.get("niche_en", "Local Business")
+        schema_type = niche_item.get("schema_type", "LocalBusiness")
+        high_ticket = niche_item.get("high_ticket", "High-Value Services")
+        avg_ticket = niche_item.get("avg_ticket", "$3,500")
+        accent_rgb = _hex_to_rgb(niche_item.get("accent", "#0d9488"))
+
+        f_xs = ImageFont.load_default(size=15)
+        f_sm = ImageFont.load_default(size=18)
+        f_md = ImageFont.load_default(size=22)
+        f_lg = ImageFont.load_default(size=28)
+        f_xl = ImageFont.load_default(size=36)
+        f_2xl = ImageFont.load_default(size=44)
+
+        if img_type == "chart":
+            w, h = 1200, 650
+            img = Image.new("RGB", (w, h), (11, 17, 32))
+            draw = ImageDraw.Draw(img)
+
+            # Moldura executiva
+            draw.rounded_rectangle([24, 24, w - 24, h - 24], radius=24, fill=(17, 25, 44), outline=(38, 52, 82), width=2)
+            draw.rounded_rectangle([48, 48, 340, 82], radius=10, fill=accent_rgb)
+            draw.text((62, 56), "2026 AI SEARCH RESEARCH DATA", font=f_xs, fill=(255, 255, 255))
+
+            draw.text((48, 98), f"Lead-to-Client Conversion Rate: {niche_en[:42]}", font=f_xl, fill=(255, 255, 255))
+            draw.text((48, 145), f"Comparison between Generative AI Citations (ChatGPT/Gemini) vs. Traditional Search Ads (Avg LTV: {avg_ticket})", font=f_sm, fill=(148, 163, 184))
+
+            bars = [
+                ("ChatGPT Search & Google Gemini (Top 3 Recommended Entity)", "38.5% Conversion", 0.86, (16, 185, 129)),
+                ("Perplexity AI & Microsoft Copilot Verified Citations", "29.2% Conversion", 0.68, (14, 165, 233)),
+                ("Traditional Google Organic Links (Positions #4 to #10)", "8.7% Conversion", 0.25, (100, 116, 139)),
+                ("Paid Search Ads (High CPC & Banner Blindness)", "4.1% Conversion", 0.13, (244, 63, 94)),
+            ]
+
+            y_pos = 200
+            for label, val_txt, pct, col in bars:
+                draw.text((48, y_pos), label, font=f_sm, fill=(226, 232, 240))
+                draw.text((w - 230, y_pos), val_txt, font=f_sm, fill=col)
+                bar_y = y_pos + 28
+                draw.rounded_rectangle([48, bar_y, w - 48, bar_y + 24], radius=12, fill=(30, 41, 59))
+                fill_w = int((w - 96) * pct)
+                draw.rounded_rectangle([48, bar_y, 48 + fill_w, bar_y + 24], radius=12, fill=col)
+                y_pos += 72
+
+            # 3 KPI Cards no rodapé
+            kpis = [
+                ("68% of Clients", f"Consult ChatGPT or Gemini before hiring {niche_en[:24]}", (16, 185, 129)),
+                (f"{avg_ticket}+ LTV", "Average client value captured via AI recommendations", (245, 158, 11)),
+                ("$0 Cost / Click", "Organic AI entity citations require zero ad spend", (56, 189, 248)),
+            ]
+            card_w = 350
+            for idx, (k_title, k_sub, k_col) in enumerate(kpis):
+                cx = 48 + idx * 375
+                cy = 505
+                draw.rounded_rectangle([cx, cy, cx + card_w, cy + 95], radius=16, fill=(11, 17, 32), outline=(45, 60, 90), width=2)
+                draw.text((cx + 20, cy + 16), k_title, font=f_lg, fill=k_col)
+                draw.text((cx + 20, cy + 54), k_sub[:46], font=f_xs, fill=(203, 213, 225))
+
+        elif img_type == "architecture":
+            w, h = 1200, 650
+            img = Image.new("RGB", (w, h), (11, 17, 32))
+            draw = ImageDraw.Draw(img)
+
+            draw.rounded_rectangle([24, 24, w - 24, h - 24], radius=24, fill=(17, 25, 44), outline=(38, 52, 82), width=2)
+            draw.rounded_rectangle([48, 48, 390, 82], radius=10, fill=accent_rgb)
+            draw.text((62, 56), "4-PILLAR GEO ENGINEERING ARCHITECTURE", font=f_xs, fill=(255, 255, 255))
+
+            draw.text((48, 98), f"How AI Engines Rank the #1 {niche_en[:36]}", font=f_xl, fill=(255, 255, 255))
+            draw.text((48, 145), f"Retrieval-Augmented Generation (RAG) & Entity Verification Pipeline for schema.org/{schema_type}", font=f_sm, fill=(148, 163, 184))
+
+            pillars = [
+                ("PILLAR 01", "/llms.txt Protocol", "Machine-readable markdown context file for GPTBot & Gemini", (16, 185, 129)),
+                ("PILLAR 02", f"{schema_type} Graph", "Verified JSON-LD structured data & AggregateRating nodes", (14, 165, 233)),
+                ("PILLAR 03", "RAG Co-Citations", "Authority editorial articles & Top-5 comparative guides", (168, 85, 247)),
+                ("PILLAR 04", "IndexNow Pings", "Instant priority indexing into Bing & ChatGPT Search", (245, 158, 11)),
+            ]
+
+            box_w = 258
+            for i, (p_num, p_title, p_desc, p_col) in enumerate(pillars):
+                bx = 48 + i * 282
+                by = 205
+                draw.rounded_rectangle([bx, by, bx + box_w, by + 210], radius=18, fill=(11, 17, 32), outline=p_col, width=2)
+                draw.rounded_rectangle([bx + 18, by + 18, bx + 115, by + 46], radius=8, fill=p_col)
+                draw.text((bx + 28, by + 24), p_num, font=f_xs, fill=(11, 17, 32))
+                draw.text((bx + 18, by + 62), p_title[:20], font=f_md, fill=(255, 255, 255))
+                lines = textwrap.wrap(p_desc, width=26)
+                for l_idx, line in enumerate(lines[:3]):
+                    draw.text((bx + 18, by + 102 + l_idx * 24), line, font=f_xs, fill=(148, 163, 184))
+                # Seta conectora para baixo
+                mid_x = bx + box_w // 2
+                draw.line([(mid_x, by + 210), (mid_x, 465)], fill=p_col, width=3)
+
+            # Caixa de Resultado Final (Top 3 AI Citation)
+            draw.rounded_rectangle([48, 465, w - 48, 595], radius=20, fill=(6, 78, 59), outline=(16, 185, 129), width=3)
+            draw.text((80, 488), "RESULT: TOP 3 RECOMMENDED AUTHORITY ON CHATGPT, GEMINI & PERPLEXITY", font=f_lg, fill=(255, 255, 255))
+            draw.text((80, 532), f"High-intent clients searching for {high_ticket[:55]} are directed to your business first.", font=f_sm, fill=(167, 243, 208))
+
+        else:
+            # CAPA 3D DO E-BOOK + BANNER HD (1280 x 720)
+            w, h = 1280, 720
+            img = Image.new("RGB", (w, h), (10, 15, 28))
+            draw = ImageDraw.Draw(img)
+
+            # Fundo decorativo
+            draw.rounded_rectangle([20, 20, w - 20, h - 20], radius=28, fill=(15, 23, 42), outline=(40, 55, 85), width=2)
+            draw.ellipse([880, -120, 1380, 380], fill=(accent_rgb[0] // 3, accent_rgb[1] // 3, accent_rgb[2] // 3))
+
+            # --- LADO ESQUERDO: MOCKUP 3D DE LIVRO DE CAPA DURA ---
+            # Sombra do livro
+            draw.rounded_rectangle([88, 78, 495, 658], radius=16, fill=(5, 8, 15))
+            # Lombada 3D
+            spine_col = (max(0, accent_rgb[0] - 40), max(0, accent_rgb[1] - 40), max(0, accent_rgb[2] - 40))
+            draw.rounded_rectangle([72, 62, 116, 642], radius=10, fill=spine_col, outline=(255, 255, 255), width=1)
+            # Capa Frontal do Livro
+            draw.rounded_rectangle([106, 62, 480, 642], radius=14, fill=(19, 30, 54), outline=accent_rgb, width=3)
+            # Faixa superior da capa do livro
+            draw.rounded_rectangle([106, 62, 480, 135], radius=14, fill=accent_rgb)
+            draw.text((132, 86), "2026 EXECUTIVE PLAYBOOK", font=f_sm, fill=(255, 255, 255))
+
+            # Sub-badge dentro do livro
+            draw.text((132, 162), "AI SEARCH DOMINANCE FOR:", font=f_xs, fill=(56, 189, 248))
+
+            # Nome do Nicho na capa do livro (quebrado em linhas)
+            wrapped_niche = textwrap.wrap(niche_en.upper(), width=18)
+            ny = 195
+            for line in wrapped_niche[:3]:
+                draw.text((132, ny), line, font=f_lg, fill=(255, 255, 255))
+                ny += 36
+
+            draw.line([(132, ny + 12), (450, ny + 12)], fill=accent_rgb, width=2)
+
+            # Subtítulo na capa do livro
+            book_sub = textwrap.wrap("The Step-by-Step Blueprint to Rank in the Top 3 of ChatGPT, Google Gemini & Perplexity in 14 Days", width=30)
+            bsy = ny + 30
+            for line in book_sub[:3]:
+                draw.text((132, bsy), line, font=f_xs, fill=(203, 213, 225))
+                bsy += 22
+
+            # Mini gráfico ilustrativo na capa do livro
+            draw.rounded_rectangle([132, 435, 452, 565], radius=12, fill=(11, 17, 32), outline=(45, 62, 95), width=1)
+            draw.text((148, 448), "AI CITATION SCORE TARGET:", font=f_xs, fill=(16, 185, 129))
+            draw.rounded_rectangle([148, 478, 425, 494], radius=8, fill=(16, 185, 129))
+            draw.rounded_rectangle([148, 506, 365, 522], radius=8, fill=(14, 165, 233))
+            draw.rounded_rectangle([148, 534, 290, 550], radius=8, fill=(168, 85, 247))
+
+            draw.text((132, 595), "GEOPULSE AI PUBLISHING", font=f_xs, fill=(148, 163, 184))
+
+            # --- LADO DIREITO: HEADLINE E BENEFÍCIOS DO PLAYBOOK ---
+            draw.rounded_rectangle([535, 68, 985, 106], radius=10, fill=(6, 78, 59), outline=(16, 185, 129), width=1)
+            draw.text((552, 78), "ILLUSTRATED 7-CHAPTER BESTSELLER EDITION", font=f_xs, fill=(167, 243, 208))
+
+            # Título Principal à direita
+            right_title = textwrap.wrap(f"AI Search Dominance for {niche_en}", width=26)
+            rty = 126
+            for line in right_title[:2]:
+                draw.text((535, rty), line, font=f_2xl, fill=(255, 255, 255))
+                rty += 52
+
+            draw.text((535, rty + 6), f"Capture High-Ticket Clients ({avg_ticket}+ LTV) from ChatGPT & Gemini", font=f_md, fill=(56, 189, 248))
+
+            # 4 Caixas de Benefícios Visuais
+            bullets = [
+                f"1. Production-Ready /llms.txt Template for {niche_en[:26]}",
+                f"2. Verified Schema.org ({schema_type}) JSON-LD Knowledge Graph",
+                f"3. High-Intent Client Prompt Matrix ({high_ticket[:32]})",
+                "4. Complete 14-Day AI Visibility Sprint Implementation Checklist",
+            ]
+            by_pos = rty + 56
+            for b_txt in bullets:
+                draw.rounded_rectangle([535, by_pos, 1220, by_pos + 56], radius=12, fill=(23, 35, 62), outline=(45, 62, 95), width=1)
+                draw.rounded_rectangle([550, by_pos + 13, 580, by_pos + 43], radius=8, fill=(16, 185, 129))
+                draw.text((559, by_pos + 17), "✓", font=f_md, fill=(11, 17, 32))
+                draw.text((596, by_pos + 18), b_txt[:58], font=f_sm, fill=(241, 245, 249))
+                by_pos += 68
+
+            # Rodapé Direito
+            draw.rounded_rectangle([535, 582, 1220, 642], radius=14, fill=accent_rgb)
+            draw.text((560, 602), "INSTANT ACCESS: INTERACTIVE WEB EDITION + PRINTABLE A4 PDF", font=f_sm, fill=(255, 255, 255))
+
+        buf = io.BytesIO()
+        img.save(buf, format="PNG", optimize=True)
+        return buf.getvalue()
+
+    @classmethod
     def build_ebook_record(
         cls,
         niche_item: Dict[str, Any],
@@ -1137,8 +1337,8 @@ class EbookFactoryService:
         main_product_url: str = "https://geopulseai.store",
     ) -> Dict[str, Any]:
         """
-        Constrói os metadados ricos, título best-seller, descrição de venda para o Gumroad
-        e estrutura de 7 capítulos ilustrados do e-book para o nicho especificado.
+        Constrói os metadados ricos, título em Inglês, descrição em HTML Rico com 3 Imagens PNG
+        para o Gumroad (sem Markdown cru!) e estrutura de 7 capítulos ilustrados.
         """
         slug = niche_item["slug"]
         edition = niche_item.get("edition", 1)
@@ -1151,55 +1351,75 @@ class EbookFactoryService:
         high_ticket = niche_item["high_ticket"]
         avg_ticket = niche_item["avg_ticket"]
         prompts = niche_item["sample_prompts"]
-        ebook_public_url = f"{site_url.rstrip('/')}/ebook/{slug}?lang={language}"
+        base = site_url.rstrip("/")
+        ebook_public_url = f"{base}/ebook/{slug}?lang={language}"
+
+        cover_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/cover.png"
+        chart_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/chart.png"
+        arch_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/architecture.png"
 
         if language == "pt":
-            title = f"Dominância nas Buscas de IA para {niche_name} — O Playbook Oficial 2026"
+            title = f"Dominancia nas Buscas de IA para {niche_name} — O Playbook Oficial 2026"
             subtitle = f"O Guia Prático Passo a Passo para Posicionar seu Negócio de {niche_name} no Top 3 do ChatGPT, Google Gemini e Perplexity em 14 Dias"
+            custom_summary = (
+                f"Acesso Digital Imediato: Playbook Executivo Ilustrado de 7 Capítulos para {niche_name} (Edição Web + PDF A4), "
+                f"Templates prontos de /llms.txt e Schema.org ({schema_type}) + Checklist de 14 Dias."
+            )
             gumroad_desc = (
-                f"## {icon} {title}\n\n"
-                f"**{subtitle}**\n\n"
-                f"Mais de **68% dos clientes de alto valor** que buscam por *{high_ticket}* deixaram de clicar em anúncios caros e agora perguntam diretamente ao **ChatGPT, Google Gemini e Perplexity** qual empresa contratar.\n\n"
-                f"Baseado na estrutura dos maiores best-sellers de negócios do mundo, este **Playbook Visual e Didático com Imagens, Gráficos e Templates Prontos** revela a estratégia exata para fazer sua marca dominar as recomendações de Inteligência Artificial.\n\n"
-                f"### 📚 O que você vai aprender e aplicar (7 Capítulos Ilustrados):\n"
-                f"1. **A Revolução da Busca Generativa em {niche_name}:** Dados visuais e por que o SEO tradicional não basta mais.\n"
-                f"2. **A Anatomia do Algoritmo de Recomendação (RAG):** Como o ChatGPT e o Gemini escolhem apenas 3 líderes locais.\n"
-                f"3. **Template Oficial `/llms.txt` para {niche_name}:** Código pronto para copiar e colar adaptado para `{schema_type}`.\n"
-                f"4. **Grafo de Conhecimento Schema.org JSON-LD:** Estrutura técnica validada para destacar seus serviços de *{high_ticket}*.\n"
-                f"5. **Matriz das 10 Perguntas de Ouro:** Os prompts reais que seus clientes digitam na IA e como respondê-los.\n"
-                f"6. **Plano de Execução de 14 Dias (Checklist Visual):** O cronograma diário do Dia 1 ao Dia 14.\n"
-                f"7. **Automação Total com 1 Clique:** Como ativar os 7 ativos automaticamente sem tocar em código.\n\n"
-                f"---\n"
-                f"### ⚡ ACESSO IMEDIATO AO SEU E-BOOK ILUSTRADO (WEB + PDF):\n"
-                f"Assim que concluir o pedido, acesse e baixe sua edição completa ilustrada aqui:\n"
-                f"👉 **[Abrir e Baixar E-book Oficial em PDF]({ebook_public_url})**\n\n"
-                f"*(Inclui gráficos visuais, diagramas de arquitetura de IA e templates prontos para uso imediato)*."
+                f'<p><img src="{cover_img_url}" alt="{title}" /></p>'
+                f"<h2>{title}</h2>"
+                f"<p><strong>{subtitle}</strong></p>"
+                f"<p>Mais de <strong>68% dos clientes de alto valor</strong> que buscam por <em>{high_ticket}</em> (ticket médio: <strong>{avg_ticket}</strong>) deixaram de clicar em anúncios caros e agora perguntam diretamente ao <strong>ChatGPT, Google Gemini e Perplexity</strong> qual empresa contratar.</p>"
+                f"<p>Baseado na estrutura dos maiores best-sellers de negócios do mundo, este <strong>Playbook Visual e Didático com Imagens, Gráficos e Templates Prontos</strong> revela a estratégia exata para fazer sua marca dominar as recomendações de Inteligência Artificial.</p>"
+                f'<p><img src="{chart_img_url}" alt="Dados de Mercado e Conversão em IA" /></p>'
+                f"<h3>📚 O que você vai dominar e aplicar (7 Capítulos Ilustrados):</h3>"
+                f"<ol>"
+                f"<li><strong>A Revolução da Busca Generativa em {niche_name}:</strong> Dados visuais de mercado e por que o SEO tradicional não basta mais em 2026.</li>"
+                f"<li><strong>A Anatomia do Motor de Recomendação (RAG):</strong> Os 4 sinais matemáticos que o ChatGPT e o Gemini usam para escolher o Top 3 local.</li>"
+                f"<li><strong>Template Oficial <code>/llms.txt</code> para {niche_name}:</strong> Código pronto para copiar e colar adaptado para <code>{schema_type}</code>.</li>"
+                f"<li><strong>Grafo de Conhecimento Schema.org JSON-LD:</strong> Estrutura técnica validada para destacar seus serviços de <em>{high_ticket}</em>.</li>"
+                f"<li><strong>Matriz das Perguntas de Alta Intenção:</strong> Os prompts reais que seus clientes digitam na IA e como respondê-los.</li>"
+                f"<li><strong>Plano de Execução de 14 Dias (Checklist Visual):</strong> O cronograma passo a passo do Dia 1 ao Dia 14.</li>"
+                f"<li><strong>Atalho de Automação Total:</strong> Como ativar os 7 ativos automaticamente em 2 minutos sem tocar em código.</li>"
+                f"</ol>"
+                f'<p><img src="{arch_img_url}" alt="Arquitetura de 4 Pilares GEO" /></p>'
+                f"<hr />"
+                f"<h3>⚡ Entrega Digital Imediata (Edição Interativa + PDF para Impressão A4)</h3>"
+                f"<p>Assim que seu pedido é confirmado, você recebe acesso imediato ao seu Playbook Ilustrado completo com todos os gráficos, diagramas e códigos prontos para copiar — protegido por nossa <strong>Garantia Incondicional de 7 Dias</strong>.</p>"
             )
         else:
             title = f"AI Search Dominance for {niche_name} — The 2026 ChatGPT & Gemini Playbook"
             subtitle = f"The Step-by-Step Visual Blueprint to Rank Your {niche_name} Brand in the Top 3 of ChatGPT, Google Gemini & Perplexity in 14 Days"
+            custom_summary = (
+                f"Instant Digital Access: Illustrated 7-Chapter Executive Playbook for {niche_name} (Interactive Web + Printable A4 PDF), "
+                f"Copy-Paste /llms.txt & Schema.org ({schema_type}) Templates + 14-Day Ranking Roadmap."
+            )
             gumroad_desc = (
-                f"## {icon} {title}\n\n"
-                f"**{subtitle}**\n\n"
-                f"Over **68% of high-intent clients** searching for *{high_ticket}* (average client value: **{avg_ticket}**) are bypassing traditional search ads and asking **ChatGPT, Google Gemini, Copilot, and Perplexity** who they should trust and hire.\n\n"
-                f"Modeled after the world's top-selling business playbooks, this **Illustrated, Data-Driven Executive E-Book** gives you the exact Generative Engine Optimization (GEO) strategy tailored specifically for **{niche_name}**.\n\n"
-                f"### 📚 Inside This Illustrated 7-Chapter Playbook:\n"
-                f"1. **The AI Search Shift in {niche_name}:** Visual market data showing how conversational AI is capturing high-ticket leads.\n"
-                f"2. **Inside the AI Recommendation Engine (RAG):** The 4 authority signals ChatGPT & Gemini use to pick the Top 3 providers.\n"
-                f"3. **The Custom `/llms.txt` Blueprint for {niche_name}:** Copy-and-paste machine-readable training file built for `{schema_type}`.\n"
-                f"4. **Verified Schema.org JSON-LD Knowledge Graph:** Complete structured data template highlighting *{high_ticket}*.\n"
-                f"5. **The High-Intent Prompt Matrix:** The exact questions your prospects ask AI engines—and how to engineer winning answers.\n"
-                f"6. **The 14-Day Implementation Roadmap:** Illustrated step-by-step checklist from Day 1 to Day 14.\n"
-                f"7. **Done-For-You AI Automation:** How to deploy all 7 entity assets automatically in under 2 minutes with GeoPulse AI.\n\n"
-                f"---\n"
-                f"### ⚡ INSTANT ACCESS TO YOUR ILLUSTRATED E-BOOK (INTERACTIVE + PDF):\n"
-                f"Access and download your full illustrated playbook immediately here:\n"
-                f"👉 **[Open & Download Your Official Illustrated E-Book (PDF)]({ebook_public_url})**\n\n"
-                f"*(Includes high-resolution SVG infographics, architecture diagrams, code templates, and executive checklists)*."
+                f'<p><img src="{cover_img_url}" alt="{title}" /></p>'
+                f"<h2>{title}</h2>"
+                f"<p><strong>{subtitle}</strong></p>"
+                f"<p>Over <strong>68% of high-intent clients</strong> searching for <em>{high_ticket}</em> (average client lifetime value: <strong>{avg_ticket}+</strong>) are bypassing traditional search ads and asking <strong>ChatGPT, Google Gemini, Copilot, and Perplexity</strong> who they should trust and hire.</p>"
+                f"<p>Modeled after the world's best-selling executive business playbooks, this <strong>Illustrated, Data-Driven 7-Chapter Blueprint</strong> gives you the exact Generative Engine Optimization (GEO) strategy tailored specifically for <strong>{niche_name}</strong>.</p>"
+                f'<p><img src="{chart_img_url}" alt="2026 AI Search Market Research Data" /></p>'
+                f"<h3>📚 Inside This Illustrated 7-Chapter Executive Playbook:</h3>"
+                f"<ol>"
+                f"<li><strong>The AI Search Shift in {niche_name}:</strong> Visual benchmark data showing how conversational AI captures high-ticket leads ({avg_ticket}+).</li>"
+                f"<li><strong>Inside the AI Recommendation Engine (RAG):</strong> The 4 authority signals ChatGPT &amp; Google Gemini use to select the Top 3 local providers.</li>"
+                f"<li><strong>The Custom <code>/llms.txt</code> Blueprint for {niche_name}:</strong> Copy-and-paste machine-readable training file engineered specifically for <code>{schema_type}</code>.</li>"
+                f"<li><strong>Verified Schema.org JSON-LD Knowledge Graph:</strong> Complete structured data template highlighting <em>{high_ticket}</em> and verified client ratings.</li>"
+                f"<li><strong>The High-Intent Prompt Matrix:</strong> The exact conversational prompts your prospects type into AI engines—and how to engineer winning answers.</li>"
+                f"<li><strong>The 14-Day Implementation Roadmap:</strong> Illustrated step-by-step daily execution checklist from Day 1 to Day 14.</li>"
+                f"<li><strong>Done-For-You AI Automation:</strong> How to deploy all 7 entity assets automatically in under 2 minutes with GeoPulse AI.</li>"
+                f"</ol>"
+                f'<p><img src="{arch_img_url}" alt="4-Pillar GEO Engineering Architecture" /></p>'
+                f"<hr />"
+                f"<h3>⚡ Instant Digital Delivery (Interactive Edition + Printable A4 PDF)</h3>"
+                f"<p>Immediately upon checkout, you receive instant access to your complete illustrated playbook, high-resolution visual charts, copy-and-paste code templates, and 14-day executive checklist—backed by our <strong>7-Day 100% Satisfaction Guarantee</strong>.</p>"
             )
 
         return {
             "slug": slug,
+            "base_slug": niche_item["slug"],
             "niche_en": niche_item["niche_en"],
             "niche_pt": niche_item["niche_pt"],
             "niche_display": niche_name,
@@ -1214,7 +1434,11 @@ class EbookFactoryService:
             "price_usd": price_usd,
             "title": title,
             "subtitle": subtitle,
+            "custom_summary": custom_summary,
             "ebook_url": ebook_public_url,
+            "cover_img_url": cover_img_url,
+            "chart_img_url": chart_img_url,
+            "arch_img_url": arch_img_url,
             "gumroad_description": gumroad_desc,
             "main_product_url": main_product_url,
             "created_at": datetime.utcnow().isoformat(),
@@ -1223,13 +1447,12 @@ class EbookFactoryService:
     @classmethod
     def render_ebook_html(cls, ebook: Dict[str, Any]) -> str:
         """
-        Renderiza o E-book completo em formato de Livro Digital Bestseller (HTML5 + SVG Infographics + Print-to-PDF A4).
-        Inclui capa 3D, ilustrações vetoriais, gráficos comparativos, blocos de código prontos e CTA para o produto principal.
+        Renderiza o E-book completo em formato de Livro Digital Bestseller (HTML5 + Imagens HD PNG + Print-to-PDF A4).
         """
         lang = ebook.get("language", "en")
         niche = ebook.get("niche_display") or ebook.get("niche_en", "Business")
+        base_slug = ebook.get("base_slug") or ebook.get("slug", "dental-clinics-implantology").split("-vol-")[0]
         icon = ebook.get("icon", "🚀")
-        accent = ebook.get("accent", "#0d9488")
         bg_gradient = ebook.get("bg_gradient", "linear-gradient(135deg, #0f172a 0%, #115e59 100%)")
         schema_type = ebook.get("schema_type", "LocalBusiness")
         high_ticket = ebook.get("high_ticket", "Premium Services")
@@ -1238,6 +1461,10 @@ class EbookFactoryService:
         title = ebook.get("title", f"AI Search Dominance for {niche}")
         subtitle = ebook.get("subtitle", "")
         main_cta_url = ebook.get("main_product_url") or "https://geopulseai.store"
+
+        cover_img = f"/api/ebooks/image/{base_slug}/cover.png"
+        chart_img = f"/api/ebooks/image/{base_slug}/chart.png"
+        arch_img = f"/api/ebooks/image/{base_slug}/architecture.png"
 
         prompts_rows_html = ""
         for idx, p in enumerate(prompts, 1):
@@ -1308,7 +1535,7 @@ class EbookFactoryService:
       font-family: 'JetBrains Mono', monospace;
     }}
     .ebook-page {{
-      max-width: 900px;
+      max-width: 920px;
       margin: 2rem auto;
       background: #ffffff;
       box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
@@ -1354,77 +1581,14 @@ class EbookFactoryService:
   <!-- LIVRO PRINCIPAL -->
   <article class="ebook-page">
 
-    <!-- ===================================================================== -->
-    <!-- CAPA EDITORIAL 3D BESTSELLER                                          -->
-    <!-- ===================================================================== -->
-    <section style="background: {bg_gradient};" class="relative text-white p-10 sm:p-16 md:p-20 overflow-hidden">
-      <!-- Elementos Geométricos Decorativos de Capa -->
-      <svg class="absolute right-0 top-0 w-96 h-96 opacity-10 pointer-events-none" viewBox="0 0 200 200" fill="none">
-        <circle cx="150" cy="50" r="90" stroke="white" stroke-width="2" stroke-dasharray="6 6"/>
-        <circle cx="150" cy="50" r="60" stroke="white" stroke-width="1.5"/>
-        <circle cx="150" cy="50" r="30" fill="white" fill-opacity="0.2"/>
-      </svg>
+    <!-- CAPA 3D ILUSTRADA EM ALTA RESOLUÇÃO -->
+    <div class="bg-slate-950 p-4 sm:p-6">
+      <img src="{cover_img}" alt="{title}" class="w-full rounded-2xl shadow-2xl border border-slate-800" />
+    </div>
 
-      <div class="relative z-10 max-w-2xl space-y-6">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-xs font-extrabold uppercase tracking-widest text-emerald-300">
-          <span>🏆 INTERNATIONAL EXECUTIVE PLAYBOOK • 2026 EDITION</span>
-        </div>
-
-        <div class="flex items-center gap-4 pt-2">
-          <div class="w-20 h-20 rounded-3xl bg-white/15 border border-white/25 flex items-center justify-center text-5xl shadow-2xl">
-            {icon}
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-widest text-slate-300 font-bold">Industry Specialization</div>
-            <div class="text-xl sm:text-2xl font-extrabold text-white">{niche}</div>
-          </div>
-        </div>
-
-        <h1 class="serif-heading text-3xl sm:text-5xl font-extrabold leading-tight tracking-tight text-white pt-2">
-          {title}
-        </h1>
-
-        <p class="text-base sm:text-lg text-slate-200 leading-relaxed font-normal">
-          {subtitle}
-        </p>
-
-        <!-- Ilustração Vetorial de Capa: Fluxo de Recomendação de IA -->
-        <div class="pt-6">
-          <div class="bg-slate-950/60 border border-white/15 rounded-2xl p-5 backdrop-blur-md">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-3">
-              Visual Architecture: How AI Engines Select the #1 {niche} Provider
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-              <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
-                <div class="text-xs font-bold text-white">1. Entity Ingestion</div>
-                <div class="text-[11px] text-slate-300 mt-1"><code>/llms.txt</code> + <code>{schema_type}</code> JSON-LD Knowledge Graph</div>
-              </div>
-              <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
-                <div class="text-xs font-bold text-emerald-300">2. RAG Consensus</div>
-                <div class="text-[11px] text-slate-300 mt-1">Editorial citations, verified reviews & IndexNow priority pings</div>
-              </div>
-              <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
-                <div class="text-xs font-bold text-amber-300">3. Top 3 Citation</div>
-                <div class="text-[11px] text-slate-300 mt-1">ChatGPT, Gemini & Perplexity recommend your brand first</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="pt-6 border-t border-white/15 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-300">
-          <div><strong>Author:</strong> GeoPulse AI Research Lab</div>
-          <div><strong>Target Schema:</strong> <code>schema.org/{schema_type}</code></div>
-          <div><strong>Avg. Client LTV:</strong> {avg_ticket}+</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- SUMÁRIO EXECUTIVO & INTRODUÇÃO                                        -->
-    <!-- ===================================================================== -->
     <div class="p-8 sm:p-14 md:p-16 space-y-14">
 
-      <!-- Box de Destaque Estilo Harvard Business Review -->
+      <!-- Sumário Executivo -->
       <div class="bg-slate-50 border-l-4 border-emerald-600 rounded-r-2xl p-6 sm:p-8 space-y-3">
         <div class="text-xs font-extrabold uppercase tracking-wider text-emerald-700">Executive Summary • Why This Playbook Matters Today</div>
         <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
@@ -1438,9 +1602,7 @@ class EbookFactoryService:
         </p>
       </div>
 
-      <!-- =================================================================== -->
-      <!-- CAPÍTULO 1: INFOGRÁFICO COMPARATIVO (A GRANDE VIRADA)               -->
-      <!-- =================================================================== -->
+      <!-- CAPÍTULO 1 -->
       <section class="space-y-6">
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold">CHAPTER 01</span>
@@ -1451,78 +1613,12 @@ class EbookFactoryService:
           When a prospect searches for <strong>{high_ticket}</strong>, their journey has fundamentally changed. Below is the visual breakdown of how client attention and conversion rates compare between legacy search engines and Generative AI engines in 2026:
         </p>
 
-        <!-- Infográfico Visual SVG + Barras Comparativas -->
-        <div class="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4">
-            <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">Figure 1.1 • Market Research Data</div>
-              <div class="text-lg font-extrabold">Traditional Search vs. Generative AI Recommendations ({niche})</div>
-            </div>
-            <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold">4.4x Higher Conversion</span>
-          </div>
-
-          <div class="space-y-4">
-            <div>
-              <div class="flex justify-between text-xs font-bold mb-1.5">
-                <span class="text-emerald-300">ChatGPT Search / Google Gemini Direct Citation (Top 3 Entity)</span>
-                <span class="font-mono text-emerald-400">38.5% Lead-to-Client Conversion</span>
-              </div>
-              <div class="w-full h-4 bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" style="width: 86%"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs font-bold mb-1.5">
-                <span class="text-sky-300">Perplexity AI & Microsoft Copilot Verified Sources</span>
-                <span class="font-mono text-sky-400">29.2% Lead-to-Client Conversion</span>
-              </div>
-              <div class="w-full h-4 bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-sky-500 to-indigo-400 rounded-full" style="width: 68%"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs font-bold mb-1.5">
-                <span class="text-slate-400">Traditional Organic Blue Links (Page 1 Position #4–#10)</span>
-                <span class="font-mono text-slate-400">8.7% Lead-to-Client Conversion</span>
-              </div>
-              <div class="w-full h-4 bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-slate-600 rounded-full" style="width: 24%"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs font-bold mb-1.5">
-                <span class="text-rose-400">Paid Search Ads (High CPC / Ad Fatigue)</span>
-                <span class="font-mono text-rose-400">4.1% Lead-to-Client Conversion</span>
-              </div>
-              <div class="w-full h-4 bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-rose-600 rounded-full" style="width: 13%"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-slate-800 text-center">
-            <div class="bg-slate-800/70 rounded-2xl p-4">
-              <div class="text-2xl font-extrabold text-emerald-400">68%</div>
-              <div class="text-[11px] text-slate-300 mt-1">of affluent clients consult AI before booking {niche}</div>
-            </div>
-            <div class="bg-slate-800/70 rounded-2xl p-4">
-              <div class="text-2xl font-extrabold text-amber-400">{avg_ticket}</div>
-              <div class="text-[11px] text-slate-300 mt-1">Average lifetime value of a single AI-referred client</div>
-            </div>
-            <div class="bg-slate-800/70 rounded-2xl p-4">
-              <div class="text-2xl font-extrabold text-sky-400">$0 CPC</div>
-              <div class="text-[11px] text-slate-300 mt-1">Organic AI citations do not charge per click</div>
-            </div>
-          </div>
+        <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
+          <img src="{chart_img}" alt="Market Research Chart" class="w-full" />
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- CAPÍTULO 2: COMO OS MOTORES DE IA ESCOLHEM O TOP 3 (DIAGRAMA SVG)    -->
-      <!-- =================================================================== -->
+      <!-- CAPÍTULO 2 -->
       <section class="space-y-6 page-break">
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold">CHAPTER 02</span>
@@ -1530,11 +1626,14 @@ class EbookFactoryService:
         </div>
 
         <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
-          Large Language Models do not "read" websites like humans do. Heavy visual pages, animations, and unstructured text confuse AI crawlers (`GPTBot`, `Google-Extended`, `PerplexityBot`). Instead, AI engines rely on <strong>Retrieval-Augmented Generation (RAG)</strong> and 4 specific mathematical signals:
+          Large Language Models do not "read" websites like humans do. Heavy visual pages, animations, and unstructured text confuse AI crawlers (<code>GPTBot</code>, <code>Google-Extended</code>, <code>PerplexityBot</code>). Instead, AI engines rely on <strong>Retrieval-Augmented Generation (RAG)</strong> and 4 specific mathematical signals:
         </p>
 
-        <!-- Ilustração de 4 Pilares -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
+          <img src="{arch_img}" alt="4-Pillar GEO Architecture" class="w-full" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
           <div class="border-2 border-slate-200 rounded-2xl p-6 space-y-2 bg-white shadow-sm">
             <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-extrabold text-lg">01</div>
             <h3 class="text-base font-extrabold text-slate-900">Machine-Readable Context (<code>/llms.txt</code>)</h3>
@@ -1561,7 +1660,7 @@ class EbookFactoryService:
 
           <div class="border-2 border-slate-200 rounded-2xl p-6 space-y-2 bg-white shadow-sm">
             <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-extrabold text-lg">04</div>
-            <h3 class="text-base font-extrabold text-slate-900">Conversational Q&A Alignment</h3>
+            <h3 class="text-base font-extrabold text-slate-900">Conversational Q&amp;A Alignment</h3>
             <p class="text-xs text-slate-600 leading-relaxed">
               Structuring your content around the exact natural-language questions prospects ask AI enables direct zero-shot extraction into ChatGPT and Perplexity answers.
             </p>
@@ -1569,9 +1668,7 @@ class EbookFactoryService:
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- CAPÍTULO 3: O PROTOCOLO /LLMS.TXT PARA O NICHO                      -->
-      <!-- =================================================================== -->
+      <!-- CAPÍTULO 3 -->
       <section class="space-y-6">
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold">CHAPTER 03</span>
@@ -1585,15 +1682,13 @@ class EbookFactoryService:
         <div class="bg-slate-900 text-slate-100 rounded-2xl p-6 font-mono text-xs overflow-x-auto border border-slate-800 shadow-lg">
           <div class="flex items-center justify-between text-slate-400 text-[11px] pb-3 mb-3 border-b border-slate-800">
             <span>FILE: /llms.txt • Industry: {niche}</span>
-            <span class="text-emerald-400 font-bold">✓ Ready for GPTBot & Gemini</span>
+            <span class="text-emerald-400 font-bold">✓ Ready for GPTBot &amp; Gemini</span>
           </div>
           <pre class="whitespace-pre-wrap leading-relaxed text-emerald-300">{llms_template}</pre>
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- CAPÍTULO 4: SCHEMA.ORG JSON-LD KNOWLEDGE GRAPH                      -->
-      <!-- =================================================================== -->
+      <!-- CAPÍTULO 4 -->
       <section class="space-y-6 page-break">
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold">CHAPTER 04</span>
@@ -1613,9 +1708,7 @@ class EbookFactoryService:
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- CAPÍTULO 5: MATRIZ DE PROMPTS DE ALTA INTENÇÃO                      -->
-      <!-- =================================================================== -->
+      <!-- CAPÍTULO 5 -->
       <section class="space-y-6">
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold">CHAPTER 05</span>
@@ -1643,9 +1736,7 @@ class EbookFactoryService:
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- CAPÍTULO 6: PLANO DE AÇÃO DE 14 DIAS (CHECKLIST VISUAL)             -->
-      <!-- =================================================================== -->
+      <!-- CAPÍTULO 6 -->
       <section class="space-y-6 page-break">
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold">CHAPTER 06</span>
@@ -1658,34 +1749,32 @@ class EbookFactoryService:
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-            <div class="text-xs font-extrabold text-emerald-700 uppercase">Days 1 – 3 • Baseline & Entity Setup</div>
-            <div class="text-sm font-bold text-slate-900">Audit Current Share-of-Model & Deploy <code>/llms.txt</code></div>
+            <div class="text-xs font-extrabold text-emerald-700 uppercase">Days 1 – 3 • Baseline &amp; Entity Setup</div>
+            <div class="text-sm font-bold text-slate-900">Audit Current Share-of-Model &amp; Deploy <code>/llms.txt</code></div>
             <p class="text-xs text-slate-600">Test your brand across 15 niche prompts, identify which local competitor is taking your leads, and publish your machine-readable entity file.</p>
           </div>
 
           <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
             <div class="text-xs font-extrabold text-emerald-700 uppercase">Days 4 – 7 • Semantic Knowledge Graph</div>
-            <div class="text-sm font-bold text-slate-900">Inject <code>{schema_type}</code> JSON-LD & Conversational FAQ</div>
-            <p class="text-xs text-slate-600">Structure your core offer ({high_ticket}) with verified schema nodes and publish the 10 high-intent Q&A blocks.</p>
+            <div class="text-sm font-bold text-slate-900">Inject <code>{schema_type}</code> JSON-LD &amp; Conversational FAQ</div>
+            <p class="text-xs text-slate-600">Structure your core offer ({high_ticket}) with verified schema nodes and publish the 10 high-intent Q&amp;A blocks.</p>
           </div>
 
           <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-            <div class="text-xs font-extrabold text-emerald-700 uppercase">Days 8 – 11 • Editorial Authority & Citations</div>
+            <div class="text-xs font-extrabold text-emerald-700 uppercase">Days 8 – 11 • Editorial Authority &amp; Citations</div>
             <div class="text-sm font-bold text-slate-900">Publish Comparative Top-5 Industry Article</div>
             <p class="text-xs text-slate-600">Create an objective, data-backed industry guide positioning your brand at the top of local {niche} recommendations.</p>
           </div>
 
           <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-            <div class="text-xs font-extrabold text-emerald-700 uppercase">Days 12 – 14 • Priority Indexing & Verification</div>
-            <div class="text-sm font-bold text-slate-900">Trigger IndexNow Pings to Bing & ChatGPT Search</div>
+            <div class="text-xs font-extrabold text-emerald-700 uppercase">Days 12 – 14 • Priority Indexing &amp; Verification</div>
+            <div class="text-sm font-bold text-slate-900">Trigger IndexNow Pings to Bing &amp; ChatGPT Search</div>
             <p class="text-xs text-slate-600">Force immediate re-crawling of your entity endpoints and re-verify your visibility score (0–100) across all AI models.</p>
           </div>
         </div>
       </section>
 
-      <!-- =================================================================== -->
-      <!-- CAPÍTULO 7: ATALHO AUTOMÁTICO (CTA DE ALTA CONVERSÃO)               -->
-      <!-- =================================================================== -->
+      <!-- CAPÍTULO 7 -->
       <section class="pt-4">
         <div style="background: {bg_gradient};" class="rounded-3xl p-8 sm:p-12 text-white space-y-6 shadow-2xl">
           <div class="inline-block px-3.5 py-1 rounded-full bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 text-xs font-extrabold uppercase tracking-wider">
@@ -1708,14 +1797,13 @@ class EbookFactoryService:
 
           <div class="pt-2 flex flex-wrap items-center gap-4">
             <a href="{main_cta_url}" target="_blank" class="px-8 py-4 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-extrabold text-sm sm:text-base shadow-xl transition inline-flex items-center gap-2">
-              <span>🚀</span> Run Your Free AI Visibility Audit & Activate 14-Day Sprint
+              <span>🚀</span> Run Your Free AI Visibility Audit &amp; Activate 14-Day Sprint
             </a>
             <span class="text-xs text-slate-300">Instant activation • Works for any {niche} website or Instagram</span>
           </div>
         </div>
       </section>
 
-      <!-- RODAPÉ EDITORIAL -->
       <footer class="pt-8 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
         <div>© 2026 GeoPulse AI Publishing (<a href="https://geopulseai.store" class="underline hover:text-slate-600">geopulseai.store</a>). All rights reserved.</div>
         <div>Edition: {niche} • Bestseller Playbook Series</div>
@@ -1739,8 +1827,8 @@ class EbookFactoryService:
         progress_callback=None,
     ) -> Dict[str, Any]:
         """
-        Gera 20 e-books para 20 nichos diferentes e publica todos os 20 automaticamente no Gumroad.
-        Chama progress_callback(completed, total, latest_ebook) a cada item concluído.
+        Gera 20 e-books para 20 nichos diferentes e publica todos os 20 automaticamente no Gumroad
+        com HTML Rico, 3 Imagens PNG embutidas e custom_summary preenchido.
         """
         batch = cls.get_batch_of_20_niches(offset=offset)
         price_cents = int(round(price_usd * 100))
@@ -1757,7 +1845,6 @@ class EbookFactoryService:
                 main_product_url=main_product_url,
             )
 
-            # Se houver token do Gumroad, publica cada e-book na loja Gumroad
             if access_token and len(access_token.strip()) >= 10:
                 res = await GumroadService.create_product(
                     access_token=access_token,
@@ -1765,6 +1852,7 @@ class EbookFactoryService:
                     price_cents=price_cents,
                     currency="usd",
                     description=ebook_data["gumroad_description"],
+                    custom_summary=ebook_data["custom_summary"],
                 )
                 if res.get("success"):
                     ebook_data["gumroad_url"] = res.get("short_url")
@@ -1788,8 +1876,7 @@ class EbookFactoryService:
                 except Exception as cb_err:
                     logger.warning(f"Erro no progress_callback: {cb_err}")
 
-            # Pausa leve para respeitar rate-limit da API do Gumroad
-            await asyncio.sleep(0.6)
+            await asyncio.sleep(0.5)
 
         return {
             "success": True,
@@ -1798,4 +1885,86 @@ class EbookFactoryService:
             "next_offset": (offset + 20) % len(NICHE_CATALOG),
             "ebooks": created_ebooks,
             "errors": errors,
+        }
+
+    @classmethod
+    async def repair_existing_gumroad_products(
+        cls,
+        access_token: str,
+        site_url: str = "https://geopulseai.store",
+        main_product_url: str = "https://geopulseai.store",
+    ) -> Dict[str, Any]:
+        """
+        Varre todos os produtos existentes na conta Gumroad do usuário e atualiza (PUT)
+        qualquer produto que tenha saído com Markdown cru ou sem imagens, injetando HTML Rico,
+        3 Imagens PNG de alta resolução e custom_summary em Inglês.
+        """
+        listed = await GumroadService.list_products(access_token)
+        if not listed.get("success"):
+            return {"success": False, "error": listed.get("error", "Falha ao listar produtos")}
+
+        products = listed.get("products", [])
+        updated_count = 0
+        updated_items = []
+
+        for prod in products:
+            pid = prod.get("id")
+            pname = prod.get("name") or ""
+            if not pid:
+                continue
+
+            # Verifica se é o produto principal de $47
+            if "14-Day AI Search Visibility Sprint" in pname or "Desafio 14 Dias" in pname:
+                new_desc = GumroadService.get_main_product_html_description(site_url=site_url)
+                new_sum = (
+                    "Instant Automated Activation: All 7 Generative AI Search Assets (/llms.txt, Schema.org Graph, "
+                    "Editorial Authority Article & IndexNow Pings) + 7-Day Money-Back Guarantee."
+                )
+                up = await GumroadService.update_product(
+                    access_token=access_token,
+                    product_id=pid,
+                    name="GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT & Gemini)",
+                    description=new_desc,
+                    custom_summary=new_sum,
+                )
+                if up.get("success"):
+                    updated_count += 1
+                    updated_items.append(pname)
+                await asyncio.sleep(0.4)
+                continue
+
+            # Verifica se corresponde a algum nicho do catálogo
+            matched_niche = None
+            for n in NICHE_CATALOG:
+                if n["niche_en"].lower() in pname.lower() or n["niche_pt"].lower() in pname.lower():
+                    matched_niche = n
+                    break
+
+            if not matched_niche and ("Playbook" in pname or "AI Search Dominance" in pname):
+                matched_niche = NICHE_CATALOG[0]
+
+            if matched_niche:
+                eb_rec = cls.build_ebook_record(
+                    niche_item=matched_niche,
+                    language="en",
+                    site_url=site_url,
+                    main_product_url=main_product_url,
+                )
+                up = await GumroadService.update_product(
+                    access_token=access_token,
+                    product_id=pid,
+                    name=eb_rec["title"],
+                    description=eb_rec["gumroad_description"],
+                    custom_summary=eb_rec["custom_summary"],
+                )
+                if up.get("success"):
+                    updated_count += 1
+                    updated_items.append(eb_rec["title"])
+                await asyncio.sleep(0.4)
+
+        return {
+            "success": True,
+            "total_checked": len(products),
+            "updated_count": len(updated_items),
+            "updated_items": updated_items,
         }

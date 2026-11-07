@@ -149,6 +149,13 @@
           <span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-800 font-extrabold animate-pulse">AUTÔNOMO</span>
         </button>
 
+        <button @click="activeTab = 'ebooks'; loadEbooksStatus();"
+          :class="activeTab === 'ebooks' ? 'border-pink-600 text-pink-900 bg-pink-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
+          class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
+          <span>📚</span> Gerador de 20 E-books (Gumroad)
+          <span class="px-2 py-0.5 rounded-full text-[10px] bg-pink-600 text-white font-extrabold" x-text="(ebookStatus.total_ebooks_created || 0) + ' CRIADOS'"></span>
+        </button>
+
         <button @click="activeTab = 'leads'"
           :class="activeTab === 'leads' ? 'border-emerald-600 text-emerald-800 bg-emerald-50 font-extrabold' : 'border-transparent text-slate-600 hover:text-slate-900'"
           class="px-5 py-3 border-b-2 text-xs sm:text-sm whitespace-nowrap transition rounded-t-xl flex items-center gap-2">
@@ -1018,6 +1025,17 @@
                 </div>
               </template>
 
+              <div class="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-pink-950 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
+                <div class="space-y-0.5">
+                  <div class="text-xs font-extrabold text-pink-300">📚 Fábrica Autônoma de 20 E-books Best-Seller por Nicho</div>
+                  <div class="text-[11px] text-slate-300">Gere 20 e-books ilustrados de 20 nichos diferentes e publique todos no Gumroad (manual ou 2x/3x/4x por semana):</div>
+                </div>
+                <button type="button" @click="activeTab = 'ebooks'; loadEbooksStatus();"
+                  class="px-4 py-2.5 rounded-xl bg-pink-500 hover:bg-pink-400 text-white font-extrabold text-xs transition shadow-md cursor-pointer">
+                  📚 Abrir Gerador de 20 E-books →
+                </button>
+              </div>
+
               <div class="text-[11px] text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <strong>Webhook (Ping) do Gumroad:</strong> Configure em <a href="https://gumroad.com/settings/advanced" target="_blank" class="text-pink-600 underline font-bold">Settings &gt; Advanced &gt; Ping</a> a URL:
                 <code class="block mt-1 font-mono text-[10px] text-slate-800 bg-white p-1 rounded border border-slate-300 select-all">https://geopulseai.store/api/webhooks/gumroad</code>
@@ -1252,6 +1270,191 @@
         </div>
       </section>
 
+      <!-- ================================================================= -->
+      <!-- ABA: FÁBRICA AUTÔNOMA DE 20 E-BOOKS POR NICHO + GUMROAD           -->
+      <!-- ================================================================= -->
+      <section x-show="activeTab === 'ebooks'" x-cloak class="space-y-6">
+
+        <!-- Hero Card do Gerador de 20 E-books -->
+        <div class="bg-gradient-to-br from-slate-900 via-pink-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-pink-500/30 space-y-6">
+          <div class="flex flex-wrap items-start justify-between gap-6">
+            <div class="space-y-2 max-w-3xl">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-300 text-xs font-extrabold uppercase tracking-wider">
+                <span>📚 FÁBRICA AUTÔNOMA DE E-BOOKS BEST-SELLER • 20 NICHOS POR CLIQUE</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                Gerador de 20 E-books Profissionais por Nicho + Publicação Automática no Gumroad
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Cada vez que você clica no botão abaixo (ou no horário programado), o sistema gera <strong>20 E-books completos de 20 nichos diferentes</strong> (com Capa 3D, 7 Capítulos Didáticos baseados nos maiores Best-Sellers do mundo, Infográficos Visuais, código <code>/llms.txt</code> + <code>Schema.org</code> prontos e versão PDF) e <strong>publica automaticamente os 20 produtos na sua conta do Gumroad</strong>!
+              </p>
+            </div>
+
+            <div class="flex flex-col items-stretch sm:items-end gap-2 w-full sm:w-auto">
+              <button type="button" @click="triggerEbookBatch()" :disabled="ebookStatus.is_running"
+                class="px-7 py-4 rounded-2xl bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 text-white font-extrabold text-sm sm:text-base shadow-xl transition flex items-center justify-center gap-2.5 disabled:opacity-60 cursor-pointer">
+                <span class="text-xl" x-text="ebookStatus.is_running ? '⏳' : '🚀'">🚀</span>
+                <span x-text="ebookStatus.is_running ? ('Gerando Lote (' + ebookStatus.progress_current + '/20)...') : 'Gerar 20 E-books & Postar no Gumroad Agora'">Gerar 20 E-books & Postar no Gumroad Agora</span>
+              </button>
+              <span class="text-[11px] text-pink-200 text-center sm:text-right">
+                Catálogo rotativo de <strong x-text="ebookStatus.total_niches_available || 60">60</strong> nichos de alto ticket • Nunca repete o mesmo lote
+              </span>
+            </div>
+          </div>
+
+          <!-- Barra de Progresso em Tempo Real (Visível durante a geração) -->
+          <div x-show="ebookStatus.is_running" x-cloak class="bg-slate-950/80 border border-pink-500/40 rounded-2xl p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
+              <span class="text-pink-300 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-pink-500 animate-ping"></span>
+                <span>Processando nicho: <strong class="text-white" x-text="ebookStatus.current_niche"></strong></span>
+              </span>
+              <span class="font-mono text-emerald-400" x-text="ebookStatus.progress_current + ' / ' + ebookStatus.progress_total + ' E-books (' + ebookStatus.published_count + ' postados no Gumroad)'"></span>
+            </div>
+            <div class="w-full h-3.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-pink-500 via-rose-400 to-emerald-400 transition-all duration-500 rounded-full"
+                :style="'width: ' + Math.round((ebookStatus.progress_current / (ebookStatus.progress_total || 20)) * 100) + '%'"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel de Agendamento Automático (Manual vs 2x, 3x ou 4x por Semana) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          <!-- Escolha da Frequência -->
+          <div class="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base font-extrabold text-slate-900">⏰ Modo de Operação: Manual ou Automático por Semana</h3>
+                <p class="text-xs text-slate-500">Escolha se deseja gerar apenas quando clicar ou se o robô deve criar e postar 20 novos e-books sozinho toda semana:</p>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-extrabold"
+                :class="ebookStatus.schedule !== 'off' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-600'"
+                x-text="ebookStatus.schedule === 'off' ? 'Modo Manual Ativo' : ('Robô Automático: ' + ebookStatus.schedule.toUpperCase() + ' por semana')"></span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+              <button type="button" @click="saveEbookSchedule('off')"
+                :class="ebookStatus.schedule === 'off' ? 'border-slate-900 bg-slate-900 text-white shadow-md' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'"
+                class="p-4 rounded-2xl border-2 text-left transition cursor-pointer space-y-1">
+                <div class="text-lg">🖐️</div>
+                <div class="text-xs font-extrabold">Apenas Manual</div>
+                <div class="text-[11px] opacity-80">Gera os 20 e-books quando você clicar no botão</div>
+              </button>
+
+              <button type="button" @click="saveEbookSchedule('2x')"
+                :class="ebookStatus.schedule === '2x' ? 'border-pink-600 bg-pink-600 text-white shadow-md' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-pink-50'"
+                class="p-4 rounded-2xl border-2 text-left transition cursor-pointer space-y-1">
+                <div class="text-lg">⚡</div>
+                <div class="text-xs font-extrabold">Automático 2x / Sem</div>
+                <div class="text-[11px] opacity-80">Cria +40 e-books/semana no Gumroad sozinho</div>
+              </button>
+
+              <button type="button" @click="saveEbookSchedule('3x')"
+                :class="ebookStatus.schedule === '3x' ? 'border-pink-600 bg-pink-600 text-white shadow-md' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-pink-50'"
+                class="p-4 rounded-2xl border-2 text-left transition cursor-pointer space-y-1">
+                <div class="text-lg">🔥</div>
+                <div class="text-xs font-extrabold">Automático 3x / Sem</div>
+                <div class="text-[11px] opacity-80">Cria +60 e-books/semana no Gumroad sozinho</div>
+              </button>
+
+              <button type="button" @click="saveEbookSchedule('4x')"
+                :class="ebookStatus.schedule === '4x' ? 'border-pink-600 bg-pink-600 text-white shadow-md' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-pink-50'"
+                class="p-4 rounded-2xl border-2 text-left transition cursor-pointer space-y-1">
+                <div class="text-lg">🚀</div>
+                <div class="text-xs font-extrabold">Automático 4x / Sem</div>
+                <div class="text-[11px] opacity-80">Cria +80 e-books/semana no Gumroad sozinho</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Configurações de Idioma e Preço no Gumroad -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+            <h3 class="text-base font-extrabold text-slate-900">🌍 Idioma & Preço no Gumroad</h3>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Idioma dos E-books e da Página Gumroad:</label>
+              <select x-model="ebookStatus.language" @change="saveEbookSchedule(ebookStatus.schedule)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900">
+                <option value="en">🇺🇸 Inglês Internacional (Bestseller Global - USD)</option>
+                <option value="pt">🇧🇷 Português (Mercado Brasileiro)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Preço de Venda de Cada E-book (USD):</label>
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-2.5 rounded-xl bg-slate-100 border border-slate-300 font-mono text-xs font-bold text-slate-700">$ USD</span>
+                <input type="number" step="0.10" min="1" x-model="ebookStatus.price_usd" @change="saveEbookSchedule(ebookStatus.schedule)"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-mono font-bold text-slate-900" />
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">Recomendado: <strong>$14.90 USD</strong> (converte rápido e leva o cliente para o plano de $47).</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Galeria de E-books Gerados e Links do Gumroad -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-900">
+                📖 Biblioteca de E-books Best-Seller Gerados (<span x-text="ebookStatus.ebooks.length"></span>)
+              </h3>
+              <p class="text-xs text-slate-500">
+                Clique em <strong>"Abrir E-book Ilustrado / PDF"</strong> para ver o livro com capa 3D, infográficos e capítulos, ou em <strong>"Ver no Gumroad"</strong> para abrir a página de venda.
+              </p>
+            </div>
+            <button type="button" @click="loadEbooksStatus()"
+              class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+              🔄 Atualizar Lista
+            </button>
+          </div>
+
+          <template x-if="!ebookStatus.ebooks || ebookStatus.ebooks.length === 0">
+            <div class="p-12 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+              <div class="text-4xl">📚</div>
+              <div class="text-base font-extrabold text-slate-800">Nenhum lote de E-books gerado ainda</div>
+              <p class="text-xs text-slate-500 max-w-md mx-auto">
+                Clique no botão <strong>"🚀 Gerar 20 E-books & Postar no Gumroad Agora"</strong> acima para criar seu primeiro lote de 20 nichos diferentes!
+              </p>
+            </div>
+          </template>
+
+          <div x-show="ebookStatus.ebooks && ebookStatus.ebooks.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <template x-for="eb in ebookStatus.ebooks" :key="eb.slug + '_' + eb.created_at">
+              <div class="p-5 rounded-2xl border border-slate-200 hover:border-pink-400 bg-slate-50/60 hover:bg-white transition flex flex-col justify-between gap-4 shadow-2xs">
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white" x-text="eb.icon + ' ' + eb.niche_display"></span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold"
+                      :class="eb.gumroad_published ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800'"
+                      x-text="eb.gumroad_published ? '✓ Postado no Gumroad ($' + eb.price_usd + ')' : '📖 E-book Hospedado'"></span>
+                  </div>
+                  <h4 class="text-sm font-extrabold text-slate-900 leading-snug" x-text="eb.title"></h4>
+                  <p class="text-[11px] text-slate-500 line-clamp-2" x-text="eb.subtitle"></p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80">
+                  <a :href="'/ebook/' + eb.slug + '?lang=' + (eb.language || 'en')" target="_blank"
+                    class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition inline-flex items-center gap-1.5">
+                    <span>📖</span> Abrir E-book Ilustrado / PDF
+                  </a>
+
+                  <template x-if="eb.gumroad_url">
+                    <a :href="eb.gumroad_url" target="_blank"
+                      class="px-3.5 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs transition inline-flex items-center gap-1.5">
+                      <span>🛍️</span> Ver Produto no Gumroad ↗
+                    </a>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+      </section>
+
     </main>
   </div>
 
@@ -1374,6 +1577,22 @@
         },
         lastMaxCustomerId: null,
         pollTimer: null,
+        ebookPollTimer: null,
+        ebookStatus: {
+          is_running: false,
+          progress_current: 0,
+          progress_total: 20,
+          current_niche: '',
+          published_count: 0,
+          last_error: '',
+          schedule: 'off',
+          language: 'en',
+          price_usd: 14.90,
+          last_run_at: '',
+          total_niches_available: 60,
+          total_ebooks_created: 0,
+          ebooks: []
+        },
 
         overview: {
           financials: {
@@ -1515,6 +1734,7 @@
             if (resOverview.ok) {
               this.overview = await resOverview.json();
               this.loadFunnel();
+              this.loadEbooksStatus();
               if (this.overview.api_status.spark_webhook_url) {
                 this.keyForm.spark_webhook_url = this.overview.api_status.spark_webhook_url;
               }
@@ -1732,6 +1952,72 @@
           } finally {
             this.savingKeys = false;
             this.toastMessage = '';
+          }
+        },
+
+        async loadEbooksStatus() {
+          try {
+            const res = await fetch('/api/admin/ebooks/status');
+            if (res.ok) {
+              const data = await res.json();
+              this.ebookStatus = data;
+              if (data.is_running && !this.ebookPollTimer) {
+                this.ebookPollTimer = setInterval(() => { this.loadEbooksStatus(); }, 2000);
+              } else if (!data.is_running && this.ebookPollTimer) {
+                clearInterval(this.ebookPollTimer);
+                this.ebookPollTimer = null;
+              }
+            }
+          } catch (e) {
+            console.error('Erro ao carregar status de ebooks:', e);
+          }
+        },
+
+        async triggerEbookBatch() {
+          if (!confirm('Deseja gerar agora 20 E-books profissionais para 20 nichos diferentes e publicar todos os 20 automaticamente na sua conta do Gumroad?')) {
+            return;
+          }
+          try {
+            const res = await fetch('/api/admin/ebooks/generate-batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                language: this.ebookStatus.language || 'en',
+                price_usd: parseFloat(this.ebookStatus.price_usd || 14.90),
+                schedule: this.ebookStatus.schedule || 'off'
+              })
+            });
+            const data = await res.json();
+            this.toastMessage = data.message || '🚀 Fábrica de 20 E-books iniciada!';
+            setTimeout(() => { this.toastMessage = ''; }, 6000);
+            await this.loadEbooksStatus();
+            if (!this.ebookPollTimer) {
+              this.ebookPollTimer = setInterval(() => { this.loadEbooksStatus(); }, 2000);
+            }
+          } catch (e) {
+            alert('Erro ao iniciar geração de e-books: ' + e.message);
+          }
+        },
+
+        async saveEbookSchedule(newSched) {
+          if (newSched) this.ebookStatus.schedule = newSched;
+          try {
+            const res = await fetch('/api/admin/ebooks/schedule', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                schedule: this.ebookStatus.schedule || 'off',
+                language: this.ebookStatus.language || 'en',
+                price_usd: parseFloat(this.ebookStatus.price_usd || 14.90)
+              })
+            });
+            const data = await res.json();
+            if (res.ok) {
+              this.toastMessage = data.message || 'Configuração de agendamento salva!';
+              setTimeout(() => { this.toastMessage = ''; }, 4000);
+            }
+          } catch (e) {
+            console.error('Erro ao salvar agendamento de ebooks:', e);
           }
         },
 

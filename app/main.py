@@ -49,6 +49,7 @@ from app.services.auditor import AuditorService
 from app.services.generator import ArtifactGeneratorService
 from app.services.spark_bridge import SparkSyndicatorBridge
 from app.services.gumroad_service import GumroadService
+from app.services.ebook_factory_service import EbookFactoryService, NICHE_CATALOG
 from app.services.security import (
     SecurityHeadersMiddleware, rate_limit, audit_slot, detect_image_ext, client_ip
 )
@@ -445,10 +446,12 @@ async def lifespan(app: FastAPI):
     task = asyncio.create_task(_monitoring_loop())
     keep_alive_task = asyncio.create_task(_self_keep_alive_loop())
     salesbot_task = asyncio.create_task(_salesbot_autonomous_worker())
+    ebook_task = asyncio.create_task(_ebook_scheduler_worker())
     yield
     task.cancel()
     keep_alive_task.cancel()
     salesbot_task.cancel()
+    ebook_task.cancel()
 
 
 app = FastAPI(
@@ -3730,4 +3733,272 @@ async def toggle_sales_bot_autonomous(db: AsyncSession = Depends(get_db)):
         "ok": True,
         "salesbot_active": (new_state == "1"),
         "message": "🟢 Robô de Vendas Autônomo 24/7 ATIVADO! Trabalhando continuamente." if new_state == "1" else "🔴 Robô de Vendas Autônomo PAUSADO."
+    }
+
+
+# ==============================================================================
+# FÁBRICA AUTÔNOMA DE E-BOOKS (20 NICHOS POR LOTE + GUMROAD + AGENDADOR SEMANAL)
+# ==============================================================================
+_ebook_job_state: Dict[str, Any] = {
+    "is_running": False,
+    "progress_current": 0,
+    "progress_total": 20,
+    "current_niche": "",
+    "published_count": 0,
+    "last_error": "",
+}
+
+
+async def _run_ebook_batch_job(
+    override_lang: Optional[str] = None,
+    override_price: Optional[float] = None,
+) -> Dict[str, Any]:
+    """
+    Executa em background a geração de 20 e-books de 20 nichos diferentes
+    e publica automaticamente cada um no Gumroad.
+    """
+    if _ebook_job_state["is_running"]:
+        return {"already_running": True}
+
+    _ebook_job_state["is_running"] = True
+    _ebook_job_state["progress_current"] = 0
+    _ebook_job_state["progress_total"] = 20
+    _ebook_job_state["current_niche"] = "Iniciando motor editorial..."
+    _ebook_job_state["published_count"] = 0
+    _ebook_job_state["last_error"] = ""
+
+    try:
+        async with AsyncSessionLocal() as db:
+            keys = await get_all_configured_keys(db)
+            token = keys.get("gumroad_access_token") or ""
+            main_prod_url = keys.get("gumroad_product_url") or settings.SITE_URL or "https://geopulseai.store"
+
+            offset_str = await get_system_key(db, "ebook_batch_offset")
+            offset = int(offset_str) if (offset_str and offset_str.isdigit()) else 0
+
+            lang = override_lang or (await get_system_key(db, "ebook_language")) or "en"
+            price_str = await get_system_key(db, "ebook_price_usd")
+            price_usd = float(override_price) if override_price is not None else (float(price_str) if price_str else 14.90)
+
+            existing_json = await get_system_key(db, "ebook_catalog_json")
+            catalog_list: List[Dict[str, Any]] = []
+            if existing_json:
+                try:
+                    catalog_list = json.loads(existing_json)
+                except Exception:
+                    catalog_list = []
+
+            async def _on_progress(done: int, total: int, latest_ebook: Dict[str, Any]):
+                _ebook_job_state["progress_current"] = done
+                _ebook_job_state["progress_total"] = total
+                _ebook_job_state["current_niche"] = latest_ebook.get("niche_display", "")
+                if latest_ebook.get("gumroad_published"):
+                    _ebook_job_state["published_count"] += 1
+
+                # Adiciona no topo do catálogo (mantendo até 120 e-books recentes no histórico)
+                catalog_list.insert(0, latest_ebook)
+                del catalog_list[120:]
+                await set_system_key(db, "ebook_catalog_json", json.dumps(catalog_list, ensure_ascii=False))
+
+            res = await EbookFactoryService.generate_and_publish_20_ebooks(
+                access_token=token,
+                offset=offset,
+                language=lang,
+                price_usd=price_usd,
+                site_url=settings.SITE_URL or "https://geopulseai.store",
+                main_product_url=main_prod_url,
+                progress_callback=_on_progress,
+            )
+
+            await set_system_key(db, "ebook_batch_offset", str(res["next_offset"]))
+            await set_system_key(db, "ebook_last_run_at", datetime.utcnow().isoformat())
+            if override_lang:
+                await set_system_key(db, "ebook_language", override_lang)
+            if override_price is not None:
+                await set_system_key(db, "ebook_price_usd", str(override_price))
+
+            logger.info(
+                f"📚 [EbookFactory] Lote de 20 e-books concluído! Gerados: {res['total_generated']}, "
+                f"Publicados no Gumroad: {res['published_to_gumroad']}"
+            )
+            return res
+    except Exception as e:
+        logger.error(f"Erro no _run_ebook_batch_job: {e}")
+        _ebook_job_state["last_error"] = str(e)
+        return {"success": False, "error": str(e)}
+    finally:
+        _ebook_job_state["is_running"] = False
+
+
+async def _ebook_scheduler_worker():
+    """
+    Worker autônomo que verifica se o agendamento automático de E-books está ativo
+    (2x, 3x ou 4x por semana) e dispara lotes de 20 e-books + publicação no Gumroad.
+    """
+    await asyncio.sleep(45)
+    schedule_intervals = {
+        "2x": 3.5 * 86400,   # A cada 84 horas (2x por semana)
+        "3x": 2.33 * 86400,  # A cada 56 horas (3x por semana)
+        "4x": 1.75 * 86400,  # A cada 42 horas (4x por semana)
+    }
+    while True:
+        try:
+            async with AsyncSessionLocal() as db:
+                sched = (await get_system_key(db, "ebook_auto_schedule")) or "off"
+                if sched in schedule_intervals and not _ebook_job_state["is_running"]:
+                    interval_sec = schedule_intervals[sched]
+                    last_run_str = await get_system_key(db, "ebook_last_run_at")
+                    should_run = False
+                    if not last_run_str:
+                        should_run = True
+                    else:
+                        try:
+                            last_dt = datetime.fromisoformat(last_run_str)
+                            if (datetime.utcnow() - last_dt).total_seconds() >= interval_sec:
+                                should_run = True
+                        except Exception:
+                            should_run = True
+
+                    if should_run:
+                        logger.info(f"⏰ [EbookScheduler] Disparando geração automática programada ({sched}/semana) de 20 e-books!")
+                        await _run_ebook_batch_job()
+        except Exception as e:
+            logger.warning(f"Erro no _ebook_scheduler_worker: {e}")
+
+        await asyncio.sleep(600)
+
+
+@app.get("/ebook/{slug}", response_class=HTMLResponse)
+async def view_illustrated_ebook(slug: str, lang: str = "en", db: AsyncSession = Depends(get_db)):
+    """
+    Exibe o E-book Best-Seller completo com capa 3D, infográficos SVG, tabelas e opção de salvar em PDF.
+    """
+    clean_slug = slug.strip().lower()
+    keys = await get_all_configured_keys(db)
+    main_prod_url = keys.get("gumroad_product_url") or settings.SITE_URL or "https://geopulseai.store"
+
+    # 1. Tenta localizar no catálogo já gerado no banco
+    existing_json = await get_system_key(db, "ebook_catalog_json")
+    if existing_json:
+        try:
+            catalog_list = json.loads(existing_json)
+            for item in catalog_list:
+                if item.get("slug") == clean_slug:
+                    item["main_product_url"] = main_prod_url
+                    return HTMLResponse(content=EbookFactoryService.render_ebook_html(item))
+        except Exception:
+            pass
+
+    # 2. Fallback dinâmico: reconstrói a partir do NICHE_CATALOG (garante 100% de disponibilidade permanente)
+    base_slug = clean_slug.split("-vol-")[0]
+    matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == base_slug), NICHE_CATALOG[0])
+    ebook_record = EbookFactoryService.build_ebook_record(
+        niche_item=matched_niche,
+        language=lang if lang in ("en", "pt") else "en",
+        site_url=settings.SITE_URL or "https://geopulseai.store",
+        main_product_url=main_prod_url,
+    )
+    return HTMLResponse(content=EbookFactoryService.render_ebook_html(ebook_record))
+
+
+@app.get("/api/admin/ebooks/status", dependencies=[Depends(verify_admin_password_header)])
+async def admin_get_ebooks_status(db: AsyncSession = Depends(get_db)):
+    """Retorna o status em tempo real da Fábrica de E-books, agendamento e lista de e-books gerados."""
+    sched = (await get_system_key(db, "ebook_auto_schedule")) or "off"
+    lang = (await get_system_key(db, "ebook_language")) or "en"
+    price_str = await get_system_key(db, "ebook_price_usd")
+    price_usd = float(price_str) if price_str else 14.90
+    last_run_at = await get_system_key(db, "ebook_last_run_at")
+    offset_str = await get_system_key(db, "ebook_batch_offset")
+    offset = int(offset_str) if (offset_str and offset_str.isdigit()) else 0
+
+    existing_json = await get_system_key(db, "ebook_catalog_json")
+    catalog_list = []
+    if existing_json:
+        try:
+            catalog_list = json.loads(existing_json)
+        except Exception:
+            catalog_list = []
+
+    return {
+        "is_running": _ebook_job_state["is_running"],
+        "progress_current": _ebook_job_state["progress_current"],
+        "progress_total": _ebook_job_state["progress_total"],
+        "current_niche": _ebook_job_state["current_niche"],
+        "published_count": _ebook_job_state["published_count"],
+        "last_error": _ebook_job_state["last_error"],
+        "schedule": sched,
+        "language": lang,
+        "price_usd": price_usd,
+        "last_run_at": last_run_at,
+        "next_batch_offset": offset,
+        "total_niches_available": len(NICHE_CATALOG),
+        "total_ebooks_created": len(catalog_list),
+        "ebooks": catalog_list[:60],
+    }
+
+
+@app.post("/api/admin/ebooks/generate-batch", dependencies=[Depends(verify_admin_password_header)])
+async def admin_trigger_ebook_batch(request: Request, db: AsyncSession = Depends(get_db)):
+    """
+    Dispara manualmente a geração de um lote de 20 E-books de 20 nichos diferentes
+    e publica automaticamente todos os 20 no Gumroad.
+    """
+    if _ebook_job_state["is_running"]:
+        return {
+            "started": False,
+            "message": "Já existe um lote de 20 e-books sendo gerado neste momento! Acompanhe a barra de progresso.",
+            "state": _ebook_job_state,
+        }
+
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    lang = str(body.get("language") or "en").strip().lower()
+    if lang not in ("en", "pt"):
+        lang = "en"
+    price_usd = float(body.get("price_usd") or 14.90)
+    sched = str(body.get("schedule") or "").strip().lower()
+    if sched in ("off", "2x", "3x", "4x"):
+        await set_system_key(db, "ebook_auto_schedule", sched)
+
+    await set_system_key(db, "ebook_language", lang)
+    await set_system_key(db, "ebook_price_usd", str(price_usd))
+
+    asyncio.create_task(_run_ebook_batch_job(override_lang=lang, override_price=price_usd))
+
+    return {
+        "started": True,
+        "message": "🚀 Fábrica iniciada! Gerando 20 E-books ilustrados de 20 nichos diferentes e publicando no Gumroad...",
+    }
+
+
+@app.post("/api/admin/ebooks/schedule", dependencies=[Depends(verify_admin_password_header)])
+async def admin_update_ebook_schedule(request: Request, db: AsyncSession = Depends(get_db)):
+    """Salva a frequência automática da Fábrica de E-books (off, 2x, 3x ou 4x por semana)."""
+    body = await request.json()
+    sched = str(body.get("schedule") or "off").strip().lower()
+    if sched not in ("off", "2x", "3x", "4x"):
+        raise HTTPException(status_code=400, detail="Frequência inválida. Use off, 2x, 3x ou 4x.")
+
+    lang = str(body.get("language") or "en").strip().lower()
+    price_usd = float(body.get("price_usd") or 14.90)
+
+    await set_system_key(db, "ebook_auto_schedule", sched)
+    await set_system_key(db, "ebook_language", lang)
+    await set_system_key(db, "ebook_price_usd", str(price_usd))
+
+    labels = {
+        "off": "Modo Manual (Agendamento automático desativado)",
+        "2x": "Automático: 2x por semana (40 novos e-books/semana no Gumroad)",
+        "3x": "Automático: 3x por semana (60 novos e-books/semana no Gumroad)",
+        "4x": "Automático: 4x por semana (80 novos e-books/semana no Gumroad)",
+    }
+    return {
+        "ok": True,
+        "schedule": sched,
+        "message": f"✅ Configuração salva: {labels.get(sched, sched)}",
     }

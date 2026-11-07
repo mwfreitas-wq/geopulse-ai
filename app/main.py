@@ -3798,7 +3798,7 @@ async def _run_ebook_batch_job(
                 # Adiciona no topo do catálogo (mantendo até 120 e-books recentes no histórico)
                 catalog_list.insert(0, latest_ebook)
                 del catalog_list[120:]
-                await set_system_key(db, "ebook_catalog_json", json.dumps(catalog_list, ensure_ascii=False))
+                await set_system_key(db, "ebook_catalog_json", json.dumps(catalog_list, ensure_ascii=False, default=str))
 
             res = await EbookFactoryService.generate_and_publish_20_ebooks(
                 access_token=token,
@@ -3936,6 +3936,39 @@ async def admin_get_ebooks_status(db: AsyncSession = Depends(get_db)):
             catalog_list = json.loads(existing_json)
         except Exception:
             catalog_list = []
+
+    if not catalog_list:
+        keys = await get_all_configured_keys(db)
+        token = keys.get("gumroad_access_token") or ""
+        main_url = keys.get("gumroad_product_url") or settings.SITE_URL or "https://geopulseai.store"
+        if token and len(token.strip()) >= 10:
+            try:
+                listed = await GumroadService.list_products(token)
+                if listed.get("success"):
+                    for prod in listed.get("products", []):
+                        pname = prod.get("name") or ""
+                        if "14-Day AI Search Visibility Sprint" in pname or "Desafio 14 Dias" in pname:
+                            continue
+                        matched_niche = next(
+                            (n for n in NICHE_CATALOG if n["niche_en"].lower() in pname.lower() or n["niche_pt"].lower() in pname.lower()),
+                            None,
+                        )
+                        if matched_niche:
+                            eb_rec = EbookFactoryService.build_ebook_record(
+                                niche_item=matched_niche,
+                                language="en",
+                                price_usd=round(float(prod.get("price", 1490)) / 100.0, 2),
+                                site_url=settings.SITE_URL or "https://geopulseai.store",
+                                main_product_url=main_url,
+                            )
+                            eb_rec["gumroad_url"] = prod.get("short_url") or prod.get("url") or ""
+                            eb_rec["gumroad_product_id"] = prod.get("id")
+                            eb_rec["gumroad_published"] = True
+                            catalog_list.append(eb_rec)
+                    if catalog_list:
+                        await set_system_key(db, "ebook_catalog_json", json.dumps(catalog_list, ensure_ascii=False, default=str))
+            except Exception:
+                pass
 
     return {
         "is_running": _ebook_job_state["is_running"],

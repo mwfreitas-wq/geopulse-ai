@@ -1588,8 +1588,17 @@ class EbookFactoryService:
   <article class="ebook-page">
 
     <!-- CAPA 3D ILUSTRADA EM ALTA RESOLUÇÃO -->
-    <div class="bg-slate-950 p-4 sm:p-6">
+    <div class="bg-slate-950 p-4 sm:p-6 relative">
       <img src="{cover_img}" alt="{title}" class="w-full rounded-2xl shadow-2xl border border-slate-800" />
+      <div class="no-print mt-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400 font-bold">📄 Official Digital Edition:</span>
+          <span>Read online or save a clean offline copy on your device.</span>
+        </div>
+        <button onclick="window.print()" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition flex items-center gap-1.5 cursor-pointer shadow">
+          <span>📥</span> Download / Save as PDF
+        </button>
+      </div>
     </div>
 
     <div class="p-8 sm:p-14 md:p-16 space-y-14">

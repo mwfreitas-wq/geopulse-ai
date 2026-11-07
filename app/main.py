@@ -4093,6 +4093,24 @@ async def admin_repair_gumroad_products(db: AsyncSession = Depends(get_db)):
     return res
 
 
+@app.get("/api/admin/ebooks/debug-content/{slug}", dependencies=[Depends(verify_admin_password_header)])
+async def debug_gumroad_content(slug: str, db: AsyncSession = Depends(get_db)):
+    keys = await get_all_configured_keys(db)
+    token = keys.get("gumroad_access_token") or ""
+    pid = "WHDCmgjND-7Q4HNGe39MAg=="
+    async with httpx.AsyncClient(timeout=20.0, verify=False) as client:
+        r = await client.get(f"https://api.gumroad.com/v2/products/{pid}", headers={"Authorization": f"Bearer {token}"})
+        p = r.json().get("product", {})
+        return {
+            "name": p.get("name"),
+            "rich_content": p.get("rich_content"),
+            "custom_html": p.get("custom_html"),
+            "sections": p.get("sections"),
+            "files": p.get("files"),
+        }
+
+
+
 
 
 

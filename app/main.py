@@ -2038,6 +2038,27 @@ async def admin_create_gumroad_product(request: Request, db: AsyncSession = Depe
     if short_url:
         await set_system_key(db, "gumroad_product_url", short_url)
 
+    pid = res.get("product_id")
+    if pid:
+        try:
+            site_url = settings.SITE_URL or "https://geopulseai.store"
+            cov_bytes = EbookFactoryService.generate_geopulse_product_cover_png()
+            await GumroadService.upload_product_cover(
+                access_token=token,
+                product_id=pid,
+                image_url=f"{site_url.rstrip('/')}/api/ebooks/image/geopulse-main/cover.png",
+                image_bytes=cov_bytes,
+            )
+            th_bytes = EbookFactoryService.generate_geopulse_product_thumbnail_png()
+            await GumroadService.upload_product_thumbnail(
+                access_token=token,
+                product_id=pid,
+                image_url=f"{site_url.rstrip('/')}/api/ebooks/image/geopulse-main/thumbnail.png",
+                image_bytes=th_bytes,
+            )
+        except Exception as e_cov:
+            logger.warning(f"Aviso upload capas produto principal: {e_cov}")
+
     return {
         "success": True,
         "message": "Produto criado e publicado com sucesso no Gumroad!",
@@ -4060,14 +4081,27 @@ async def admin_update_ebook_schedule(request: Request, db: AsyncSession = Depen
 @app.get("/api/ebooks/image/{slug}/{img_type}.png")
 async def serve_ebook_hd_image(slug: str, img_type: str = "cover"):
     """
-    Gera e entrega em tempo real as 4 imagens PNG de alta resolução (Capa 3D 1280x720,
-    Gráfico Antes vs Depois 1200x680, Blueprint 4 Passos 1200x680 e Roadmap 14 Dias 1200x680).
+    Gera e entrega em tempo real as imagens PNG de alta resolução tanto para os E-books de nicho
+    quanto para o produto principal do GeoPulse AI ($47 USD).
     """
-    base_slug = slug.strip().lower().split("-vol-")[0]
-    matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == base_slug), NICHE_CATALOG[0])
     clean_type = img_type.strip().lower()
     if clean_type not in ("cover", "chart", "architecture", "roadmap", "thumbnail"):
         clean_type = "cover"
+
+    clean_slug = slug.strip().lower()
+    if clean_slug in ("geopulse-main", "geopulse", "geopulse-ai", "main"):
+        if clean_type == "thumbnail":
+            png_bytes = EbookFactoryService.generate_geopulse_product_thumbnail_png()
+        else:
+            png_bytes = EbookFactoryService.generate_geopulse_product_cover_png()
+        return Response(
+            content=png_bytes,
+            media_type="image/png",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+
+    base_slug = clean_slug.split("-vol-")[0]
+    matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == base_slug), NICHE_CATALOG[0])
     png_bytes = EbookFactoryService.generate_ebook_image_png(matched_niche, img_type=clean_type)
     return Response(
         content=png_bytes,

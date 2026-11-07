@@ -1426,6 +1426,160 @@ class EbookFactoryService:
         return buf.getvalue()
 
     @classmethod
+    def generate_geopulse_product_cover_png(cls) -> bytes:
+        """
+        Gera a Capa Oficial de Alta Resolução (1280x720) para o Produto Principal do GeoPulse AI no Gumroad.
+        """
+        w, h = 1280, 720
+        img = Image.new("RGB", (w, h), (8, 13, 26))
+        draw = ImageDraw.Draw(img)
+
+        f_xs = ImageFont.load_default(size=14)
+        f_sm = ImageFont.load_default(size=18)
+        f_md = ImageFont.load_default(size=22)
+        f_lg = ImageFont.load_default(size=28)
+        f_xl = ImageFont.load_default(size=36)
+        f_2xl = ImageFont.load_default(size=44)
+
+        # Moldura externa e glow esmeralda
+        draw.rounded_rectangle([20, 20, w - 20, h - 20], radius=28, fill=(15, 23, 42), outline=(16, 185, 129), width=2)
+        draw.ellipse([880, -120, 1380, 380], fill=(6, 78, 59))
+        draw.ellipse([-80, 480, 380, 880], fill=(13, 50, 77))
+
+        # --- LADO ESQUERDO: MOCKUP 3D DA SUITE GEOPULSE AI ---
+        bx, by, bw, bh = 80, 68, 410, 584
+        draw.rounded_rectangle([bx + 14, by + 14, bx + bw + 14, by + bh + 14], radius=20, fill=(5, 8, 15))
+        draw.rounded_rectangle([bx, by, bx + bw, by + bh], radius=20, fill=(19, 30, 54), outline=(16, 185, 129), width=3)
+        draw.rounded_rectangle([bx + bw - 18, by + 14, bx + bw - 4, by + bh - 14], radius=6, fill=(16, 185, 129))
+
+        # Topo do Box
+        draw.rounded_rectangle([bx, by, bx + bw, by + 115], radius=20, fill=(6, 95, 70))
+        draw.text((bx + 28, by + 24), "AUTONOMOUS AI ENGINE", font=f_xs, fill=(167, 243, 208))
+        draw.text((bx + 28, by + 48), "GEOPULSE AI", font=f_xl, fill=(255, 255, 255))
+        draw.text((bx + 28, by + 90), "(( RADAR PULSE ACTIVE ))", font=f_xs, fill=(110, 231, 183))
+
+        # Cartão de Resultado Antes vs Depois dentro do Box
+        draw.rounded_rectangle([bx + 24, by + 140, bx + bw - 24, by + 295], radius=14, fill=(11, 17, 32), outline=(38, 52, 82), width=1)
+        draw.text((bx + 40, by + 155), "14-DAY AI VISIBILITY SPRINT", font=f_xs, fill=(56, 189, 248))
+        draw.text((bx + 40, by + 185), "After Sprint: 94% (TOP 10)", font=f_sm, fill=(255, 255, 255))
+        draw.rounded_rectangle([bx + 40, by + 215, bx + bw - 48, by + 233], radius=6, fill=(16, 185, 129))
+        draw.text((bx + 40, by + 245), "Before: 18% (Invisible to AI)", font=f_xs, fill=(148, 163, 184))
+        draw.rounded_rectangle([bx + 40, by + 267, bx + 160, by + 281], radius=6, fill=(244, 63, 94))
+
+        # Lista de 7 Ativos Ativados
+        assets = [
+            "1. Custom /llms.txt Entity File",
+            "2. Schema.org JSON-LD Knowledge Graph",
+            "3. Public Authority Directory Profile",
+            "4. Comparative Top-5 Industry Article",
+            "5. IndexNow AI Instant Crawl Ping",
+            "6. Daily AI Visibility Tracking (0-100)",
+            "7. Done-For-You Zero Coding Setup",
+        ]
+        ay = by + 312
+        for a in assets:
+            draw.text((bx + 28, ay), f"✓  {a}", font=f_xs, fill=(226, 232, 240))
+            ay += 27
+
+        draw.rounded_rectangle([bx + 24, by + bh - 58, bx + bw - 24, by + bh - 16], radius=10, fill=(16, 185, 129))
+        draw.text((bx + 48, by + bh - 44), "100% AUTONOMOUS • NO CODE", font=f_sm, fill=(11, 17, 32))
+
+        # --- LADO DIREITO: HEADLINE, OFERTA E GARANTIA ---
+        draw.rounded_rectangle([525, 60, 990, 102], radius=10, fill=(6, 78, 59), outline=(16, 185, 129), width=1)
+        draw.text((544, 72), "TOP 10 CHATGPT & GEMINI SPRINT • 14 DAYS", font=f_xs, fill=(167, 243, 208))
+
+        # Selo de Preço $47 USD
+        draw.rounded_rectangle([1015, 54, 1220, 108], radius=12, fill=(245, 158, 11))
+        draw.text((1038, 70), "ONLY $47 USD", font=f_md, fill=(11, 17, 32))
+
+        # Título Principal
+        draw.text((525, 122), "GeoPulse AI — 14-Day AI Search Sprint", font=f_2xl, fill=(255, 255, 255))
+        draw.text((525, 178), "Position Your Business in the Top 10 of ChatGPT, Google Gemini & Perplexity", font=f_md, fill=(56, 189, 248))
+
+        # 4 Cartões de Benefício Executivo
+        pills = [
+            ("1. Complete 7-Asset Autonomous Activation", "We build, host, and verify your /llms.txt and Knowledge Graph automatically."),
+            ("2. High-Authority Editorial Co-Citation", "Featured in independent comparative articles so LLMs trust and recommend you."),
+            ("3. Instant AI Re-Indexing via IndexNow", "Force-crawl your profile across Bing, Copilot & ChatGPT Search in 48 hours."),
+            ("4. 14-Day Managed Ranking Sprint + Guarantee", "Daily technical actions pushing your score from 18% to 90%+ or 100% refund."),
+        ]
+        py = 226
+        for p_title, p_desc in pills:
+            draw.rounded_rectangle([525, py, 1220, py + 68], radius=14, fill=(23, 35, 62), outline=(45, 62, 95), width=1)
+            draw.rounded_rectangle([542, py + 16, 574, py + 48], radius=8, fill=(16, 185, 129))
+            draw.text((552, py + 22), "✓", font=f_md, fill=(11, 17, 32))
+            draw.text((590, py + 14), p_title, font=f_sm, fill=(255, 255, 255))
+            draw.text((590, py + 40), p_desc, font=f_xs, fill=(203, 213, 225))
+            py += 82
+
+        # Rodapé CTA
+        draw.rounded_rectangle([525, 576, 1220, 642], radius=14, fill=(16, 185, 129))
+        draw.text((550, 598), "INSTANT 2-MINUTE ACTIVATION • 7-DAY 100% SATISFACTION GUARANTEE", font=f_sm, fill=(11, 17, 32))
+
+        buf = io.BytesIO()
+        img.save(buf, format="PNG", optimize=True)
+        return buf.getvalue()
+
+    @classmethod
+    def generate_geopulse_product_thumbnail_png(cls) -> bytes:
+        """
+        Gera a Miniatura Quadrada (600x600) para a listagem do GeoPulse AI no Gumroad (aba Produtos e Perfil).
+        """
+        w, h = 600, 600
+        img = Image.new("RGB", (w, h), (8, 13, 26))
+        draw = ImageDraw.Draw(img)
+
+        f_xs = ImageFont.load_default(size=14)
+        f_sm = ImageFont.load_default(size=18)
+        f_lg = ImageFont.load_default(size=28)
+
+        # Moldura
+        draw.rounded_rectangle([15, 15, w - 15, h - 15], radius=24, fill=(15, 23, 42), outline=(16, 185, 129), width=2)
+
+        # Topo: Badges
+        draw.rounded_rectangle([32, 32, 280, 70], radius=10, fill=(6, 95, 70))
+        draw.text((46, 42), "GEOPULSE AI PLATFORM", font=f_sm, fill=(167, 243, 208))
+
+        draw.rounded_rectangle([w - 170, 32, w - 32, 70], radius=10, fill=(245, 158, 11))
+        draw.text((w - 154, 42), "$47 USD", font=f_sm, fill=(11, 17, 32))
+
+        # Box 3D Centralizado
+        bx, by, bw, bh = 55, 95, 490, 420
+        draw.rounded_rectangle([bx + 14, by + 14, bx + bw + 14, by + bh + 14], radius=18, fill=(5, 8, 15))
+        draw.rounded_rectangle([bx, by, bx + bw, by + bh], radius=18, fill=(19, 30, 54), outline=(16, 185, 129), width=3)
+        draw.rounded_rectangle([bx + bw - 16, by + 12, bx + bw - 4, by + bh - 12], radius=6, fill=(16, 185, 129))
+
+        # Header interno
+        draw.rounded_rectangle([bx, by, bx + bw, by + 90], radius=18, fill=(6, 78, 59))
+        draw.text((bx + 24, by + 18), "14-DAY AI SEARCH SPRINT", font=f_xs, fill=(167, 243, 208))
+        draw.text((bx + 24, by + 42), "TOP 10 ON CHATGPT & GEMINI", font=f_lg, fill=(255, 255, 255))
+
+        # Radar e Métrica Central
+        draw.rounded_rectangle([bx + 24, by + 110, bx + bw - 24, by + 250], radius=14, fill=(11, 17, 32), outline=(38, 52, 82), width=1)
+        draw.text((bx + 38, by + 126), "AI VISIBILITY JUMP (BENCHMARK)", font=f_xs, fill=(56, 189, 248))
+        draw.text((bx + 38, by + 154), "After 14 Days: 94% (Top 10 Ranked)", font=f_sm, fill=(255, 255, 255))
+        draw.rounded_rectangle([bx + 38, by + 184, bx + bw - 44, by + 200], radius=6, fill=(16, 185, 129))
+        draw.text((bx + 38, by + 214), "Before: 18% (Invisible to AI Engines)", font=f_xs, fill=(148, 163, 184))
+        draw.rounded_rectangle([bx + 38, by + 232, bx + 160, by + 244], radius=5, fill=(244, 63, 94))
+
+        # 3 Checkmarks Centrais
+        draw.text((bx + 24, by + 275), "✓  7 Generative AI Assets Hosted Automatically", font=f_xs, fill=(226, 232, 240))
+        draw.text((bx + 24, by + 308), "✓  Custom /llms.txt + Schema.org Knowledge Graph", font=f_xs, fill=(226, 232, 240))
+        draw.text((bx + 24, by + 341), "✓  7-Day Ironclad 100% Money-Back Guarantee", font=f_xs, fill=(110, 231, 183))
+
+        # Botão de Ativação no Box
+        draw.rounded_rectangle([bx + 24, by + bh - 50, bx + bw - 24, by + bh - 14], radius=10, fill=(16, 185, 129))
+        draw.text((bx + 85, by + bh - 38), "AUTONOMOUS ACTIVATION • $47 USD", font=f_sm, fill=(11, 17, 32))
+
+        # Rodapé do Card 600x600
+        draw.rounded_rectangle([32, 532, w - 32, 574], radius=10, fill=(6, 78, 59), outline=(16, 185, 129), width=1)
+        draw.text((48, 544), "✓ INSTANT DELIVERY  ✓ ZERO CODING  ✓ 100% REFUND GUARANTEE", font=f_xs, fill=(167, 243, 208))
+
+        buf = io.BytesIO()
+        img.save(buf, format="PNG", optimize=True)
+        return buf.getvalue()
+
+    @classmethod
     def build_ebook_record(
         cls,
         niche_item: Dict[str, Any],
@@ -2285,18 +2439,28 @@ class EbookFactoryService:
                 if up.get("success"):
                     updated_count += 1
                     updated_items.append(pname)
-                # Envia capa do produto principal
+                # Envia capa 1280x720 e miniatura 600x600 do GeoPulse AI
                 try:
-                    m_niche = NICHE_CATALOG[0]
-                    m_bytes = cls.generate_ebook_image_png(m_niche, img_type="cover")
+                    m_bytes = cls.generate_geopulse_product_cover_png()
                     await GumroadService.upload_product_cover(
                         access_token=access_token,
                         product_id=pid,
-                        image_url=f"{site_url.rstrip('/')}/api/ebooks/image/{m_niche['slug']}/cover.png",
+                        image_url=f"{site_url.rstrip('/')}/api/ebooks/image/geopulse-main/cover.png",
                         image_bytes=m_bytes,
                     )
                 except Exception as m_cov_err:
                     logger.warning(f"Aviso capa produto principal Gumroad: {m_cov_err}")
+
+                try:
+                    th_bytes = cls.generate_geopulse_product_thumbnail_png()
+                    await GumroadService.upload_product_thumbnail(
+                        access_token=access_token,
+                        product_id=pid,
+                        image_url=f"{site_url.rstrip('/')}/api/ebooks/image/geopulse-main/thumbnail.png",
+                        image_bytes=th_bytes,
+                    )
+                except Exception as m_th_err:
+                    logger.warning(f"Aviso thumbnail produto principal Gumroad: {m_th_err}")
                 await asyncio.sleep(0.4)
                 continue
 

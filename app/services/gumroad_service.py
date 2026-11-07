@@ -210,14 +210,30 @@ class GumroadService:
         """Adiciona a capa oficial do produto no Gumroad (seção 'Cobrir' / Cover image)."""
         if not access_token or not product_id:
             return {"success": False, "error": "Token ou product_id ausente."}
-        headers = {
-            "Authorization": f"Bearer {access_token.strip()}",
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
+
+        auth_header = {"Authorization": f"Bearer {access_token.strip()}"}
         try:
-            async with httpx.AsyncClient(timeout=35.0, verify=False) as client:
-                # 1. Envio prioritário com URL pública (método oficial suportado pela Gumroad API v2)
+            async with httpx.AsyncClient(timeout=45.0, verify=False) as client:
+                # 1. Envio multipart com campo 'cover' (formato aceito nativamente pela API v2 do Gumroad)
+                if image_bytes:
+                    files = {"cover": ("cover.png", image_bytes, "image/png")}
+                    res_mp = await client.post(
+                        f"{cls.BASE_URL}/products/{product_id}/covers",
+                        files=files,
+                        headers=auth_header,
+                    )
+                    if res_mp.status_code in (200, 201):
+                        d_mp = res_mp.json()
+                        if d_mp.get("success"):
+                            logger.info(f"✅ [Gumroad] Capa 3D enviada com sucesso para {product_id}!")
+                            return {"success": True, "data": d_mp}
+
+                # 2. Envio com URL pública
                 if image_url:
+                    headers = {
+                        "Authorization": f"Bearer {access_token.strip()}",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    }
                     res_url = await client.post(
                         f"{cls.BASE_URL}/products/{product_id}/covers",
                         data={"url": image_url},
@@ -226,24 +242,10 @@ class GumroadService:
                     if res_url.status_code in (200, 201):
                         d = res_url.json()
                         if d.get("success"):
-                            logger.info(f"✅ [Gumroad] Capa enviada com sucesso via URL para {product_id}!")
+                            logger.info(f"✅ [Gumroad] Capa enviada via URL para {product_id}!")
                             return {"success": True, "data": d}
 
-                # 2. Fallback com multipart se houver bytes
-                if image_bytes:
-                    mp_headers = {"Authorization": f"Bearer {access_token.strip()}"}
-                    files = {"file": ("cover.png", image_bytes, "image/png")}
-                    res_mp = await client.post(
-                        f"{cls.BASE_URL}/products/{product_id}/covers",
-                        files=files,
-                        headers=mp_headers,
-                    )
-                    if res_mp.status_code in (200, 201):
-                        d_mp = res_mp.json()
-                        if d_mp.get("success"):
-                            return {"success": True, "data": d_mp}
-
-                return {"success": False, "error": f"Gumroad covers falhou: {res_url.text if image_url else 'Sem URL'}"}
+                return {"success": False, "error": f"Gumroad covers falhou: {res_mp.text if image_bytes else 'Sem bytes'}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 

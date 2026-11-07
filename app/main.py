@@ -306,12 +306,76 @@ async def _salesbot_autonomous_worker():
                             )
                             db.add(lead_cap)
                             await db.commit()
+
+                            # Dispara Webhook Make.com / n8n / Evolution API em tempo real para automação de WhatsApp!
+                            spark_wh = keys.get("spark_webhook_url")
+                            if spark_wh and (c_phone or c_email):
+                                try:
+                                    async with httpx.AsyncClient(timeout=6.0, verify=False) as wh_client:
+                                        await wh_client.post(spark_wh, json={
+                                            "event": "geopulse.salesbot_lead",
+                                            "company_id": company.id,
+                                            "company_name": c_name,
+                                            "niche": niche_to_search,
+                                            "city_region": target_entry["city"],
+                                            "score": score_val,
+                                            "top_competitor": top_comp,
+                                            "whatsapp": c_phone,
+                                            "email": c_email,
+                                            "instagram": c_instagram,
+                                            "report_url": report_url,
+                                            "checkout_url": f"{report_url}&checkout=1",
+                                            "whatsapp_link": outreach.get("whatsapp_link", ""),
+                                            "whatsapp_text": outreach.get("whatsapp_text", ""),
+                                            "instagram_link": outreach.get("instagram_link", ""),
+                                            "email_sent": email_sent,
+                                        })
+                                except Exception:
+                                    pass
+
                         logger.info(f"🤖 [SalesBot 24/7] Lead processado: {c_name} ({target_entry['city']}) | Status: {status_label}")
 
                         if email_sent:
                             # Aguarda intervalo seguro entre cada envio individual
                             await asyncio.sleep(interval_min * 60)
                             break
+
+                    # 1B. Máquina Inbound Autônoma (IndexNow + Portal Público + Dev.to):
+                    # A cada 8 rodadas, publica um Guia Oficial de Ranking Regional com backlink para atrair empresários via Google/ChatGPT!
+                    if city_idx % 8 == 1 and raw_leads:
+                        try:
+                            lead_sample = raw_leads[0]
+                            city_short = target_entry["city"].split(",")[0].strip()
+                            inbound_title = f"Ranking 2026: Melhores de {niche_to_search} em {city_short} segundo ChatGPT e Gemini"
+                            inbound_md = (
+                                f"# {inbound_title}\n\n"
+                                f"As buscas por **{niche_to_search} em {target_entry['city']}** estão migrando rapidamente do Google tradicional para motores generativos como **ChatGPT Search, Google Gemini e Perplexity**.\n\n"
+                                f"## Por que algumas empresas de {city_short} dominam as recomendações da IA?\n"
+                                f"Nossa auditoria técnica analisou empresas reais de {niche_to_search} em {target_entry['city']} (incluindo *{lead_sample['company_name']}* e concorrentes locais) nos 4 pilares de **GEO (Generative Engine Optimization)**:\n"
+                                f"1. **Protocolo `/llms.txt` público**\n"
+                                f"2. **Grafo de Entidade Schema.org JSON-LD (`LocalBusiness` / `MedicalBusiness` / `LegalService`)**\n"
+                                f"3. **Densidade de Citação e Provas Sociais Verificadas**\n"
+                                f"4. **FAQ Semântico Conversacional**\n\n"
+                                f"---\n\n"
+                                f"### 🚀 Sua empresa de {niche_to_search} em {city_short} aparece no ChatGPT?\n"
+                                f"Faça agora o **Diagnóstico Gratuito de Visibilidade em IA** em 30 segundos e descubra sua nota oficial (0 a 100) e qual concorrente está recebendo seus clientes:\n\n"
+                                f"👉 **[Testar Minha Empresa Grátis no GeoPulse AI]({base_site})**\n"
+                            )
+                            await SparkSyndicatorBridge.process_syndication_event(
+                                {
+                                    "company_name": f"Guia {niche_to_search} {city_short}",
+                                    "niche": niche_to_search,
+                                    "city_region": target_entry["city"],
+                                    "url": base_site,
+                                    "article_title": inbound_title,
+                                    "article_markdown": inbound_md,
+                                    "visibility_score": 92.0,
+                                },
+                                medium_token=keys.get("medium_api_token"),
+                                devto_api_key=keys.get("devto_api_key") if city_idx % 24 == 1 else None,
+                            )
+                        except Exception as e_inb:
+                            logger.warning(f"Inbound syndication warning: {e_inb}")
 
                     # 2. Cadência Automática (2º Toque / Follow-up) para leads que ainda não receberam ou abriram e-mail
                     pending_leads = (await db.execute(
@@ -1859,6 +1923,75 @@ async def mercadopago_webhook(request: Request, db: AsyncSession = Depends(get_d
     return {"status": "received"}
 
 
+@app.post("/api/webhooks/hotmart")
+@app.post("/api/webhooks/kiwify")
+async def infoproduct_platform_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    """
+    Webhook Universal para Hotmart e Kiwify:
+    - Quando uma compra é aprovada (PURCHASE_APPROVED / order_approved / paid), localiza a empresa pelo
+      parâmetro customizado (sck / src / external_reference) ou pelo e-mail do comprador e ativa os 7 artefatos + Desafio de 14 Dias!
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    event_type = str(body.get("event") or body.get("webhook_event_type") or body.get("order_status") or body.get("status") or "").upper()
+    data_obj = body.get("data") or body
+
+    is_approved = any(k in event_type for k in ("APPROVED", "COMPLETE", "PAID", "APROVAD"))
+    if not is_approved:
+        purchase_status = str((data_obj.get("purchase") or {}).get("status") or data_obj.get("order_status") or "").upper()
+        is_approved = any(k in purchase_status for k in ("APPROVED", "COMPLETE", "PAID", "APROVAD"))
+
+    if not is_approved:
+        return {"status": "ignored", "event": event_type}
+
+    # Extrai e-mail, nome, telefone e possível company_id (sck/src)
+    buyer = data_obj.get("buyer") or data_obj.get("Customer") or {}
+    buyer_email = str(buyer.get("email") or data_obj.get("email") or "").strip().lower()
+    buyer_name = str(buyer.get("name") or buyer.get("full_name") or data_obj.get("name") or "Cliente Hotmart/Kiwify").strip()
+    buyer_phone = str(buyer.get("checkout_phone") or buyer.get("mobile") or buyer.get("phone") or "").strip()
+
+    tracking = (data_obj.get("purchase") or {}).get("origin") or data_obj.get("TrackingParameters") or {}
+    sck_val = str(tracking.get("sck") or tracking.get("src") or body.get("sck") or "").strip()
+
+    comp = None
+    if sck_val and sck_val.isdigit():
+        res_c = await db.execute(select(Company).filter_by(id=int(sck_val)))
+        comp = res_c.scalars().first()
+
+    if not comp and buyer_email:
+        res_e = await db.execute(select(Company).where(Company.email == buyer_email).order_by(Company.id.desc()))
+        comp = res_e.scalars().first()
+
+    if not comp:
+        comp = Company(
+            name=buyer_name,
+            url=f"https://www.{re.sub(r'[^a-z0-9]', '', buyer_name.lower()) or 'empresa'}.com.br",
+            niche="Especialidades",
+            city_region="Brasil",
+            email=buyer_email,
+            whatsapp=buyer_phone,
+            entity_type="company",
+            is_paid=False,
+            access_token=secrets.token_urlsafe(24),
+        )
+        db.add(comp)
+        await db.commit()
+        await db.refresh(comp)
+
+    if not comp.is_paid:
+        checkout_req = CheckoutRequest(
+            plan_name="Plano Dominância IA (Hotmart/Kiwify)",
+            payment_method="card",
+            amount=settings.PLAN_PRICE,
+        )
+        await activate_paid_geo_engine(company_id=comp.id, checkout=checkout_req, db=db)
+
+    return {"status": "activated", "company_id": comp.id}
+
+
 @app.post("/api/admin/companies/{company_id}/activate", dependencies=[Depends(verify_admin_password_header)])
 async def admin_manual_activate_company(company_id: int, db: AsyncSession = Depends(get_db)):
     """
@@ -1890,17 +2023,37 @@ async def admin_delete_company(company_id: int, db: AsyncSession = Depends(get_d
     return {"message": f"Registro '{company.name}' removido com sucesso."}
 
 
+@app.get("/api/track/open/{company_id}.gif")
+async def track_email_open_pixel(company_id: int, db: AsyncSession = Depends(get_db)):
+    """Pixel transparente 1x1 para detectar abertura real de e-mail frio no celular/PC do lead."""
+    from fastapi.responses import Response
+    gif_bytes = b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
+    if company_id > 0:
+        try:
+            lead_res = await db.execute(select(LeadCapture).filter_by(company_id=company_id).order_by(LeadCapture.id.desc()))
+            lead_row = lead_res.scalars().first()
+            if lead_row and "Visualizado" not in (lead_row.status or "") and "Aberto" not in (lead_row.status or ""):
+                lead_row.status = "📩 E-mail Aberto!"
+                await db.commit()
+        except Exception:
+            pass
+    return Response(content=gif_bytes, media_type="image/gif", headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
+
+
 @app.get("/api/companies/{company_id}", response_model=FullDiagnosticResponse)
 @app.get("/api/companies/{company_id}/diagnostic", response_model=FullDiagnosticResponse)
 async def get_company_diagnostic(company_id: int, request: Request, viewed: Optional[int] = 0, db: AsyncSession = Depends(get_db)):
     resp = await _build_diagnostic(company_id, db)
-    if viewed == 1 and not _is_admin(request):
+    ua = (request.headers.get("User-Agent") or "").lower()
+    is_bot_scanner = any(b in ua for b in ("bot", "crawler", "spider", "preview", "mimecast", "proofpoint", "barracuda", "headless"))
+    if viewed == 1 and not _is_admin(request) and not is_bot_scanner:
         try:
+            db.add(SiteEvent(event="visita"))
             lead_res = await db.execute(select(LeadCapture).filter_by(company_id=company_id).order_by(LeadCapture.id.desc()))
             lead_row = lead_res.scalars().first()
             if lead_row and "Visualizado" not in (lead_row.status or ""):
                 lead_row.status = "👀 Relatório Visualizado!"
-                await db.commit()
+            await db.commit()
             asyncio.create_task(notify_owner(
                 f"👀 Lead Abriu o Relatório: {resp.company.name}",
                 f"A empresa {resp.company.name} ({resp.company.city_region}) acabou de abrir o link do Dossiê (?report={company_id})!\nHora perfeita para fechar a venda.",

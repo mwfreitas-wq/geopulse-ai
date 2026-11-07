@@ -33,29 +33,32 @@ class SalesBotService:
         openai_key = keys.get("openai_api_key") or settings.OPENAI_API_KEY
         gemini_key = keys.get("gemini_api_key") or settings.GEMINI_API_KEY
 
-        # 1. Groq (Gratuito e Ultrarrápido)
+        # 1. Groq (Gratuito e Ultrarrápido - Modelos Ativos 2026)
         if groq_key:
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
-            payload = {
-                "model": "llama-3.3-70b-versatile",
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                "temperature": 0.3,
-                "max_tokens": 600
-            }
-            try:
-                async with httpx.AsyncClient(timeout=8.0, verify=False) as client:
-                    res = await client.post(url, headers=headers, json=payload)
-                    if res.status_code == 200:
-                        data = res.json()
-                        choices = data.get("choices", [])
-                        if choices:
-                            return choices[0].get("message", {}).get("content", "").strip()
-            except Exception as e:
-                logger.warning(f"Groq sales bot error: {e}")
+            for groq_model in ("openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"):
+                payload = {
+                    "model": groq_model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 700
+                }
+                try:
+                    async with httpx.AsyncClient(timeout=8.0, verify=False) as client:
+                        res = await client.post(url, headers=headers, json=payload)
+                        if res.status_code == 200:
+                            data = res.json()
+                            choices = data.get("choices", [])
+                            if choices:
+                                content = choices[0].get("message", {}).get("content", "").strip()
+                                if content:
+                                    return content
+                except Exception as e:
+                    logger.warning(f"Groq sales bot error ({groq_model}): {e}")
 
         # 2. OpenAI (se configurada)
         if openai_key:
@@ -301,71 +304,147 @@ class SalesBotService:
             best = f"{best[:45]} ({domain_raw})"
         return best[:75]
 
+    GLOBAL_BLOCKED_DOMAINS = (
+        "duckduckgo.com", "yahoo.com", "bing.com", "google.", "whatsapp.com", "wa.me",
+        "doctoralia", "guiamais", "apontador", "solutudo", "reclameaqui", "facebook.com",
+        "instagram.com", "linkedin.com", "youtube.com", "wikipedia.org", "tiktok.com",
+        "yelp.com", "tripadvisor", "yellowpages", "mapquest", "expertise.com", "healthgrades",
+        "zocdoc", "threebestrated", "listamais", "applocal", "acheioprofissional", "telelistas",
+        "hagah", "encontra", "econodata", "cnpj.biz", "casadosdados", "jusbrasil", "cylex",
+        "infobel", "hotfrog", "kekanto", "catalogo", "guiadelocalizacao", "melhores", "top10",
+        "gov.", ".gov", "edu.", ".edu", "crosp", "cfo.org", "oab", "cfm.org", "odontoblog",
+        "g1.globo", "globo.com", "uol.com.br", "terra.com.br", "exame.com", "forbes.com",
+        "cnbc.com", "nba.com", "espn.com", "amazon.", "mercadolivre", "shopee", "aliexpress",
+        "spotify.com", "uber.com", "apple.com", "microsoft.com", "gemini.com", "insidertrades",
+        "morningstar", "prnewswire", "gartic", "karafun", "versao-karaoke", "zhihu.com",
+        "douban.com", "flashscore", "bula.com", "patient.info", "coveredca.com", "aspenideas",
+        "collegeboard", "clicrbs", "zerohora", "estadao", "folha.uol", "r7.com", "ig.com.br"
+    )
+
+    @classmethod
+    def _is_valid_business_candidate(cls, title: str, url: str, niche: str, is_international: bool) -> bool:
+        """Filtra rigorosamente portais de notícias, gigantes globais e resultados falsos anti-bot."""
+        if not url or not url.startswith("http"):
+            return False
+        dom = urlparse(url).netloc.lower().replace("www.", "")
+        if not dom or len(dom) < 4:
+            return False
+        if any(b in dom for b in cls.GLOBAL_BLOCKED_DOMAINS):
+            return False
+        # Se for busca no Brasil, exige domínio .br ou título em português do nicho
+        if not is_international and not dom.endswith(".br"):
+            combined = f"{title} {dom}".lower()
+            br_niche_roots = ("odonto", "dent", "clinic", "clínic", "advoc", "advog", "direito", "estetic", "estétic", "medic", "médic", "imobi", "contab", "arquit", "solar", "dermat", "harmoniza", "fisiot", "psicol", "nutri", "vet")
+            if not any(k in combined for k in br_niche_roots):
+                return False
+        # Bloqueia títulos que claramente são notícias sobre CEOs, jogos, política ou fóruns
+        bad_title_words = ("ceo ", "net worth", "biography", "earnings", "schedule", "nba ", "roster", "scores", "karaoke", "karaokê", "interações medicamentosas", "presidente", "governor", "primature", "flamengo", "corinthians", "palmeiras")
+        t_low = title.lower()
+        if any(bw in t_low for bw in bad_title_words):
+            return False
+        return True
+
     @classmethod
     async def _scrape_site_contacts(cls, client: httpx.AsyncClient, url: str) -> Dict[str, str]:
-        """Visita o site real da empresa (em <5.5s) e extrai WhatsApp, Telefone com DDD, E-mail e Instagram."""
+        """Visita o site real da empresa (e a página /contato se necessário) extraindo WhatsApp, Telefone, E-mail e Instagram sem falsos positivos de JS/CSS."""
+        from urllib.parse import urljoin
         phone = ""
         email = ""
         instagram = ""
-        try:
-            r = await client.get(url, timeout=5.5)
-            html = r.text
-            # 1. Procura links diretos de WhatsApp (wa.me/55... ou api.whatsapp.com/send?phone=...)
-            wpp_matches = re.findall(r"(?:wa\.me/|phone=)(\d{10,14})", html)
-            if wpp_matches:
-                phone = wpp_matches[0]
-            else:
-                # 2. Procura links tel: ou telefones brasileiros com DDD: (19) 99999-9999 ou 11 98888-7777
-                tel_links = re.findall(r"tel:[\+\s]*([0-9\-\(\)\s]{10,16})", html)
-                br_phones = re.findall(r"(?:\(?[1-9]{2}\)?\s*9?\d{4}[-\s]\d{4})", html)
-                raw_phone_list = tel_links + br_phones
-                for rp in raw_phone_list:
-                    digits = re.sub(r"\D", "", rp)
-                    if len(digits) in (10, 11):
-                        phone = f"55{digits}"
-                        break
-                    elif len(digits) in (12, 13) and digits.startswith("55"):
-                        phone = digits
-                        break
+        pages_to_visit = [url]
+        is_br_site = ".br" in urlparse(url).netloc.lower()
 
-            # 3. Procura e-mails reais na página
-            email_matches = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", html)
-            blocked_ext = (".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".css", ".js", "sentry.io", "wixpress.com", "example.com", "yourdomain", "email.com", "dominio.com")
-            for em in email_matches:
-                em_low = em.lower()
-                if not any(em_low.endswith(ext) or ext in em_low for ext in blocked_ext):
-                    email = em_low
-                    break
+        blocked_email_tokens = (
+            ".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".css", ".js",
+            "sentry", "wix", "example", "yourdomain", "email.com", "dominio",
+            "voce@", "seuemail@", "nome@", "usuario@", "teste@", "contato@site",
+            "wordpress", "godaddy", "hostgator", "locaweb", "globoid", "versantmedia"
+        )
+        blocked_ig = ("p", "reel", "reels", "tv", "explore", "stories", "share", "accounts", "legal", "about", "developer")
 
-            # 4. Procura perfil oficial do Instagram (instagram.com/perfil)
-            ig_matches = re.findall(r"instagram\.com/([a-zA-Z0-9._-]+)", html)
-            blocked_ig = ("p", "reel", "reels", "tv", "explore", "stories", "share", "accounts", "legal", "about", "developer")
-            for ig in ig_matches:
-                clean_ig = ig.strip().strip("/").split("?")[0]
-                if clean_ig and clean_ig.lower() not in blocked_ig and len(clean_ig) >= 3:
-                    instagram = clean_ig
-                    break
-        except Exception:
-            pass
+        for idx, page_url in enumerate(pages_to_visit):
+            try:
+                r = await client.get(page_url, timeout=6.0)
+                if r.status_code >= 400:
+                    continue
+                html = r.text
+                soup = BeautifulSoup(html, "html.parser")
+
+                # 1. Links diretos de WhatsApp no HTML bruto
+                if not phone:
+                    wpp_matches = re.findall(r"(?:wa\.me/|api\.whatsapp\.com/send\?[^\"'>\s]*phone=)(55\d{10,11}|\d{10,13})", html)
+                    if wpp_matches:
+                        d = re.sub(r"\D", "", wpp_matches[0])
+                        phone = f"55{d}" if (is_br_site and len(d) in (10, 11) and not d.startswith("55")) else d
+
+                # 2. Links tel: explícitos
+                if not phone:
+                    tel_links = re.findall(r"href=[\"']tel:[\+\s]*([0-9\-\(\)\s]{10,16})[\"']", html, flags=re.I)
+                    for rp in tel_links:
+                        digits = re.sub(r"\D", "", rp)
+                        if len(digits) in (10, 11) and is_br_site:
+                            phone = f"55{digits}"
+                            break
+                        elif len(digits) in (12, 13) and digits.startswith("55"):
+                            phone = digits
+                            break
+
+                # 3. Remove <script>, <style>, <svg> antes de procurar telefone no texto visível (evita capturar IDs de JS!)
+                for tag in soup(["script", "style", "noscript", "svg", "head"]):
+                    tag.decompose()
+                visible_text = soup.get_text(" ", strip=True)
+
+                if not phone and is_br_site:
+                    br_phones = re.findall(r"(?:\([1-9]{2}\)\s*9?\d{4}[-\s]\d{4}|\b[1-9]{2}\s+9\d{4}[-\s]\d{4}\b)", visible_text)
+                    for rp in br_phones:
+                        digits = re.sub(r"\D", "", rp)
+                        if len(digits) in (10, 11):
+                            phone = f"55{digits}"
+                            break
+
+                # 4. Procura e-mails reais (priorizando links mailto:)
+                if not email:
+                    mailtos = re.findall(r"mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", html, flags=re.I)
+                    text_emails = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", visible_text + " " + html)
+                    for em in (mailtos + text_emails):
+                        em_low = em.lower().strip(".")
+                        if not any(em_low.endswith(ext) or ext in em_low for ext in blocked_email_tokens):
+                            email = em_low
+                            break
+
+                # 5. Procura perfil oficial do Instagram
+                if not instagram:
+                    ig_matches = re.findall(r"instagram\.com/([a-zA-Z0-9._-]+)", html)
+                    for ig in ig_matches:
+                        clean_ig = ig.strip().strip("/").split("?")[0]
+                        if clean_ig and clean_ig.lower() not in blocked_ig and len(clean_ig) >= 3:
+                            instagram = clean_ig
+                            break
+
+                # Se não achou e-mail na capa, visita a página interna de /contato na 2ª iteração
+                if idx == 0 and not email:
+                    soup_links = BeautifulSoup(html, "html.parser")
+                    for a in soup_links.select("a[href]"):
+                        href = a.get("href", "")
+                        if any(k in href.lower() for k in ("contato", "fale-conosco", "faleconosco", "contact", "atendimento")):
+                            contact_url = urljoin(url, href)
+                            if urlparse(contact_url).netloc == urlparse(url).netloc and contact_url not in pages_to_visit:
+                                pages_to_visit.append(contact_url)
+                                break
+            except Exception:
+                pass
         return {"phone": phone, "email": email, "instagram": instagram}
 
     @classmethod
     async def _search_duckduckgo_leads(cls, client: httpx.AsyncClient, query: str, niche: str, city_region: str, qty: int) -> List[Dict[str, str]]:
-        """Pesquisa global de empresas via DuckDuckGo HTML (sem bloqueio de IP ou captcha)."""
-        blocked_domains = (
-            "duckduckgo.com", "yahoo.com", "bing.com", "google.com", "doctoralia", "guiamais",
-            "apontador", "solutudo", "reclameaqui", "facebook.com", "instagram.com", "linkedin.com",
-            "youtube.com", "wikipedia.org", "tiktok.com", "yelp.com", "tripadvisor", "yellowpages",
-            "mapquest", "expertise.com", "healthgrades", "zocdoc", "threebestrated",
-            "listamais", "applocal", "acheioprofissional", "telelistas", "hagah", "encontra",
-            "econodata", "cnpj.biz", "casadosdados", "jusbrasil", "cylex", "infobel", "hotfrog",
-            "kekanto", "catalogo", "guiadelocalizacao", "melhores", "top10", "gov.br", "crosp", "cfo.org",
-            "odontoblog", "blog", "revista", "noticias", "g1.globo", "uol.com.br", "terra.com.br"
-        )
+        """Pesquisa global de empresas via DuckDuckGo HTML com filtro rigoroso de relevância."""
+        is_international = any(k in city_region.lower() for k in ["usa", "fl", "ny", "ca", "tx", "il", "espan", "madrid", "barcelona", "portugal", "lisboa", "porto", "london", "uk"])
         candidates = []
         seen = set()
         try:
-            r = await client.post("https://html.duckduckgo.com/html/", data={"q": query}, timeout=9.0)
+            r = await client.post("https://html.duckduckgo.com/html/", data={"q": query}, timeout=8.0)
+            if r.status_code != 200:
+                return []
             soup = BeautifulSoup(r.text, "html.parser")
             for res_div in soup.select("div.result"):
                 a_title = res_div.select_one("a.result__a")
@@ -374,13 +453,13 @@ class SalesBotService:
                 href = a_title.get("href", "")
                 m = re.search(r"uddg=([^&]+)", href)
                 raw_url = unquote(m.group(1)) if m else href
-                if not raw_url.startswith("http"):
+                title = a_title.get_text(" ", strip=True)
+                if not cls._is_valid_business_candidate(title, raw_url, niche, is_international):
                     continue
                 dom = urlparse(raw_url).netloc.lower().replace("www.", "")
-                if not dom or dom in seen or any(b in dom for b in blocked_domains):
+                if dom in seen:
                     continue
                 seen.add(dom)
-                title = a_title.get_text(" ", strip=True)
                 clean_name = cls._clean_company_title(title, raw_url)
                 candidates.append({"company_name": clean_name, "url": raw_url, "domain": dom})
                 if len(candidates) >= qty:
@@ -392,87 +471,64 @@ class SalesBotService:
     @classmethod
     async def _search_real_web_leads(cls, niche: str, city_region: str, qty: int) -> List[Dict[str, Any]]:
         """
-        Faz busca orgânica ao vivo no DuckDuckGo / Yahoo / Bing por empresas reais de `niche` em `city_region`,
-        filtra diretórios genéricos e extrai WhatsApp, Telefone, E-mail e Instagram reais do site!
+        Faz busca orgânica ao vivo no Yahoo Brasil (site:.br) e DuckDuckGo por empresas reais de `niche` em `city_region`,
+        valida relevância semântica e extrai WhatsApp, Telefone, E-mail e Instagram reais do site (e da página /contato)!
         """
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
         }
-        blocked_domains = (
-            "yahoo.com", "bing.com", "google.com", "doctoralia", "guiamais",
-            "apontador", "solutudo", "reclameaqui", "facebook.com",
-            "instagram.com", "linkedin.com", "youtube.com", "wikipedia.org",
-            "tiktok.com", "yelp.com", "tripadvisor", "jusbrasil", "econodata",
-            "listamais", "applocal", "acheioprofissional", "telelistas", "hagah", "encontra"
-        )
         candidates: List[Dict[str, str]] = []
         seen_domains = set()
+        city_name = city_region.split(",")[0].split("-")[0].strip()
 
-        is_international = any(k in city_region.lower() for k in ["usa", "fl", "ny", "ca", "tx", "espan", "madrid", "barcelona", "portugal", "lisboa", "porto", "london", "uk", "france", "paris", "germany", "berlin"]) or any(k in niche.lower() for k in ["dentist", "lawyer", "attorney", "clinic", "realtor", "abogado"])
+        is_international = any(k in city_region.lower() for k in ["usa", "fl", "ny", "ca", "tx", "il", "espan", "madrid", "barcelona", "portugal", "lisboa", "porto", "london", "uk", "france", "paris", "germany", "berlin"]) or any(k in niche.lower() for k in ["dentist", "lawyer", "attorney", "clinic", "realtor", "abogado", "practice", "firm", "spa"])
 
         async with httpx.AsyncClient(verify=False, timeout=9.0, follow_redirects=True, headers=headers) as client:
-            # 0. Usa DuckDuckGo HTML SEMPRE (Brasil + Internacional) pois não sofre bloqueio de IP em Cloud
-            q_ddg = f"{niche} in {city_region} official website contact" if is_international else f"{niche} em {city_region} contato whatsapp"
-            ddg_list = await cls._search_duckduckgo_leads(client, q_ddg, niche, city_region, qty * 2 + 2)
-            for item in ddg_list:
-                if item["domain"] not in seen_domains:
-                    seen_domains.add(item["domain"])
-                    candidates.append(item)
-
-            # 1. Se for Brasil (ou DDG não retornou), busca no Yahoo Brasil
-            if len(candidates) < qty:
+            # 1. Busca principal no Yahoo (múltiplas queries focadas em empresas reais locais)
+            yahoo_queries = (
+                [f'"{niche}" "{city_name}" contact email phone', f'{niche} in {city_region} official site contact']
+                if is_international else
+                [f'site:.br "{niche}" "{city_name}" contato', f'site:.br {niche} {city_name} contato telefone', f'{niche} em {city_name} contato']
+            )
+            for yq in yahoo_queries:
+                if len(candidates) >= qty * 2 + 2:
+                    break
                 try:
-                    q = f"{niche} {city_region} contato whatsapp"
-                    r = await client.get("https://br.search.yahoo.com/search", params={"p": q, "n": 20})
+                    r = await client.get("https://br.search.yahoo.com/search", params={"p": yq, "n": 20})
                     soup = BeautifulSoup(r.text, "html.parser")
                     for div in soup.select("div.algo"):
                         a = div.select_one("h3.title a")
                         if not a:
                             continue
                         real_url = cls._decode_yahoo_url(a.get("href", ""))
-                        if not real_url.startswith("http"):
-                            continue
-                        dom = urlparse(real_url).netloc.lower().replace("www.", "")
-                        if not dom or dom in seen_domains or any(b in dom for b in blocked_domains):
-                            continue
                         for sp in a.select("span"):
                             sp.decompose()
                         raw_title = a.get_text(" ", strip=True)
+                        if not cls._is_valid_business_candidate(raw_title, real_url, niche, is_international):
+                            continue
+                        dom = urlparse(real_url).netloc.lower().replace("www.", "")
+                        if dom in seen_domains:
+                            continue
                         clean_name = cls._clean_company_title(raw_title, real_url)
                         seen_domains.add(dom)
                         candidates.append({"company_name": clean_name, "url": real_url, "domain": dom})
-                        if len(candidates) >= qty + 3:
+                        if len(candidates) >= qty * 2 + 4:
                             break
                 except Exception as e:
-                    logger.warning(f"Yahoo search warning: {e}")
+                    logger.warning(f"Yahoo search warning ({yq}): {e}")
 
-            # 2. Se ainda precisar de mais empresas, complementa com Bing Search
+            # 2. Complementa com DuckDuckGo HTML se necessário (NUNCA usa www.bing.com pois retorna honeypot falso!)
             if len(candidates) < qty:
-                try:
-                    q_bing = f"{niche} em {city_region} contato"
-                    r2 = await client.get("https://www.bing.com/search", params={"q": q_bing})
-                    soup2 = BeautifulSoup(r2.text, "html.parser")
-                    for li in soup2.select("li.b_algo"):
-                        a = li.select_one("h2 a")
-                        if not a:
-                            continue
-                        real_url = cls._decode_bing_url(a.get("href", ""))
-                        if not real_url.startswith("http"):
-                            continue
-                        dom = urlparse(real_url).netloc.lower().replace("www.", "")
-                        if not dom or dom in seen_domains or any(b in dom for b in blocked_domains):
-                            continue
-                        clean_name = cls._clean_company_title(a.get_text(" ", strip=True), real_url)
-                        seen_domains.add(dom)
-                        candidates.append({"company_name": clean_name, "url": real_url, "domain": dom})
-                        if len(candidates) >= qty + 2:
-                            break
-                except Exception as e:
-                    logger.warning(f"Bing search warning: {e}")
+                q_ddg = f"{niche} in {city_region} contact" if is_international else f'site:.br "{niche}" "{city_name}" contato'
+                ddg_list = await cls._search_duckduckgo_leads(client, q_ddg, niche, city_region, qty * 2)
+                for item in ddg_list:
+                    if item["domain"] not in seen_domains:
+                        seen_domains.add(item["domain"])
+                        candidates.append(item)
 
-            # 3. Visita em paralelo os sites candidatos para extrair WhatsApp, Telefone, E-mail e Instagram reais
-            selected = candidates[:max(qty * 2, 8)]
+            # 3. Visita em paralelo os sites candidatos (e página /contato) para extrair WhatsApp, Telefone, E-mail e Instagram reais
+            selected = candidates[:max(qty * 2 + 2, 10)]
             tasks = [cls._scrape_site_contacts(client, c["url"]) for c in selected]
             scraped_contacts = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -485,6 +541,9 @@ class SalesBotService:
                     c_phone = contact_res.get("phone", "")
                     c_email = contact_res.get("email", "")
                     c_instagram = contact_res.get("instagram", "")
+                # Só aceita o lead se conseguiu extrair pelo menos 1 canal real de contato (E-mail, WhatsApp/Telefone ou Instagram)
+                if not (c_email or c_phone or c_instagram):
+                    continue
                 final_leads.append({
                     "company_name": c["company_name"],
                     "url": c["url"],
@@ -496,8 +555,8 @@ class SalesBotService:
                     "decision_maker": "Diretoria / Atendimento",
                 })
 
-            # Ordena priorizando empresas que possuem WhatsApp/Telefone, Instagram ou E-mail reais extraídos
-            final_leads.sort(key=lambda x: (bool(x.get("phone")), bool(x.get("instagram")), bool(x.get("email"))), reverse=True)
+            # Ordena priorizando empresas que possuem E-mail real (para disparo automático) + WhatsApp + Instagram
+            final_leads.sort(key=lambda x: (bool(x.get("email")), bool(x.get("phone")), bool(x.get("instagram"))), reverse=True)
             return final_leads[:qty]
 
     @classmethod
@@ -517,63 +576,54 @@ class SalesBotService:
         niche_clean = niche.strip()
         city_clean = city_region.strip()
 
-        # 1. Prioridade Máxima: Busca Web Real (Yahoo/Bing + Scraping de WhatsApp e E-mail reais do site)
+        # 1. Prioridade Máxima: Busca Web Real (Yahoo site:.br + Deep Contact Scraping)
         leads = await cls._search_real_web_leads(niche_clean, city_clean, qty)
-        if leads:
-            return leads
+        if len(leads) >= qty:
+            return leads[:qty]
 
-        # 2. Fallback Secundário via LLM (se configurada)
+        # 2. Complemento via LLM (Groq openai/gpt-oss-120b) + Verificação HTTP Ao Vivo (NUNCA salva empresa que não existe!)
         system_prompt = (
-            "You are an Elite B2B Commercial Prospector. Identify REAL businesses in the requested city and niche. "
-            "Output ONLY a valid JSON array of objects with keys: "
-            "'company_name', 'url', 'niche', 'city_region', 'phone', 'email', 'decision_maker'."
+            "You are an Elite B2B Commercial Prospector. List REAL, existing businesses with active official websites in the requested city and niche. "
+            "Output ONLY a valid JSON array of objects with keys: 'company_name', 'url'."
         )
-        user_prompt = f"Encontre {qty} empresas reais de '{niche_clean}' localizadas em '{city_clean}'."
+        user_prompt = f"Liste {qty * 2} empresas reais e conhecidas de '{niche_clean}' localizadas em '{city_clean}' com seus sites oficiais reais."
         raw = await cls._call_llm(system_prompt, user_prompt, keys)
         if raw:
             cleaned = re.sub(r"^```json\s*|\s*```$", "", raw.strip(), flags=re.I)
+            m_arr = re.search(r"\[.*\]", cleaned, flags=re.S)
+            if m_arr:
+                cleaned = m_arr.group(0)
             try:
                 data = json.loads(cleaned)
                 if isinstance(data, list):
-                    for item in data[:qty]:
-                        if isinstance(item, dict) and item.get("company_name"):
-                            leads.append({
-                                "company_name": str(item.get("company_name", "")).strip(),
-                                "url": str(item.get("url", "")).strip(),
-                                "niche": str(item.get("niche") or niche_clean).strip(),
-                                "city_region": str(item.get("city_region") or city_clean).strip(),
-                                "phone": str(item.get("phone", "")).strip(),
-                                "email": str(item.get("email", "")).strip(),
-                                "decision_maker": str(item.get("decision_maker", "Diretoria")).strip(),
-                            })
+                    existing_urls = {l["url"] for l in leads}
+                    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+                    async with httpx.AsyncClient(verify=False, timeout=7.0, follow_redirects=True, headers=headers) as client:
+                        for item in data:
+                            if not isinstance(item, dict) or not item.get("url") or not item.get("company_name"):
+                                continue
+                            u = str(item["url"]).strip()
+                            if not u.startswith("http") or u in existing_urls:
+                                continue
+                            contacts = await cls._scrape_site_contacts(client, u)
+                            if contacts.get("email") or contacts.get("phone") or contacts.get("instagram"):
+                                leads.append({
+                                    "company_name": str(item["company_name"]).strip(),
+                                    "url": u,
+                                    "niche": niche_clean,
+                                    "city_region": city_clean,
+                                    "phone": contacts.get("phone", ""),
+                                    "email": contacts.get("email", ""),
+                                    "instagram": contacts.get("instagram", ""),
+                                    "decision_maker": "Diretoria / Atendimento",
+                                })
+                                existing_urls.add(u)
+                                if len(leads) >= qty:
+                                    break
             except Exception:
                 pass
 
-        # 3. Fallback Sintético de Alta Precisão (garante que NUNCA retorne vazio mesmo se motores de busca bloquearem)
-        if not leads:
-            city_first = city_clean.split(",")[0].strip()
-            domain_slug = re.sub(r"[^a-zA-Z0-9]", "", city_first).lower()
-            niche_slug = re.sub(r"[^a-zA-Z0-9]", "", niche_clean).lower()[:12]
-            
-            synthetic_templates = [
-                (f"Centro de {niche_clean.title()} {city_first}", f"https://www.{niche_slug}{domain_slug}.com.br", f"contato@{niche_slug}{domain_slug}.com.br"),
-                (f"Instituto {niche_clean.title()} Especializado", f"https://www.instituto{niche_slug}.com.br", f"atendimento@instituto{niche_slug}.com.br"),
-                (f"Clínica Referência {city_first}", f"https://www.referencia{domain_slug}.com.br", f"comercial@referencia{domain_slug}.com.br"),
-                (f"{niche_clean.title()} Prime {city_first}", f"https://www.{niche_slug}prime.com.br", f"contato@{niche_slug}prime.com.br"),
-                (f"Consultoria & {niche_clean.title()} Integrada", f"https://www.integrada{domain_slug}.com.br", f"contato@integrada{domain_slug}.com.br")
-            ]
-            for name_tpl, url_tpl, email_tpl in synthetic_templates[:qty]:
-                leads.append({
-                    "company_name": name_tpl,
-                    "url": url_tpl,
-                    "niche": niche_clean,
-                    "city_region": city_clean,
-                    "phone": "",
-                    "email": email_tpl,
-                    "decision_maker": "Diretoria Comercial"
-                })
-
-        return leads
+        return leads[:qty]
 
     @classmethod
     def build_cold_outreach(
@@ -596,6 +646,10 @@ class SalesBotService:
         comp_top = top_competitor.strip() or "os principais líderes locais"
         score_val = round(float(score or 38.0), 1)
         checkout_url = f"{report_url}&checkout=1" if "?" in report_url else f"{report_url}?checkout=1"
+        base_origin = report_url.split("/?")[0] if "/?" in report_url else "https://geopulseai.store"
+        comp_id_match = re.search(r"report=(\d+)", report_url)
+        comp_id_str = comp_id_match.group(1) if comp_id_match else "0"
+        open_pixel_url = f"{base_origin}/api/track/open/{comp_id_str}.gif"
 
         email_subject = f"Auditoria de IA: {comp_name} vs {comp_top} no ChatGPT e Gemini ({city_region})"
         email_body = (
@@ -632,6 +686,7 @@ class SalesBotService:
             f"<p style='font-size:12px;color:#475569;background:#f1f5f9;padding:10px 14px;border-radius:8px;'>🛡️ <strong>Garantia Blindada de 7 Dias:</strong> Se sua empresa não subir nas recomendações de IA, devolvemos 100% do valor.</p>"
             f"<hr style='border:none;border-top:1px solid #e2e8f0;margin:20px 0;'>"
             f"<p style='font-size:12px;color:#64748b;margin:0;'>GeoPulse AI • Plataforma de Posicionamento em Motores de Busca Generativos (<a href='https://geopulseai.store' style='color:#2563eb;text-decoration:none;'>geopulseai.store</a>)</p>"
+            f"<img src='{open_pixel_url}' width='1' height='1' style='display:none;' alt='' />"
             f"</div>"
         )
 

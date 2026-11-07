@@ -2073,6 +2073,7 @@ function extractTopCompetitor(data) {
 
     function openCheckoutModal() {
       document.getElementById('checkout-modal').classList.remove('hidden');
+      fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'checkout_aberto' }) }).catch(() => {});
       const dict = I18N[window.currentLang || 'pt'] || I18N.pt;
       const total = dict.planPrice + (currentOrderBump ? dict.bumpPrice : 0.0);
       if (dict.currencyCode === 'BRL') {
@@ -2283,6 +2284,9 @@ function extractTopCompetitor(data) {
 
     /* INICIALIZAÇÃO DA PÁGINA (CARREGA DADOS DO BACKEND & RETORNO DO CHECKOUT) */
     window.addEventListener('DOMContentLoaded', async () => {
+      // 0. Registra visita real no Funil do Admin
+      fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'visita' }) }).catch(() => {});
+
       // 1. Preenche a grade explicativa dos 14 dias
       if (typeof window.render14DaySchedule === 'function') {
         window.render14DaySchedule(window.currentLang || 'pt');
@@ -2335,6 +2339,30 @@ function extractTopCompetitor(data) {
           if (repRes.ok) {
             const repData = await repRes.json();
             renderDiagnosticResults(repData);
+
+            // Exibe Banner Fixo Personalizado de Alto Impacto no Topo para quem clicou no link do e-mail/WhatsApp
+            if (repData.company && !repData.company.is_paid) {
+              const cName = repData.company.name || 'Sua Empresa';
+              const cScore = Math.round(repData.metrics?.visibility_score || 22);
+              const cCity = repData.company.city_region || '';
+              const bannerDiv = document.createElement('div');
+              bannerDiv.className = 'sticky top-0 z-50 bg-slate-950 text-white border-b border-rose-500/40 px-4 py-2.5 shadow-xl';
+              bannerDiv.innerHTML = `
+                <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-black uppercase text-[10px]">Dossiê Exclusivo</span>
+                    <span><strong>${cName}</strong> (${cCity}): Nota atual nas IAs <strong class="text-rose-400">${cScore}/100</strong> (Fora do Top 10)</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button onclick="openCheckoutModal()" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow">
+                      ⚡ Destravar Top 10 Agora (14 Dias)
+                    </button>
+                  </div>
+                </div>
+              `;
+              document.body.prepend(bannerDiv);
+            }
+
             // Se veio do botão de checkout direto do e-mail (?report=ID&checkout=1), abre o modal de pagamento automaticamente!
             if (autoCheckout === '1') {
               setTimeout(() => {

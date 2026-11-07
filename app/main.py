@@ -4137,3 +4137,32 @@ async def admin_repair_gumroad_products(db: AsyncSession = Depends(get_db)):
 
 
 
+
+
+@app.post("/api/admin/debug/test-upload-thumbnail", dependencies=[Depends(verify_admin_password_header)])
+async def debug_test_upload_thumbnail(db: AsyncSession = Depends(get_db)):
+    keys = await get_all_configured_keys(db)
+    token = keys.get("gumroad_access_token") or ""
+    res_list = await GumroadService.list_products(token)
+    products = res_list.get("products", [])
+    ycuspm_prod = next((p for p in products if "ycuspm" in (p.get("short_url") or p.get("url") or "") or "14-Day AI Search" in (p.get("name") or "") or "Sprint" in (p.get("name") or "")), None)
+    if not ycuspm_prod:
+        return {"error": "Product not found", "all": [p.get("name") for p in products]}
+    pid = ycuspm_prod["id"]
+    th_bytes = EbookFactoryService.generate_geopulse_product_thumbnail_png()
+    cov_bytes = EbookFactoryService.generate_geopulse_product_cover_png()
+    site_url = "https://geopulseai.store"
+    
+    res_th = await GumroadService.upload_product_thumbnail(
+        access_token=token,
+        product_id=pid,
+        image_url=f"{site_url}/api/ebooks/image/geopulse-main/thumbnail.png",
+        image_bytes=th_bytes,
+    )
+    res_cov = await GumroadService.upload_product_cover(
+        access_token=token,
+        product_id=pid,
+        image_url=f"{site_url}/api/ebooks/image/geopulse-main/cover.png",
+        image_bytes=cov_bytes,
+    )
+    return {"pid": pid, "name": ycuspm_prod.get("name"), "res_th": res_th, "res_cov": res_cov}

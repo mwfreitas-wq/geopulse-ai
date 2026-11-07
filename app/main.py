@@ -4066,7 +4066,7 @@ async def serve_ebook_hd_image(slug: str, img_type: str = "cover"):
     base_slug = slug.strip().lower().split("-vol-")[0]
     matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == base_slug), NICHE_CATALOG[0])
     clean_type = img_type.strip().lower()
-    if clean_type not in ("cover", "chart", "architecture", "roadmap"):
+    if clean_type not in ("cover", "chart", "architecture", "roadmap", "thumbnail"):
         clean_type = "cover"
     png_bytes = EbookFactoryService.generate_ebook_image_png(matched_niche, img_type=clean_type)
     return Response(

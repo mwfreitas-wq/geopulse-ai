@@ -316,6 +316,60 @@ class GumroadService:
             return {"success": False, "error": str(e)}
 
     @classmethod
+    async def upload_product_thumbnail(
+        cls,
+        access_token: str,
+        product_id: str,
+        image_url: Optional[str] = None,
+        image_bytes: Optional[bytes] = None,
+    ) -> Dict[str, Any]:
+        """Adiciona a miniatura quadrada oficial do produto no Gumroad (seção 'Miniatura' / Thumbnail 600x600)."""
+        if not access_token or not product_id:
+            return {"success": False, "error": "Token ou product_id ausente."}
+
+        auth_header = {"Authorization": f"Bearer {access_token.strip()}"}
+        try:
+            async with httpx.AsyncClient(timeout=45.0, verify=False) as client:
+                # 1. Envio multipart com campo 'thumbnail' ou 'file'
+                if image_bytes:
+                    for field_name in ("thumbnail", "file"):
+                        try:
+                            files = {field_name: ("thumbnail.png", image_bytes, "image/png")}
+                            res_mp = await client.post(
+                                f"{cls.BASE_URL}/products/{product_id}/thumbnail",
+                                files=files,
+                                headers=auth_header,
+                            )
+                            if res_mp.status_code in (200, 201):
+                                d_mp = res_mp.json()
+                                if d_mp.get("success"):
+                                    logger.info(f"✅ [Gumroad] Miniatura ({field_name}) enviada para {product_id}!")
+                                    return {"success": True, "data": d_mp}
+                        except Exception as e_field:
+                            logger.warning(f"[Gumroad] Tentativa thumbnail multipart ({field_name}): {e_field}")
+
+                # 2. Envio com URL pública
+                if image_url:
+                    headers = {
+                        "Authorization": f"Bearer {access_token.strip()}",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    }
+                    res_url = await client.post(
+                        f"{cls.BASE_URL}/products/{product_id}/thumbnail",
+                        data={"url": image_url},
+                        headers=headers,
+                    )
+                    if res_url.status_code in (200, 201):
+                        d = res_url.json()
+                        if d.get("success"):
+                            logger.info(f"✅ [Gumroad] Miniatura enviada via URL para {product_id}!")
+                            return {"success": True, "data": d}
+
+                return {"success": False, "error": "Falha no envio de thumbnail"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    @classmethod
     async def list_products(cls, access_token: str) -> Dict[str, Any]:
         """Consulta os produtos existentes na conta Gumroad."""
         if not access_token:

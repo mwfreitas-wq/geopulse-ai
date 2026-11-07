@@ -1290,6 +1290,47 @@ class EbookFactoryService:
                 draw.rounded_rectangle([850, sy + 52, 850 + bar_w, sy + 74], radius=10, fill=col)
                 sy += 112
 
+        elif img_type == "thumbnail":
+            w, h = 600, 600
+            img = Image.new("RGB", (w, h), (11, 17, 32))
+            draw = ImageDraw.Draw(img)
+
+            # Moldura externa quadrada
+            draw.rounded_rectangle([15, 15, w - 15, h - 15], radius=24, fill=(17, 25, 44), outline=(38, 52, 82), width=2)
+
+            # Topo: Badge de Preço $9.90 e Edição Oficial
+            draw.rounded_rectangle([32, 32, 280, 70], radius=10, fill=accent_rgb)
+            draw.text((46, 42), "2026 PLAYBOOK", font=f_sm, fill=(255, 255, 255))
+
+            draw.rounded_rectangle([w - 180, 32, w - 32, 70], radius=10, fill=(245, 158, 11))
+            draw.text((w - 165, 42), "$9.90 USD", font=f_sm, fill=(11, 17, 32))
+
+            # Capa 3D centralizada
+            bx, by, bw, bh = 60, 95, 480, 420
+            draw.rounded_rectangle([bx + 14, by + 14, bx + bw + 14, by + bh + 14], radius=16, fill=(5, 9, 18))
+            draw.rounded_rectangle([bx, by, bx + bw, by + bh], radius=16, fill=(23, 33, 56), outline=(56, 80, 120), width=2)
+            draw.rectangle([bx + bw - 16, by + 10, bx + bw - 4, by + bh - 10], fill=(226, 232, 240))
+            draw.text((bx + 26, by + 28), "AI SEARCH DOMINANCE", font=f_sm, fill=(56, 189, 248))
+
+            wrapped_niche = textwrap.wrap(niche_en.upper(), width=22)
+            ny = by + 60
+            for line in wrapped_niche[:3]:
+                draw.text((bx + 26, ny), line, font=f_lg, fill=(255, 255, 255))
+                ny += 34
+
+            draw.line([(bx + 26, ny + 8), (bx + bw - 35, ny + 8)], fill=accent_rgb, width=2)
+            gy = ny + 22
+            draw.rounded_rectangle([bx + 26, gy, bx + bw - 35, gy + 110], radius=12, fill=(11, 17, 32), outline=(45, 62, 95), width=1)
+            draw.text((bx + 40, gy + 12), "AI VISIBILITY BENCHMARK", font=f_xs, fill=(16, 185, 129))
+            draw.text((bx + 40, gy + 38), "After GEO (92% - TOP 3)", font=f_xs, fill=(255, 255, 255))
+            draw.rounded_rectangle([bx + 240, gy + 40, bx + bw - 50, gy + 54], radius=5, fill=(16, 185, 129))
+            draw.text((bx + 40, gy + 68), "Before (18% - Invisible)", font=f_xs, fill=(148, 163, 184))
+            draw.rounded_rectangle([bx + 240, gy + 70, bx + 290, gy + 84], radius=5, fill=(244, 63, 94))
+            draw.text((bx + 26, by + bh - 32), "GEOPULSE AI PUBLISHING • 14-DAY SPRINT", font=f_xs, fill=(148, 163, 184))
+
+            draw.rounded_rectangle([32, 532, w - 32, 574], radius=10, fill=(6, 78, 59), outline=(16, 185, 129), width=1)
+            draw.text((48, 544), "✓ 7 CHAPTERS  ✓ CODE TEMPLATES  ✓ 14-DAY ROADMAP", font=f_xs, fill=(167, 243, 208))
+
         else:
             # CAPA 3D DO E-BOOK + BANNER HD (1280 x 720)
             w, h = 1280, 720
@@ -1415,6 +1456,7 @@ class EbookFactoryService:
         chart_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/chart.png"
         arch_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/architecture.png"
         roadmap_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/roadmap.png"
+        thumbnail_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/thumbnail.png"
 
         if language == "pt":
             title = f"Dominancia nas Buscas de IA para {niche_name} — O Playbook Oficial 2026"
@@ -1512,6 +1554,7 @@ class EbookFactoryService:
             "chart_img_url": chart_img_url,
             "arch_img_url": arch_img_url,
             "roadmap_img_url": roadmap_img_url,
+            "thumbnail_img_url": thumbnail_img_url,
             "gumroad_description": gumroad_desc,
             "main_product_url": main_product_url,
             "created_at": datetime.utcnow().isoformat(),
@@ -2156,6 +2199,16 @@ class EbookFactoryService:
                             )
                         except Exception as cov_err:
                             logger.warning(f"Aviso upload capa Gumroad ({ebook_data['title']}): {cov_err}")
+                        try:
+                            th_bytes = cls.generate_ebook_image_png(niche_item, img_type="thumbnail")
+                            await GumroadService.upload_product_thumbnail(
+                                access_token=access_token,
+                                product_id=pid,
+                                image_url=ebook_data.get("thumbnail_img_url"),
+                                image_bytes=th_bytes,
+                            )
+                        except Exception as th_err:
+                            logger.warning(f"Aviso upload miniatura Gumroad ({ebook_data['title']}): {th_err}")
                 else:
                     ebook_data["gumroad_url"] = ""
                     ebook_data["gumroad_published"] = False
@@ -2289,6 +2342,18 @@ class EbookFactoryService:
                     )
                 except Exception as cov_err:
                     logger.warning(f"Aviso upload capa nicho ({eb_rec['title']}): {cov_err}")
+
+                # Envia a Miniatura Quadrada 600x600 para a seção 'Miniatura' do Gumroad
+                try:
+                    th_bytes = cls.generate_ebook_image_png(matched_niche, img_type="thumbnail")
+                    await GumroadService.upload_product_thumbnail(
+                        access_token=access_token,
+                        product_id=pid,
+                        image_url=eb_rec.get("thumbnail_img_url"),
+                        image_bytes=th_bytes,
+                    )
+                except Exception as th_err:
+                    logger.warning(f"Aviso upload miniatura nicho ({eb_rec['title']}): {th_err}")
                 await asyncio.sleep(0.4)
 
         return {

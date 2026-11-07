@@ -1002,7 +1002,7 @@
               <div class="pt-2 flex flex-wrap items-center justify-between gap-3 bg-pink-50/60 p-4 rounded-2xl border border-pink-200">
                 <div class="space-y-1">
                   <div class="text-xs font-extrabold text-pink-900">Criação Instantânea de Produto via Robô</div>
-                  <div class="text-[11px] text-pink-700">Cria o produto na sua conta com nome, descrição, garantia e preço $47 USD com 1 clique:</div>
+                  <div class="text-[11px] text-pink-700">Cria o produto oficial em inglês na sua conta ($47 USD, copy internacional de alta conversão e garantia de 7 dias) com 1 clique:</div>
                 </div>
                 <button type="button" @click="createGumroadProduct()" :disabled="savingKeys"
                   class="px-4 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
@@ -1686,7 +1686,7 @@
             return;
           }
 
-          if (!confirm('Deseja que o Robô crie automaticamente o produto "GeoPulse AI — Desafio 14 Dias" ($47 USD) na sua conta Gumroad agora?')) {
+          if (!confirm('Deseja que o Robô crie automaticamente o produto "GeoPulse AI — 14-Day AI Search Visibility Sprint" ($47 USD) em INGLÊS na sua conta Gumroad agora?')) {
             return;
           }
 
@@ -1706,7 +1706,7 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                name: 'GeoPulse AI — Desafio 14 Dias Rumo ao Top 10 nas IAs',
+                name: 'GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT & Gemini)',
                 price: 47.0,
                 currency: 'usd'
               })

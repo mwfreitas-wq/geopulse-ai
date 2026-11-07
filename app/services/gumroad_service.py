@@ -17,7 +17,7 @@ class GumroadService:
     async def create_product(
         cls,
         access_token: str,
-        name: str = "GeoPulse AI — Desafio 14 Dias Rumo ao Top 10 nas IAs",
+        name: str = "GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT & Gemini)",
         price_cents: int = 4700,
         currency: str = "usd",
         description: Optional[str] = None,
@@ -34,16 +34,17 @@ class GumroadService:
 
         if not description:
             description = (
-                "## GeoPulse AI — Posicionamento de Entidade no ChatGPT, Gemini e Perplexity\n\n"
-                "Garanta a presença da sua empresa ou consultório no **Top 10 de recomendações de Inteligência Artificial**.\n\n"
-                "### O que está incluso no Desafio de 14 Dias:\n"
-                "- Geração e Hospedagem de arquivo `/llms.txt` oficial da sua marca.\n"
-                "- Grafo Semântico Schema.org JSON-LD verificado.\n"
-                "- Publicação de Artigo Editorial de Autoridade Local.\n"
-                "- Pings prioritários via protocolo IndexNow (Bing / ChatGPT Search).\n"
-                "- Acompanhamento de nota de visibilidade (0 a 100).\n"
-                "- **Garantia Blindada de 7 Dias:** risco zero.\n\n"
-                "*(Não precisa alterar o código do seu site atual nem contratar programadores)*."
+                "## GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT & Google Gemini)\n\n"
+                "Secure your business at the forefront of the **Generative AI Search Revolution**. When potential clients ask ChatGPT, Google Gemini, Copilot, or Perplexity for the top providers in your city and industry, ensure your business gets recommended first.\n\n"
+                "### What is Included in Your 14-Day Sprint:\n"
+                "- **Official `/llms.txt` & `/llms-full.txt` Entity Asset:** Standardized machine-readable context file hosted for AI crawlers to accurately cite and prioritize your business.\n"
+                "- **Verified Schema.org JSON-LD Knowledge Graph:** Multi-type rich structured entity data for Google Gemini & Bing Copilot.\n"
+                "- **High-Authority AI Editorial Article & FAQ:** Optimized for retrieval-augmented generation (RAG) and direct conversational answers.\n"
+                "- **Priority IndexNow Protocol Pings:** Instant notifications sent to Microsoft Bing and ChatGPT Search indices within minutes.\n"
+                "- **Live Visibility & Sentiment Score (0–100):** Real-time monitoring of your entity ranking across all major AI engines.\n"
+                "- **Zero Tech Friction:** No changes to your existing website codebase or expensive developer hours required.\n\n"
+                "### 🛡️ Ironclad 7-Day Money-Back Guarantee:\n"
+                "Try GeoPulse AI risk-free. If you are not 100% satisfied with your entity positioning assets, simply contact us within 7 days for an immediate, full refund. No questions asked."
             )
 
         payload = {

@@ -2016,7 +2016,7 @@ async def admin_create_gumroad_product(request: Request, db: AsyncSession = Depe
     except Exception:
         body = {}
 
-    name = str(body.get("name") or "GeoPulse AI — Desafio 14 Dias Rumo ao Top 10 nas IAs").strip()
+    name = str(body.get("name") or "GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT & Gemini)").strip()
     price_val = float(body.get("price") or 47.0)
     currency = str(body.get("currency") or "usd").strip().lower()
     price_cents = int(price_val * 100)

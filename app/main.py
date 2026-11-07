@@ -4091,3 +4091,31 @@ async def admin_repair_gumroad_products(db: AsyncSession = Depends(get_db)):
         main_product_url=main_url,
     )
     return res
+
+
+@app.get("/api/admin/ebooks/debug-cover/{slug}", dependencies=[Depends(verify_admin_password_header)])
+async def debug_gumroad_cover(slug: str, db: AsyncSession = Depends(get_db)):
+    keys = await get_all_configured_keys(db)
+    token = keys.get("gumroad_access_token") or ""
+    listed = await GumroadService.list_products(token)
+    prods = listed.get("products", [])
+    target_prod = None
+    for p in prods:
+        pname = (p.get("name") or "").lower()
+        if slug.replace("-", " ") in pname or p.get("permalink") == slug:
+            target_prod = p
+            break
+    if not target_prod and prods:
+        target_prod = prods[0]
+
+    pid = target_prod.get("id")
+    matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == slug), NICHE_CATALOG[0])
+    png_bytes = EbookFactoryService.generate_ebook_image_png(matched_niche, img_type="cover")
+    res = await GumroadService.upload_product_cover(
+        access_token=token,
+        product_id=pid,
+        image_url=f"https://geopulseai.store/api/ebooks/image/{matched_niche['slug']}/cover.png",
+        image_bytes=png_bytes,
+    )
+    return {"target_prod": target_prod.get("name"), "product_id": pid, "result": res}
+

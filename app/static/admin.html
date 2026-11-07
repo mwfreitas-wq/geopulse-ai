@@ -1393,7 +1393,7 @@
                 <input type="number" step="0.10" min="1" x-model="ebookStatus.price_usd" @change="saveEbookSchedule(ebookStatus.schedule)"
                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-mono font-bold text-slate-900" />
               </div>
-              <p class="text-[11px] text-slate-500 mt-1">Recomendado: <strong>$14.90 USD</strong> (converte rápido e leva o cliente para o plano de $47).</p>
+              <p class="text-[11px] text-slate-500 mt-1">Preço oficial configurado: <strong>$9.90 USD</strong> (alta conversão por impulso + upsell para o plano de $47).</p>
             </div>
           </div>
 
@@ -1596,7 +1596,7 @@
           last_error: '',
           schedule: 'off',
           language: 'en',
-          price_usd: 14.90,
+          price_usd: 9.90,
           last_run_at: '',
           total_niches_available: 60,
           total_ebooks_created: 0,
@@ -2011,7 +2011,7 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 language: this.ebookStatus.language || 'en',
-                price_usd: parseFloat(this.ebookStatus.price_usd || 14.90),
+                price_usd: parseFloat(this.ebookStatus.price_usd || 9.90),
                 schedule: this.ebookStatus.schedule || 'off'
               })
             });
@@ -2036,7 +2036,7 @@
               body: JSON.stringify({
                 schedule: this.ebookStatus.schedule || 'off',
                 language: this.ebookStatus.language || 'en',
-                price_usd: parseFloat(this.ebookStatus.price_usd || 14.90)
+                price_usd: parseFloat(this.ebookStatus.price_usd || 9.90)
               })
             });
             const data = await res.json();

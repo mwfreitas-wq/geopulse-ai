@@ -3778,7 +3778,7 @@ async def _run_ebook_batch_job(
 
             lang = override_lang or (await get_system_key(db, "ebook_language")) or "en"
             price_str = await get_system_key(db, "ebook_price_usd")
-            price_usd = float(override_price) if override_price is not None else (float(price_str) if price_str else 14.90)
+            price_usd = float(override_price) if override_price is not None else (float(price_str) if price_str else 9.90)
 
             existing_json = await get_system_key(db, "ebook_catalog_json")
             catalog_list: List[Dict[str, Any]] = []
@@ -3924,7 +3924,10 @@ async def admin_get_ebooks_status(db: AsyncSession = Depends(get_db)):
     sched = (await get_system_key(db, "ebook_auto_schedule")) or "off"
     lang = (await get_system_key(db, "ebook_language")) or "en"
     price_str = await get_system_key(db, "ebook_price_usd")
-    price_usd = float(price_str) if price_str else 14.90
+    price_usd = float(price_str) if price_str else 9.90
+    if price_usd == 14.90:
+        price_usd = 9.90
+        await set_system_key(db, "ebook_price_usd", "9.90")
     last_run_at = await get_system_key(db, "ebook_last_run_at")
     offset_str = await get_system_key(db, "ebook_batch_offset")
     offset = int(offset_str) if (offset_str and offset_str.isdigit()) else 0
@@ -4010,7 +4013,7 @@ async def admin_trigger_ebook_batch(request: Request, db: AsyncSession = Depends
     lang = str(body.get("language") or "en").strip().lower()
     if lang not in ("en", "pt"):
         lang = "en"
-    price_usd = float(body.get("price_usd") or 14.90)
+    price_usd = float(body.get("price_usd") or 9.90)
     sched = str(body.get("schedule") or "").strip().lower()
     if sched in ("off", "2x", "3x", "4x"):
         await set_system_key(db, "ebook_auto_schedule", sched)
@@ -4035,7 +4038,7 @@ async def admin_update_ebook_schedule(request: Request, db: AsyncSession = Depen
         raise HTTPException(status_code=400, detail="Frequência inválida. Use off, 2x, 3x ou 4x.")
 
     lang = str(body.get("language") or "en").strip().lower()
-    price_usd = float(body.get("price_usd") or 14.90)
+    price_usd = float(body.get("price_usd") or 9.90)
 
     await set_system_key(db, "ebook_auto_schedule", sched)
     await set_system_key(db, "ebook_language", lang)
@@ -4057,13 +4060,13 @@ async def admin_update_ebook_schedule(request: Request, db: AsyncSession = Depen
 @app.get("/api/ebooks/image/{slug}/{img_type}.png")
 async def serve_ebook_hd_image(slug: str, img_type: str = "cover"):
     """
-    Gera e entrega em tempo real as imagens PNG de alta resolução (Capa 3D 1280x720,
-    Gráfico de Mercado 1200x650 e Arquitetura GEO 1200x650) para o Gumroad e para o E-book.
+    Gera e entrega em tempo real as 4 imagens PNG de alta resolução (Capa 3D 1280x720,
+    Gráfico Antes vs Depois 1200x680, Blueprint 4 Passos 1200x680 e Roadmap 14 Dias 1200x680).
     """
     base_slug = slug.strip().lower().split("-vol-")[0]
     matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == base_slug), NICHE_CATALOG[0])
     clean_type = img_type.strip().lower()
-    if clean_type not in ("cover", "chart", "architecture"):
+    if clean_type not in ("cover", "chart", "architecture", "roadmap"):
         clean_type = "cover"
     png_bytes = EbookFactoryService.generate_ebook_image_png(matched_niche, img_type=clean_type)
     return Response(

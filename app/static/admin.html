@@ -1004,9 +1004,10 @@
                   <div class="text-xs font-extrabold text-pink-900">Criação Instantânea de Produto via Robô</div>
                   <div class="text-[11px] text-pink-700">Cria o produto na sua conta com nome, descrição, garantia e preço $47 USD com 1 clique:</div>
                 </div>
-                <button type="button" @click="createGumroadProduct()"
-                  class="px-4 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2">
-                  <span>🚀</span> Criar Produto no Gumroad Agora
+                <button type="button" @click="createGumroadProduct()" :disabled="savingKeys"
+                  class="px-4 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <span x-text="savingKeys ? '⏳' : '🚀'">🚀</span>
+                  <span x-text="savingKeys ? 'Criando no Gumroad...' : 'Criar Produto no Gumroad Agora'">Criar Produto no Gumroad Agora</span>
                 </button>
               </div>
 
@@ -1520,6 +1521,9 @@
               if (this.overview.api_status.mercadopago_public_key) {
                 this.keyForm.mercadopago_public_key = this.overview.api_status.mercadopago_public_key;
               }
+              if (this.overview.api_status.gumroad_product_url) {
+                this.keyForm.gumroad_product_url = this.overview.api_status.gumroad_product_url;
+              }
               this.keyForm.pix_key = this.overview.api_status.pix_key || 'contato@geopulse.ai';
               this.keyForm.pix_beneficiary = this.overview.api_status.pix_beneficiary || 'GeoPulse AI Tecnologia';
               this.keyForm.plan_price = String(this.overview.api_status.plan_price || 197.0);
@@ -1671,6 +1675,63 @@
             }
           } catch (e) {
             this.toastMessage = '⚠️ ' + 'Erro ao excluir lead.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          }
+        },
+
+        async createGumroadProduct() {
+          const token = (this.keyForm.gumroad_access_token || '').trim();
+          const isConfigured = !!(this.overview.api_status && this.overview.api_status.gumroad_configured);
+          if (!token && !isConfigured) {
+            alert('⚠️ Por favor, cole o seu Access Token do Gumroad no campo acima antes de clicar em Criar Produto!');
+            return;
+          }
+
+          if (!confirm('Deseja que o Robô crie automaticamente o produto "GeoPulse AI — Desafio 14 Dias" ($47 USD) na sua conta Gumroad agora?')) {
+            return;
+          }
+
+          this.savingKeys = true;
+          this.toastMessage = '⏳ Criando produto no Gumroad via API...';
+
+          try {
+            if (token) {
+              await fetch('/api/settings/keys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gumroad_access_token: token })
+              });
+            }
+
+            const res = await fetch('/api/admin/gumroad/create-product', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: 'GeoPulse AI — Desafio 14 Dias Rumo ao Top 10 nas IAs',
+                price: 47.0,
+                currency: 'usd'
+              })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+              const url = data.short_url || (data.product && data.product.short_url) || '';
+              this.keyForm.gumroad_product_url = url;
+              if (this.overview.api_status) {
+                this.overview.api_status.gumroad_product_url = url;
+                this.overview.api_status.gumroad_configured = true;
+              }
+              alert('🎉 Produto criado com SUCESSO no Gumroad!\n\nLink oficial de vendas:\n' + url + '\n\nO robô de vendas já começará a oferecer este link nas prospecções internacionais!');
+              await this.loadOverview();
+            } else {
+              const err = data.detail || data.error || (data.message ? data.message : JSON.stringify(data));
+              alert('❌ Erro ao criar produto no Gumroad:\n\n' + err + '\n\nVerifique se o seu Access Token tem permissão de escrita de produtos (edit_products).');
+            }
+          } catch (e) {
+            console.error('Erro Gumroad:', e);
+            alert('⚠️ Falha de comunicação com o servidor: ' + e.message);
+          } finally {
+            this.savingKeys = false;
+            this.toastMessage = '';
           }
         },
 

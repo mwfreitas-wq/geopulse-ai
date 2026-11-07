@@ -45,6 +45,7 @@ class GumroadService:
         currency: str = "usd",
         description: Optional[str] = None,
         custom_summary: Optional[str] = None,
+        custom_receipt: Optional[str] = None,
         custom_permalink: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
@@ -64,12 +65,19 @@ class GumroadService:
                 "Editorial Authority Article & IndexNow Pings) + 7-Day Money-Back Guarantee."
             )
 
+        if not custom_receipt:
+            custom_receipt = (
+                "Thank you for your purchase! Your 14-Day AI Search Visibility Sprint is now active. "
+                "Access your live dashboard and entity assets at: https://geopulseai.store"
+            )
+
         payload: Dict[str, Any] = {
             "name": name,
             "price": str(price_cents),
             "currency": currency.lower(),
             "description": description,
             "custom_summary": custom_summary,
+            "custom_receipt": custom_receipt,
         }
         if custom_permalink:
             payload["url"] = custom_permalink
@@ -89,6 +97,23 @@ class GumroadService:
                 if res.status_code in (200, 201):
                     data = res.json()
                     product = data.get("product", {})
+                    pid = product.get("id")
+                    # Garante via PUT que description HTML, custom_summary e custom_receipt fiquem 100% gravados
+                    if pid:
+                        try:
+                            put_res = await client.put(
+                                f"{cls.BASE_URL}/products/{pid}",
+                                data={
+                                    "description": description,
+                                    "custom_summary": custom_summary,
+                                    "custom_receipt": custom_receipt,
+                                },
+                                headers=headers,
+                            )
+                            if put_res.status_code in (200, 201):
+                                product = put_res.json().get("product", product)
+                        except Exception as put_e:
+                            logger.warning(f"[Gumroad] Aviso PUT complementar: {put_e}")
                     short_url = product.get("short_url") or product.get("url") or f"https://gumroad.com/l/{product.get('permalink')}"
                     logger.info(f"[Gumroad] Produto criado com sucesso: {product.get('name')} -> {short_url}")
                     return {
@@ -117,6 +142,7 @@ class GumroadService:
         price_cents: Optional[int] = None,
         description: Optional[str] = None,
         custom_summary: Optional[str] = None,
+        custom_receipt: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Atualiza um produto existente no Gumroad via PUT /v2/products/{id}."""
         if not access_token or not product_id:
@@ -131,6 +157,8 @@ class GumroadService:
             payload["description"] = description
         if custom_summary is not None:
             payload["custom_summary"] = custom_summary
+        if custom_receipt is not None:
+            payload["custom_receipt"] = custom_receipt
 
         headers = {
             "Authorization": f"Bearer {access_token.strip()}",

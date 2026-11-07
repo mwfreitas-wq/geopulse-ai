@@ -1417,9 +1417,15 @@ class EbookFactoryService:
                 f"<p>Immediately upon checkout, you receive instant access to your complete illustrated playbook, high-resolution visual charts, copy-and-paste code templates, and 14-day executive checklist—backed by our <strong>7-Day 100% Satisfaction Guarantee</strong>.</p>"
             )
 
+        custom_receipt = (
+            f"Thank you for your purchase! Access and download your complete Illustrated 7-Chapter Playbook "
+            f"(Interactive Web Edition + Printable A4 PDF) immediately here: {ebook_public_url}"
+        )
+
         return {
             "slug": slug,
             "base_slug": niche_item["slug"],
+            "custom_receipt": custom_receipt,
             "niche_en": niche_item["niche_en"],
             "niche_pt": niche_item["niche_pt"],
             "niche_display": niche_name,
@@ -1853,6 +1859,7 @@ class EbookFactoryService:
                     currency="usd",
                     description=ebook_data["gumroad_description"],
                     custom_summary=ebook_data["custom_summary"],
+                    custom_receipt=ebook_data["custom_receipt"],
                 )
                 if res.get("success"):
                     ebook_data["gumroad_url"] = res.get("short_url")
@@ -1956,6 +1963,7 @@ class EbookFactoryService:
                     name=eb_rec["title"],
                     description=eb_rec["gumroad_description"],
                     custom_summary=eb_rec["custom_summary"],
+                    custom_receipt=eb_rec["custom_receipt"],
                 )
                 if up.get("success"):
                     updated_count += 1

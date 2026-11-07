@@ -37,6 +37,53 @@ class GumroadService:
         )
 
     @classmethod
+    def build_ebook_rich_content(cls, title: str, ebook_url: str) -> list:
+        """
+        Gera a estrutura nativa ProseMirror doc (rich_content) aceita pela API do Gumroad
+        para preencher automaticamente a aba 'Content' / 'Conteúdo'.
+        Isso remove o aviso amarelo e entrega o link de acesso e download em PDF instantaneamente pós-checkout.
+        """
+        doc_content = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "heading",
+                    "attrs": {"level": 2},
+                    "content": [{"type": "text", "text": "🎉 Instant Access to Your Executive Playbook"}]
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": f"Thank you for your order! Your complete illustrated edition of {title} with high-resolution 3D cover, verified JSON-LD graphs, market diagrams, and printable A4 PDF format is ready to access immediately:"
+                        }
+                    ]
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "marks": [{"type": "link", "attrs": {"href": ebook_url, "target": "_blank"}}],
+                            "text": "📖 Click Here to Open & Download Your Official E-Book (Interactive Web + PDF Download) →"
+                        }
+                    ]
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "💡 How to save your PDF: Once the book opens, simply click the '📥 Download / Save as PDF' button on the top bar or below the cover image to save a clean offline copy on your device."
+                        }
+                    ]
+                }
+            ]
+        }
+        return [{"description": doc_content}]
+
+    @classmethod
     async def create_product(
         cls,
         access_token: str,
@@ -47,9 +94,11 @@ class GumroadService:
         custom_summary: Optional[str] = None,
         custom_receipt: Optional[str] = None,
         custom_permalink: Optional[str] = None,
+        rich_content: Optional[list] = None,
     ) -> Dict[str, Any]:
         """
-        Cria um produto 100% autônomo na conta Gumroad do usuário via API com HTML Rico e Imagens.
+        Cria um produto 100% autônomo na conta Gumroad do usuário via API com HTML Rico,
+        Capa 3D HD, custom_summary e entrega automática em rich_content na aba Conteúdo.
         """
         if not access_token or len(access_token.strip()) < 10:
             return {"success": False, "error": "Token de Acesso do Gumroad não configurado."}
@@ -88,7 +137,7 @@ class GumroadService:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=20.0, verify=False) as client:
+            async with httpx.AsyncClient(timeout=25.0, verify=False) as client:
                 res = await client.post(
                     f"{cls.BASE_URL}/products",
                     data=payload,
@@ -98,22 +147,31 @@ class GumroadService:
                     data = res.json()
                     product = data.get("product", {})
                     pid = product.get("id")
-                    # Garante via PUT que description HTML, custom_summary e custom_receipt fiquem 100% gravados
+
+                    # Garante via PUT que rich_content (aba Conteúdo), description HTML, summary e receipt fiquem 100% gravados
                     if pid:
                         try:
+                            put_data: Dict[str, Any] = {
+                                "description": description,
+                                "custom_summary": custom_summary,
+                                "custom_receipt": custom_receipt,
+                            }
+                            if rich_content:
+                                put_data["rich_content"] = rich_content
                             put_res = await client.put(
                                 f"{cls.BASE_URL}/products/{pid}",
-                                data={
-                                    "description": description,
-                                    "custom_summary": custom_summary,
-                                    "custom_receipt": custom_receipt,
+                                json=put_data if rich_content else None,
+                                data=None if rich_content else put_data,
+                                headers={
+                                    "Authorization": f"Bearer {token}",
+                                    "Content-Type": "application/json" if rich_content else "application/x-www-form-urlencoded",
                                 },
-                                headers=headers,
                             )
                             if put_res.status_code in (200, 201):
                                 product = put_res.json().get("product", product)
                         except Exception as put_e:
                             logger.warning(f"[Gumroad] Aviso PUT complementar: {put_e}")
+
                     short_url = product.get("short_url") or product.get("url") or f"https://gumroad.com/l/{product.get('permalink')}"
                     logger.info(f"[Gumroad] Produto criado com sucesso: {product.get('name')} -> {short_url}")
                     return {
@@ -143,8 +201,12 @@ class GumroadService:
         description: Optional[str] = None,
         custom_summary: Optional[str] = None,
         custom_receipt: Optional[str] = None,
+        rich_content: Optional[list] = None,
     ) -> Dict[str, Any]:
-        """Atualiza um produto existente no Gumroad via PUT /v2/products/{id}."""
+        """
+        Atualiza um produto existente no Gumroad via PUT /v2/products/{id},
+        preenchendo automaticamente a aba Conteúdo (rich_content).
+        """
         if not access_token or not product_id:
             return {"success": False, "error": "Token ou product_id ausente."}
 
@@ -159,16 +221,20 @@ class GumroadService:
             payload["custom_summary"] = custom_summary
         if custom_receipt is not None:
             payload["custom_receipt"] = custom_receipt
+        if rich_content is not None:
+            payload["rich_content"] = rich_content
 
+        use_json = (rich_content is not None)
         headers = {
             "Authorization": f"Bearer {access_token.strip()}",
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json" if use_json else "application/x-www-form-urlencoded",
         }
         try:
-            async with httpx.AsyncClient(timeout=20.0, verify=False) as client:
+            async with httpx.AsyncClient(timeout=25.0, verify=False) as client:
                 res = await client.put(
                     f"{cls.BASE_URL}/products/{product_id}",
-                    data=payload,
+                    json=payload if use_json else None,
+                    data=None if use_json else payload,
                     headers=headers,
                 )
                 if res.status_code in (200, 201):

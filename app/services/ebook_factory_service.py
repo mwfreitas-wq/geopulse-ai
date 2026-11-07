@@ -1422,10 +1422,16 @@ class EbookFactoryService:
             f"(Interactive Web Edition + Printable A4 PDF) immediately here: {ebook_public_url}"
         )
 
+        rich_content = GumroadService.build_ebook_rich_content(
+            title=title,
+            ebook_url=ebook_public_url,
+        )
+
         return {
             "slug": slug,
             "base_slug": niche_item["slug"],
             "custom_receipt": custom_receipt,
+            "rich_content": rich_content,
             "niche_en": niche_item["niche_en"],
             "niche_pt": niche_item["niche_pt"],
             "niche_display": niche_name,
@@ -1869,6 +1875,7 @@ class EbookFactoryService:
                     description=ebook_data["gumroad_description"],
                     custom_summary=ebook_data["custom_summary"],
                     custom_receipt=ebook_data["custom_receipt"],
+                    rich_content=ebook_data.get("rich_content"),
                 )
                 if res.get("success"):
                     ebook_data["gumroad_url"] = res.get("short_url")
@@ -1949,12 +1956,17 @@ class EbookFactoryService:
                     "Instant Automated Activation: All 7 Generative AI Search Assets (/llms.txt, Schema.org Graph, "
                     "Editorial Authority Article & IndexNow Pings) + 7-Day Money-Back Guarantee."
                 )
+                main_rc = GumroadService.build_ebook_rich_content(
+                    title="GeoPulse AI — 14-Day AI Search Visibility Sprint",
+                    ebook_url=f"{site_url.rstrip('/')}/",
+                )
                 up = await GumroadService.update_product(
                     access_token=access_token,
                     product_id=pid,
                     name="GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT & Gemini)",
                     description=new_desc,
                     custom_summary=new_sum,
+                    rich_content=main_rc,
                 )
                 if up.get("success"):
                     updated_count += 1
@@ -1998,6 +2010,7 @@ class EbookFactoryService:
                     description=eb_rec["gumroad_description"],
                     custom_summary=eb_rec["custom_summary"],
                     custom_receipt=eb_rec["custom_receipt"],
+                    rich_content=eb_rec.get("rich_content"),
                 )
                 if up.get("success"):
                     updated_count += 1

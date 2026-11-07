@@ -4093,51 +4093,6 @@ async def admin_repair_gumroad_products(db: AsyncSession = Depends(get_db)):
     return res
 
 
-@app.get("/api/admin/ebooks/debug-content/{slug}", dependencies=[Depends(verify_admin_password_header)])
-async def debug_gumroad_content(slug: str, db: AsyncSession = Depends(get_db)):
-    keys = await get_all_configured_keys(db)
-    token = keys.get("gumroad_access_token") or ""
-    pid = "WHDCmgjND-7Q4HNGe39MAg=="
-    ebook_url = f"https://geopulseai.store/ebook/fertility-ivf-reproductive-clinics?lang=en"
-
-    doc_content = {
-        "type": "doc",
-        "content": [
-            {
-                "type": "heading",
-                "attrs": {"level": 2},
-                "content": [{"type": "text", "text": "🎉 Instant Access to Your Executive Playbook"}]
-            },
-            {
-                "type": "paragraph",
-                "content": [
-                    {"type": "text", "text": "Thank you for your order! Your complete illustrated edition with 3D cover, SVG diagrams, and printable A4 PDF is ready."}
-                ]
-            },
-            {
-                "type": "paragraph",
-                "content": [
-                    {
-                        "type": "text",
-                        "marks": [{"type": "link", "attrs": {"href": ebook_url, "target": "_blank"}}],
-                        "text": f"👉 Click Here to Open & Download Your Complete E-Book (Web + PDF Edition) →"
-                    }
-                ]
-            }
-        ]
-    }
-
-    async with httpx.AsyncClient(timeout=20.0, verify=False) as client:
-        r_put = await client.put(
-            f"https://api.gumroad.com/v2/products/{pid}",
-            json={"rich_content": [{"description": doc_content}]},
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-        )
-        return {
-            "status": r_put.status_code,
-            "response": r_put.json() if r_put.status_code in (200, 201) else r_put.text,
-        }
-
 
 
 

@@ -4110,12 +4110,56 @@ async def debug_gumroad_cover(slug: str, db: AsyncSession = Depends(get_db)):
 
     pid = target_prod.get("id")
     matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == slug), NICHE_CATALOG[0])
-    png_bytes = EbookFactoryService.generate_ebook_image_png(matched_niche, img_type="cover")
-    res = await GumroadService.upload_product_cover(
-        access_token=token,
-        product_id=pid,
-        image_url=f"https://geopulseai.store/api/ebooks/image/{matched_niche['slug']}/cover.png",
-        image_bytes=png_bytes,
-    )
-    return {"target_prod": target_prod.get("name"), "product_id": pid, "result": res}
+    img_url = f"https://geopulseai.store/api/ebooks/image/{matched_niche['slug']}/cover.png"
+
+    # Testes comparativos de formato para o endpoint de covers do Gumroad
+    test_results = {}
+    async with httpx.AsyncClient(timeout=20.0, verify=False) as client:
+        # A) Form data: data={'url': img_url}
+        try:
+            r_form = await client.post(
+                f"https://api.gumroad.com/v2/products/{pid}/covers",
+                data={"url": img_url},
+                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/x-www-form-urlencoded"},
+            )
+            test_results["form"] = {"status": r_form.status_code, "body": r_form.text}
+        except Exception as e:
+            test_results["form"] = str(e)
+
+        # B) JSON body: json={'url': img_url}
+        try:
+            r_json = await client.post(
+                f"https://api.gumroad.com/v2/products/{pid}/covers",
+                json={"url": img_url},
+                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            )
+            test_results["json"] = {"status": r_json.status_code, "body": r_json.text}
+        except Exception as e:
+            test_results["json"] = str(e)
+
+        # C) Query param: params={'url': img_url}
+        try:
+            r_param = await client.post(
+                f"https://api.gumroad.com/v2/products/{pid}/covers",
+                params={"url": img_url},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            test_results["param"] = {"status": r_param.status_code, "body": r_param.text}
+        except Exception as e:
+            test_results["param"] = str(e)
+
+        # D) Multipart file upload with filename cover.png
+        try:
+            png_bytes = EbookFactoryService.generate_ebook_image_png(matched_niche, img_type="cover")
+            r_file = await client.post(
+                f"https://api.gumroad.com/v2/products/{pid}/covers",
+                files={"cover": ("cover.png", png_bytes, "image/png")},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            test_results["file_cover"] = {"status": r_file.status_code, "body": r_file.text}
+        except Exception as e:
+            test_results["file_cover"] = str(e)
+
+    return {"target_prod": target_prod.get("name"), "product_id": pid, "test_results": test_results}
+
 

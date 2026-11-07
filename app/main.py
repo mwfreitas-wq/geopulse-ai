@@ -4093,4 +4093,36 @@ async def admin_repair_gumroad_products(db: AsyncSession = Depends(get_db)):
     return res
 
 
+@app.get("/api/admin/ebooks/inspect-product/{slug}", dependencies=[Depends(verify_admin_password_header)])
+async def inspect_gumroad_product(slug: str, db: AsyncSession = Depends(get_db)):
+    keys = await get_all_configured_keys(db)
+    token = keys.get("gumroad_access_token") or ""
+    listed = await GumroadService.list_products(token)
+    prods = listed.get("products", [])
+    target_prod = None
+    for p in prods:
+        pname = (p.get("name") or "").lower()
+        if slug.replace("-", " ") in pname or p.get("permalink") == slug:
+            target_prod = p
+            break
+    if not target_prod and prods:
+        target_prod = prods[0]
+
+    pid = target_prod.get("id")
+    # Get product from Gumroad
+    async with httpx.AsyncClient(timeout=20.0, verify=False) as client:
+        r = await client.get(f"https://api.gumroad.com/v2/products/{pid}", headers={"Authorization": f"Bearer {token}"})
+        prod_data = r.json().get("product", {})
+        return {
+            "name": prod_data.get("name"),
+            "id": pid,
+            "url": prod_data.get("url"),
+            "file_info": prod_data.get("file_info"),
+            "files": prod_data.get("files"),
+            "custom_delivery": prod_data.get("custom_delivery"),
+            "all_keys": list(prod_data.keys()),
+        }
+
+
+
 

@@ -1673,14 +1673,17 @@ class EbookFactoryService:
                 f"<p>Immediately upon checkout, you receive instant access to your complete illustrated playbook, 4 high-resolution visual infographics, 1-click copy code templates, and interactive 14-day checklist—backed by our <strong>7-Day 100% Satisfaction Guarantee</strong>.</p>"
             )
 
+        pdf_download_url = f"{base}/api/ebooks/pdf/{slug}"
+
         custom_receipt = (
-            f"Thank you for your purchase! Access and download your complete Illustrated 7-Chapter Playbook "
-            f"(Interactive Web Edition + Printable A4 PDF) immediately here: {ebook_public_url}"
+            f"Thank you for your purchase! Download your official 14-Page Executive GEO Playbook in PDF immediately: {pdf_download_url} "
+            f"or access the interactive web edition here: {ebook_public_url}"
         )
 
         rich_content = GumroadService.build_ebook_rich_content(
             title=title,
             ebook_url=ebook_public_url,
+            pdf_url=pdf_download_url,
         )
 
         return {
@@ -1688,6 +1691,7 @@ class EbookFactoryService:
             "base_slug": niche_item["slug"],
             "custom_receipt": custom_receipt,
             "rich_content": rich_content,
+            "pdf_download_url": pdf_download_url,
             "niche_en": niche_item["niche_en"],
             "niche_pt": niche_item["niche_pt"],
             "niche_display": niche_name,
@@ -1882,10 +1886,10 @@ class EbookFactoryService:
         </div>
       </div>
       <div class="flex items-center gap-2.5">
-        <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 cursor-pointer">
-          <span>🖨️</span> Save as PDF / Print E-Book
-        </button>
-        <a href="{main_cta_url}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition shadow-lg">
+        <a href="/api/ebooks/pdf/{base_slug}" target="_blank" download="{base_slug}-geo-playbook.pdf" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition flex items-center gap-1.5 shadow-lg">
+          <span>📥</span> Download 14-Page Executive PDF
+        </a>
+        <a href="{main_cta_url}" target="_blank" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition border border-white/15">
           ⚡ Automate All 7 Assets Now →
         </a>
       </div>
@@ -1900,12 +1904,12 @@ class EbookFactoryService:
       <img src="{cover_img}" alt="{title}" class="w-full rounded-2xl shadow-2xl border border-slate-800" />
       <div class="no-print mt-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300">
         <div class="flex items-center gap-2">
-          <span class="text-emerald-400 font-bold">📄 Illustrated Digital &amp; Print Edition:</span>
-          <span>Includes 4 HD Visual Infographics, Before/After Simulators &amp; 1-Click Copy Templates.</span>
+          <span class="text-emerald-400 font-bold">📄 Official 14-Page Executive PDF Edition:</span>
+          <span>Includes real photography, Princeton GEO benchmark charts &amp; valid JSON-LD code.</span>
         </div>
-        <button onclick="window.print()" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition flex items-center gap-1.5 cursor-pointer shadow">
-          <span>📥</span> Download Printable A4 PDF
-        </button>
+        <a href="/api/ebooks/pdf/{base_slug}" target="_blank" download="{base_slug}-geo-playbook.pdf" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition flex items-center gap-1.5 cursor-pointer shadow">
+          <span>📥</span> Download 14-Page Executive PDF
+        </a>
       </div>
     </div>
 

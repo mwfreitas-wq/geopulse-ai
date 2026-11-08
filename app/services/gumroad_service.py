@@ -37,26 +37,37 @@ class GumroadService:
         )
 
     @classmethod
-    def build_ebook_rich_content(cls, title: str, ebook_url: str) -> list:
+    def build_ebook_rich_content(cls, title: str, ebook_url: str, pdf_url: Optional[str] = None) -> list:
         """
         Gera a estrutura nativa ProseMirror doc (rich_content) aceita pela API do Gumroad
         para preencher automaticamente a aba 'Content' / 'Conteúdo'.
-        Isso remove o aviso amarelo e entrega o link de acesso e download em PDF instantaneamente pós-checkout.
+        Isso remove o aviso amarelo e entrega o link de acesso e download em PDF de 14 páginas instantaneamente pós-checkout.
         """
+        direct_pdf_link = pdf_url or f"{ebook_url.split('?')[0]}/download.pdf"
         doc_content = {
             "type": "doc",
             "content": [
                 {
                     "type": "heading",
                     "attrs": {"level": 2},
-                    "content": [{"type": "text", "text": "🎉 Instant Access to Your Executive Playbook"}]
+                    "content": [{"type": "text", "text": "🎉 Instant Access to Your 14-Page Executive Playbook"}]
                 },
                 {
                     "type": "paragraph",
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Thank you for your order! Your complete illustrated edition of {title} with high-resolution 3D cover, verified JSON-LD graphs, market diagrams, and printable A4 PDF format is ready to access immediately:"
+                            "text": f"Thank you for your order! Your complete 14-Page Executive Edition of {title} with real professional photography, Princeton GEO benchmark charts, verified JSON-LD graphs, and complete 90-day execution roadmap is ready to download immediately:"
+                        }
+                    ]
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "marks": [{"type": "link", "attrs": {"href": direct_pdf_link, "target": "_blank"}}],
+                            "text": "📥 Click Here to Download Your 14-Page Executive PDF Playbook (Instant Download) →"
                         }
                     ]
                 },
@@ -66,7 +77,7 @@ class GumroadService:
                         {
                             "type": "text",
                             "marks": [{"type": "link", "attrs": {"href": ebook_url, "target": "_blank"}}],
-                            "text": "📖 Click Here to Open & Download Your Official E-Book (Interactive Web + PDF Download) →"
+                            "text": "📖 Or Click Here to View the Interactive Web Edition →"
                         }
                     ]
                 },
@@ -75,7 +86,7 @@ class GumroadService:
                     "content": [
                         {
                             "type": "text",
-                            "text": "💡 How to save your PDF: Once the book opens, simply click the '📥 Download / Save as PDF' button on the top bar or below the cover image to save a clean offline copy on your device."
+                            "text": "💡 Note: The 14-Page Executive PDF is formatted in standard Letter/A4 layout, ready for printing or offline executive reading on any tablet, mobile, or desktop device."
                         }
                     ]
                 }

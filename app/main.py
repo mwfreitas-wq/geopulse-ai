@@ -15,7 +15,7 @@ from pydantic import BaseModel
 import httpx
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc, delete, func
@@ -3937,6 +3937,36 @@ async def view_illustrated_ebook(slug: str, lang: str = "en", db: AsyncSession =
         main_product_url=main_prod_url,
     )
     return HTMLResponse(content=EbookFactoryService.render_ebook_html(ebook_record))
+
+
+@app.get("/api/ebooks/pdf/{slug}")
+@app.get("/ebook/{slug}/download.pdf")
+async def download_ebook_pdf(slug: str, lang: str = "en", db: AsyncSession = Depends(get_db)):
+    """
+    Entrega o E-book Executivo de 14 páginas em PDF de altíssima fidelidade (Padrão NotebookLM).
+    Gera dinamicamente sob demanda com fotografias reais e gráficos vetoriais ou entrega do cache.
+    """
+    clean_slug = slug.strip().lower().split("-vol-")[0].replace(".pdf", "")
+    pdf_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "static", "generated_pdfs"))
+    os.makedirs(pdf_dir, exist_ok=True)
+    pdf_path = os.path.join(pdf_dir, f"{clean_slug}.pdf")
+
+    if not os.path.exists(pdf_path):
+        matched_niche = next((n for n in NICHE_CATALOG if n["slug"] == clean_slug), NICHE_CATALOG[0])
+        from app.services.pdf_playbook_generator import PdfPlaybookGenerator
+        pdf_path = PdfPlaybookGenerator.generate_pdf(matched_niche, language=lang if lang in ("en", "pt") else "en")
+
+    if pdf_path and os.path.exists(pdf_path):
+        filename = f"{clean_slug}-geo-playbook.pdf"
+        return FileResponse(
+            pdf_path,
+            media_type="application/pdf",
+            filename=filename,
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"'
+            }
+        )
+    raise HTTPException(status_code=404, detail="E-book PDF não pôde ser gerado.")
 
 
 @app.get("/api/admin/ebooks/status", dependencies=[Depends(verify_admin_password_header)])

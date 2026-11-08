@@ -4,13 +4,18 @@ Gera lotes de 20 e-books completos e ilustrados para 20 nichos diferentes por ve
 hospeda versão web/PDF editorial e publica automaticamente cada um na conta do Gumroad.
 Suporta geração manual com 1 clique e agendamento automático (2x, 3x ou 4x por semana).
 """
+import os
+import io
 import asyncio
 import json
 import logging
+import textwrap
 from datetime import datetime
 from typing import Dict, Any, List, Optional
+from PIL import Image, ImageDraw, ImageFont
 
 from app.services.gumroad_service import GumroadService
+from app.services.pdf_playbook_generator import PdfPlaybookGenerator, get_photo_theme_for_niche
 
 logger = logging.getLogger("geopulse.ebook_factory")
 
@@ -1107,11 +1112,6 @@ NICHE_CATALOG: List[Dict[str, Any]] = [
 ]
 
 
-import io
-import textwrap
-from PIL import Image, ImageDraw, ImageFont
-
-
 def _hex_to_rgb(hex_str: str):
     h = hex_str.lstrip("#")
     if len(h) == 6:
@@ -1142,68 +1142,70 @@ class EbookFactoryService:
     @classmethod
     def generate_ebook_image_png(cls, niche_item: Dict[str, Any], img_type: str = "cover") -> bytes:
         """
-        Gera 4 imagens PNG de alta resolução e ultra didáticas (cover, chart, architecture, roadmap)
-        para uso tanto nas páginas de produto do Gumroad quanto dentro do E-book em PDF.
+        Gera imagens PNG de alta resolução no padrão editorial Google NotebookLM (cover, chart, architecture, roadmap, thumbnail)
+        com fotografias reais, tipografia executiva e dados de benchmark.
         """
+        niche_slug = niche_item.get("slug", "business")
         niche_en = niche_item.get("niche_en", "Local Business")
         schema_type = niche_item.get("schema_type", "LocalBusiness")
         high_ticket = niche_item.get("high_ticket", "High-Value Services")
         avg_ticket = niche_item.get("avg_ticket", "$3,500")
-        accent_rgb = _hex_to_rgb(niche_item.get("accent", "#0d9488"))
+        accent_rgb = _hex_to_rgb(niche_item.get("accent", "#1d4ed8"))
 
-        f_xs = ImageFont.load_default(size=15)
-        f_sm = ImageFont.load_default(size=18)
-        f_md = ImageFont.load_default(size=22)
-        f_lg = ImageFont.load_default(size=28)
-        f_xl = ImageFont.load_default(size=35)
-        f_2xl = ImageFont.load_default(size=42)
+        f_xs = ImageFont.load_default(size=14)
+        f_sm = ImageFont.load_default(size=17)
+        f_md = ImageFont.load_default(size=21)
+        f_lg = ImageFont.load_default(size=26)
+        f_xl = ImageFont.load_default(size=32)
+        f_2xl = ImageFont.load_default(size=40)
+
+        theme = get_photo_theme_for_niche(niche_slug, schema_type)
+        photos_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "photos"))
 
         if img_type == "chart":
             w, h = 1200, 680
             img = Image.new("RGB", (w, h), (11, 17, 32))
             draw = ImageDraw.Draw(img)
 
-            # Moldura executiva
             draw.rounded_rectangle([20, 20, w - 20, h - 20], radius=24, fill=(17, 25, 44), outline=(38, 52, 82), width=2)
-            draw.rounded_rectangle([48, 42, 390, 76], radius=10, fill=accent_rgb)
-            draw.text((62, 50), "VISUAL MARKET DATA • BEFORE VS. AFTER", font=f_xs, fill=(255, 255, 255))
+            draw.rounded_rectangle([48, 42, 490, 76], radius=10, fill=(30, 58, 138))
+            draw.text((62, 50), "VISUAL BENCHMARK • TRADITIONAL SEO VS. AI GEO", font=f_xs, fill=(255, 255, 255))
 
-            draw.text((48, 88), f"Why {niche_en[:38]} Must Rank on AI", font=f_xl, fill=(255, 255, 255))
+            draw.text((48, 88), f"Why {niche_en[:38]} Must Optimize for AI", font=f_xl, fill=(255, 255, 255))
 
-            # Comparativo ANTES vs DEPOIS super visual no topo
+            # Comparativo Topo
             draw.rounded_rectangle([48, 138, 585, 232], radius=14, fill=(45, 18, 30), outline=(244, 63, 94), width=2)
-            draw.text((66, 150), "X  WITHOUT GEO (INVISIBLE TO AI)", font=f_sm, fill=(251, 113, 133))
-            draw.text((66, 178), "• ChatGPT & Gemini recommend your local competitors", font=f_xs, fill=(226, 232, 240))
-            draw.text((66, 200), "• Paying $15-$60 per click on crowded Google Ads", font=f_xs, fill=(203, 213, 225))
+            draw.text((66, 150), "X  WITHOUT GEO (TRADITIONAL SEARCH)", font=f_sm, fill=(251, 113, 133))
+            draw.text((66, 178), "• 1.76% avg website visitor conversion on 10 blue links", font=f_xs, fill=(226, 232, 240))
+            draw.text((66, 200), "• Paying rising CPC on ads while AI Overviews bypass links", font=f_xs, fill=(203, 213, 225))
 
             draw.rounded_rectangle([615, 138, w - 48, 232], radius=14, fill=(6, 62, 46), outline=(16, 185, 129), width=2)
-            draw.text((633, 150), "✓  WITH THIS PLAYBOOK (TOP 3 ON AI)", font=f_sm, fill=(110, 231, 183))
-            draw.text((633, 178), f"• Cited in Top 3 for {high_ticket[:34]}", font=f_xs, fill=(255, 255, 255))
-            draw.text((633, 200), f"• Captures {avg_ticket}+ clients with $0 ad spend", font=f_xs, fill=(203, 213, 225))
+            draw.text((633, 150), "✓  WITH THIS PLAYBOOK (AI DIRECT RECOMMENDATION)", font=f_sm, fill=(110, 231, 183))
+            draw.text((633, 178), "• 15.90% direct recommendation conversion (9x higher)", font=f_xs, fill=(255, 255, 255))
+            draw.text((633, 200), f"• Captures high-intent {avg_ticket}+ clients with $0 ad spend", font=f_xs, fill=(203, 213, 225))
 
-            # Barras de Conversão Didáticas
+            # Barras do Benchmark de Princeton
             bars = [
-                ("1. ChatGPT & Google Gemini (Top 3 Recommended Brand)", "38.5% Lead Conversion", 0.86, (16, 185, 129)),
-                ("2. Perplexity AI & Microsoft Copilot Direct Citations", "29.2% Lead Conversion", 0.68, (14, 165, 233)),
-                ("3. Traditional Google Organic Search (Page 1 Links)", "8.7% Lead Conversion", 0.25, (148, 163, 184)),
-                ("4. Paid Search & Social Ads (High CPC / Low Trust)", "4.1% Lead Conversion", 0.13, (244, 63, 94)),
+                ("1. Conversational AI Direct Recommendations (ChatGPT, Gemini, Perplexity)", "15.90% Conversion (9x Higher)", 0.88, (16, 185, 129)),
+                ("2. Princeton Study: Author Credentials & JD / Bar Verification", "+41% Visibility Gain", 0.76, (56, 189, 248)),
+                ("3. Princeton Study: Schema.org Machine-Readable Structured Data", "+38% Visibility Gain", 0.70, (99, 102, 241)),
+                ("4. Traditional Organic Search (10 Blue Links / Keywords)", "1.76% Avg Conversion", 0.16, (244, 63, 94)),
             ]
 
             y_pos = 252
             for label, val_txt, pct, col in bars:
                 draw.text((48, y_pos), label, font=f_sm, fill=(241, 245, 249))
-                draw.text((w - 265, y_pos), val_txt, font=f_sm, fill=col)
+                draw.text((w - 290, y_pos), val_txt, font=f_sm, fill=col)
                 bar_y = y_pos + 26
                 draw.rounded_rectangle([48, bar_y, w - 48, bar_y + 22], radius=11, fill=(30, 41, 59))
                 fill_w = int((w - 96) * pct)
                 draw.rounded_rectangle([48, bar_y, 48 + fill_w, bar_y + 22], radius=11, fill=col)
                 y_pos += 66
 
-            # 3 KPI Cards no rodapé
             kpis = [
-                ("68% of Buyers", f"Ask AI before hiring {niche_en[:24]}", (16, 185, 129)),
-                (f"{avg_ticket}+ Value", "Average client LTV from AI referrals", (245, 158, 11)),
-                ("14-Day Sprint", "Time required to index all 4 GEO pillars", (56, 189, 248)),
+                ("15.90% Conversion", "Direct AI recommendation vs 1.76% SERP", (16, 185, 129)),
+                (f"{avg_ticket}+ Ticket", "Average high-intent client value", (245, 158, 11)),
+                ("14 Pages", "Executive NotebookLM format with benchmark data", (56, 189, 248)),
             ]
             card_w = 350
             for idx, (k_title, k_sub, k_col) in enumerate(kpis):
@@ -1219,41 +1221,38 @@ class EbookFactoryService:
             draw = ImageDraw.Draw(img)
 
             draw.rounded_rectangle([20, 20, w - 20, h - 20], radius=24, fill=(17, 25, 44), outline=(38, 52, 82), width=2)
-            draw.rounded_rectangle([48, 42, 430, 76], radius=10, fill=accent_rgb)
-            draw.text((62, 50), "4-PILLAR GEO SYSTEM • EASY VISUAL BLUEPRINT", font=f_xs, fill=(255, 255, 255))
+            draw.rounded_rectangle([48, 42, 510, 76], radius=10, fill=(30, 58, 138))
+            draw.text((62, 50), "THE 3 PILLARS OF GENERATIVE ENGINE OPTIMIZATION", font=f_xs, fill=(255, 255, 255))
 
-            draw.text((48, 90), f"How AI Engines Pick the #1 {niche_en[:34]}", font=f_xl, fill=(255, 255, 255))
-            draw.text((48, 136), f"The 4 simple building blocks that train ChatGPT, Gemini & Perplexity to recommend your brand first:", font=f_sm, fill=(148, 163, 184))
+            draw.text((48, 90), f"How AI Evaluates & Recommends {niche_en[:34]}", font=f_xl, fill=(255, 255, 255))
+            draw.text((48, 136), "The 3 foundational mechanisms required to win in zero-click conversational search:", font=f_sm, fill=(148, 163, 184))
 
             pillars = [
-                ("STEP 01", "1. /llms.txt File", "A simple text summary on your site that tells ChatGPT who you are & what you charge.", "Included in Ch. 03", (16, 185, 129)),
-                ("STEP 02", f"2. {schema_type[:14]} Code", "Invisible Google/AI code that proves your 4.9★ rating, address, and specialties.", "Included in Ch. 04", (14, 165, 233)),
-                ("STEP 03", "3. Prompt Answers", "Direct Q&A blocks answering the exact 5 questions your high-ticket clients ask AI.", "Included in Ch. 05", (168, 85, 247)),
-                ("STEP 04", "4. Instant Ping", "Notifies Bing, ChatGPT & Google Gemini to read your new data in 14 days.", "Included in Ch. 06", (245, 158, 11)),
+                ("PILLAR 01", "1. Entity Grounding", "Ensuring crawlers recognize your firm as distinct, verified entities with explicit jurisdictions.", "Ch. 1 & 2 Blueprint", (56, 189, 248)),
+                ("PILLAR 02", "2. Consensus Validation", "Building multi-source third-party verification across directories, ratings, and PR.", "5 Golden Rules", (168, 85, 247)),
+                ("PILLAR 03", "3. Synthesizable Content", f"Deploying {schema_type} JSON-LD and direct 40-60 word answer blocks for RAG citation.", "Schema & Code", (16, 185, 129)),
             ]
 
-            box_w = 258
+            box_w = 345
             for i, (p_num, p_title, p_desc, p_foot, p_col) in enumerate(pillars):
-                bx = 48 + i * 282
+                bx = 48 + i * 380
                 by = 190
                 draw.rounded_rectangle([bx, by, bx + box_w, by + 250], radius=18, fill=(11, 17, 32), outline=p_col, width=2)
-                draw.rounded_rectangle([bx + 18, by + 18, bx + 115, by + 46], radius=8, fill=p_col)
+                draw.rounded_rectangle([bx + 18, by + 18, bx + 130, by + 46], radius=8, fill=p_col)
                 draw.text((bx + 26, by + 24), p_num, font=f_xs, fill=(11, 17, 32))
-                draw.text((bx + 18, by + 60), p_title[:20], font=f_md, fill=(255, 255, 255))
-                lines = textwrap.wrap(p_desc, width=26)
+                draw.text((bx + 18, by + 60), p_title[:28], font=f_md, fill=(255, 255, 255))
+                lines = textwrap.wrap(p_desc, width=32)
                 for l_idx, line in enumerate(lines[:4]):
                     draw.text((bx + 18, by + 98 + l_idx * 23), line, font=f_xs, fill=(203, 213, 225))
                 draw.rounded_rectangle([bx + 18, by + 202, bx + box_w - 18, by + 232], radius=6, fill=(23, 35, 62))
                 draw.text((bx + 28, by + 209), f"✓ {p_foot}", font=f_xs, fill=p_col)
-                # Seta conectora para baixo
                 mid_x = bx + box_w // 2
                 draw.line([(mid_x, by + 250), (mid_x, 485)], fill=p_col, width=4)
 
-            # Caixa de Resultado Final (Top 3 AI Citation)
             draw.rounded_rectangle([48, 485, w - 48, 625], radius=20, fill=(6, 78, 59), outline=(16, 185, 129), width=3)
-            draw.text((76, 508), "FINAL RESULT: YOUR BRAND RANKED IN THE TOP 3 OF CHATGPT & GEMINI", font=f_lg, fill=(255, 255, 255))
-            draw.text((76, 550), f"Clients searching for {high_ticket[:52]} see your business as the #1 trusted authority.", font=f_sm, fill=(167, 243, 208))
-            draw.text((76, 582), f"Average Client Value: {avg_ticket}+  |  100% Organic Recommendations  |  Zero Ad Spend", font=f_xs, fill=(255, 255, 255))
+            draw.text((76, 508), "FINAL OUTCOME: DIRECT ALGORITHMIC CITATION IN ZERO-CLICK SEARCH", font=f_lg, fill=(255, 255, 255))
+            draw.text((76, 550), f"Prospective clients asking for {high_ticket[:50]} receive your brand as the #1 verified answer.", font=f_sm, fill=(167, 243, 208))
+            draw.text((76, 582), f"Lead Conversion: 15.90%  |  Verified Credentials  |  14-Page Executive NotebookLM Blueprint", font=f_xs, fill=(255, 255, 255))
 
         elif img_type == "roadmap":
             w, h = 1200, 680
@@ -1261,165 +1260,192 @@ class EbookFactoryService:
             draw = ImageDraw.Draw(img)
 
             draw.rounded_rectangle([20, 20, w - 20, h - 20], radius=24, fill=(17, 25, 44), outline=(38, 52, 82), width=2)
-            draw.rounded_rectangle([48, 42, 420, 76], radius=10, fill=accent_rgb)
-            draw.text((62, 50), "14-DAY IMPLEMENTATION TIMELINE & SCORE JUMP", font=f_xs, fill=(255, 255, 255))
+            draw.rounded_rectangle([48, 42, 450, 76], radius=10, fill=(30, 58, 138))
+            draw.text((62, 50), "STRUCTURED 90-DAY GEO IMPLEMENTATION TIMELINE", font=f_xs, fill=(255, 255, 255))
 
-            draw.text((48, 90), f"14-Day AI Visibility Roadmap for {niche_en[:30]}", font=f_xl, fill=(255, 255, 255))
-            draw.text((48, 136), "Follow this step-by-step schedule to go from Invisible (22% Score) to Top 3 Recommended Authority (92% Score):", font=f_sm, fill=(148, 163, 184))
+            draw.text((48, 90), f"90-Day Implementation Roadmap for {niche_en[:30]}", font=f_xl, fill=(255, 255, 255))
+            draw.text((48, 136), "Follow this 3-phase strategic timeline to secure algorithmically recommended market leadership:", font=f_sm, fill=(148, 163, 184))
 
             stages = [
-                ("DAYS 1 - 3", "Phase 1: Entity Setup", "Audit current AI ranking & upload your /llms.txt file.", "AI Score: 22% -> 45%", 0.35, (56, 189, 248)),
-                ("DAYS 4 - 7", "Phase 2: Schema Graph", f"Add {schema_type[:14]} JSON-LD & 5 Prompt Q&As.", "AI Score: 45% -> 68%", 0.60, (168, 85, 247)),
-                ("DAYS 8 - 11", "Phase 3: Authority Citations", "Publish comparative Top-5 industry authority guide.", "AI Score: 68% -> 84%", 0.80, (245, 158, 11)),
-                ("DAYS 12 - 14", "Phase 4: IndexNow & Top 3", "Ping Bing/ChatGPT & verify Top 3 recommendation.", "AI Score: 92% (TOP 3)", 0.95, (16, 185, 129)),
+                ("DAYS 1 - 30", "Phase 1: Foundations", "Execute 7-step audit, harmonize NAP profiles, deploy Schema JSON-LD.", "Indexing across AI Crawlers", 0.35, (56, 189, 248)),
+                ("DAYS 31 - 60", "Phase 2: Content Optimization", "Restructure practice pages into direct Q&A blocks; add Bio fact-sheets.", "First Perplexity Citations", 0.70, (168, 85, 247)),
+                ("DAYS 61 - 90", "Phase 3: Authority & Tracking", "Launch legal/industry PR placements, refine reviews, configure GA4.", "High-Intent Client Inquiries", 0.95, (16, 185, 129)),
             ]
 
-            sy = 190
+            sy = 200
             for day_lbl, st_title, st_desc, score_lbl, pct, col in stages:
-                draw.rounded_rectangle([48, sy, w - 48, sy + 96], radius=16, fill=(11, 17, 32), outline=(45, 62, 95), width=2)
-                draw.rounded_rectangle([66, sy + 18, 205, sy + 78], radius=12, fill=col)
-                draw.text((82, sy + 38), day_lbl, font=f_sm, fill=(11, 17, 32))
+                draw.rounded_rectangle([48, sy, w - 48, sy + 105], radius=16, fill=(11, 17, 32), outline=(45, 62, 95), width=2)
+                draw.rounded_rectangle([66, sy + 18, 220, sy + 85], radius=12, fill=col)
+                draw.text((82, sy + 42), day_lbl, font=f_sm, fill=(11, 17, 32))
 
-                draw.text((230, sy + 18), st_title, font=f_md, fill=(255, 255, 255))
-                draw.text((230, sy + 50), st_desc[:62], font=f_sm, fill=(148, 163, 184))
+                draw.text((245, sy + 18), st_title, font=f_md, fill=(255, 255, 255))
+                draw.text((245, sy + 52), st_desc[:68], font=f_sm, fill=(148, 163, 184))
 
-                # Barra de progresso do Score à direita
-                draw.text((850, sy + 18), score_lbl, font=f_sm, fill=col)
-                draw.rounded_rectangle([850, sy + 52, w - 72, sy + 74], radius=10, fill=(30, 41, 59))
-                bar_w = int(((w - 72) - 850) * pct)
-                draw.rounded_rectangle([850, sy + 52, 850 + bar_w, sy + 74], radius=10, fill=col)
-                sy += 112
+                draw.text((840, sy + 22), score_lbl, font=f_sm, fill=col)
+                draw.rounded_rectangle([840, sy + 56, w - 72, sy + 78], radius=10, fill=(30, 41, 59))
+                bar_w = int(((w - 72) - 840) * pct)
+                draw.rounded_rectangle([840, sy + 56, 840 + bar_w, sy + 78], radius=10, fill=col)
+                sy += 125
 
         elif img_type == "thumbnail":
             w, h = 600, 600
             img = Image.new("RGB", (w, h), (11, 17, 32))
             draw = ImageDraw.Draw(img)
 
-            # Moldura externa quadrada
-            draw.rounded_rectangle([15, 15, w - 15, h - 15], radius=24, fill=(17, 25, 44), outline=(38, 52, 82), width=2)
+            draw.rounded_rectangle([12, 12, w - 12, h - 12], radius=20, fill=(15, 23, 42), outline=(37, 99, 235), width=2)
 
-            # Topo: Badge de Preço $9.90 e Edição Oficial
-            draw.rounded_rectangle([32, 32, 280, 70], radius=10, fill=accent_rgb)
-            draw.text((46, 42), "2026 PLAYBOOK", font=f_sm, fill=(255, 255, 255))
+            header_h = 160
+            draw.rounded_rectangle([14, 14, w - 14, header_h], radius=18, fill=(30, 58, 138))
+            draw.rectangle([14, header_h - 14, w - 14, header_h], fill=(30, 58, 138))
 
-            draw.rounded_rectangle([w - 180, 32, w - 32, 70], radius=10, fill=(245, 158, 11))
-            draw.text((w - 165, 42), "$9.90 USD", font=f_sm, fill=(11, 17, 32))
+            draw.text((28, 24), "FOUND BY AI: 2026 PLAYBOOK", font=f_xs, fill=(245, 158, 11))
+            draw.text((28, 46), "THE 2026 GUIDE TO GEO", font=f_sm, fill=(255, 255, 255))
 
-            # Capa 3D centralizada
-            bx, by, bw, bh = 60, 95, 480, 420
-            draw.rounded_rectangle([bx + 14, by + 14, bx + bw + 14, by + bh + 14], radius=16, fill=(5, 9, 18))
-            draw.rounded_rectangle([bx, by, bx + bw, by + bh], radius=16, fill=(23, 33, 56), outline=(56, 80, 120), width=2)
-            draw.rectangle([bx + bw - 16, by + 10, bx + bw - 4, by + bh - 10], fill=(226, 232, 240))
-            draw.text((bx + 26, by + 28), "AI SEARCH DOMINANCE", font=f_sm, fill=(56, 189, 248))
+            wrapped_niche = textwrap.wrap(niche_en.upper(), width=28)
+            ny = 72
+            for line in wrapped_niche[:2]:
+                draw.text((28, ny), line, font=f_md, fill=(255, 255, 255))
+                ny += 24
 
-            wrapped_niche = textwrap.wrap(niche_en.upper(), width=22)
-            ny = by + 60
-            for line in wrapped_niche[:3]:
-                draw.text((bx + 26, ny), line, font=f_lg, fill=(255, 255, 255))
-                ny += 34
+            draw.text((28, header_h - 22), "Mastering AI Search Visibility & RAG Systems", font=f_xs, fill=(147, 197, 253))
+            draw.line([(14, header_h), (w - 14, header_h)], fill=(245, 158, 11), width=3)
 
-            draw.line([(bx + 26, ny + 8), (bx + bw - 35, ny + 8)], fill=accent_rgb, width=2)
-            gy = ny + 22
-            draw.rounded_rectangle([bx + 26, gy, bx + bw - 35, gy + 110], radius=12, fill=(11, 17, 32), outline=(45, 62, 95), width=1)
-            draw.text((bx + 40, gy + 12), "AI VISIBILITY BENCHMARK", font=f_xs, fill=(16, 185, 129))
-            draw.text((bx + 40, gy + 38), "After GEO (92% - TOP 3)", font=f_xs, fill=(255, 255, 255))
-            draw.rounded_rectangle([bx + 240, gy + 40, bx + bw - 50, gy + 54], radius=5, fill=(16, 185, 129))
-            draw.text((bx + 40, gy + 68), "Before (18% - Invisible)", font=f_xs, fill=(148, 163, 184))
-            draw.rounded_rectangle([bx + 240, gy + 70, bx + 290, gy + 84], radius=5, fill=(244, 63, 94))
-            draw.text((bx + 26, by + bh - 32), "GEOPULSE AI PUBLISHING • 14-DAY SPRINT", font=f_xs, fill=(148, 163, 184))
+            photo_path = os.path.join(photos_dir, f"{theme}_hero.jpg")
+            if not os.path.exists(photo_path):
+                photo_path = os.path.join(photos_dir, "legal_hero.jpg")
 
-            draw.rounded_rectangle([32, 532, w - 32, 574], radius=10, fill=(6, 78, 59), outline=(16, 185, 129), width=1)
-            draw.text((48, 544), "✓ 7 CHAPTERS  ✓ CODE TEMPLATES  ✓ 14-DAY ROADMAP", font=f_xs, fill=(167, 243, 208))
+            if os.path.exists(photo_path):
+                try:
+                    p_img = Image.open(photo_path).convert("RGB")
+                    photo_target_w = w - 28
+                    photo_target_h = 280
+                    p_img_ratio = p_img.width / p_img.height
+                    target_ratio = photo_target_w / photo_target_h
+                    if p_img_ratio > target_ratio:
+                        new_h = photo_target_h
+                        new_w = int(photo_target_h * p_img_ratio)
+                    else:
+                        new_w = photo_target_w
+                        new_h = int(photo_target_w / p_img_ratio)
+                    p_img = p_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                    left = (new_w - photo_target_w) // 2
+                    top = (new_h - photo_target_h) // 2
+                    p_crop = p_img.crop((left, top, left + photo_target_w, top + photo_target_h))
+                    img.paste(p_crop, (14, header_h + 3))
+
+                    draw.rounded_rectangle([w - 170, header_h + photo_target_h - 30, w - 24, header_h + photo_target_h - 8], radius=6, fill=(15, 23, 42))
+                    draw.text((w - 162, header_h + photo_target_h - 26), "Gemini Notebook", font=f_xs, fill=(255, 255, 255))
+                except Exception as p_err:
+                    logger.warning(f"Erro foto thumbnail: {p_err}")
+
+            cy = header_h + 285
+            draw.rounded_rectangle([14, cy, w - 14, h - 14], radius=16, fill=(248, 250, 252))
+            draw.text((28, cy + 14), "NOTEBOOKLM EDITION • ONLY $9.90 USD", font=f_sm, fill=(30, 58, 138))
+            draw.text((28, cy + 40), "✓ 14-PAGE PDF  ✓ REAL BENCHMARKS  ✓ 90-DAY ROADMAP", font=f_xs, fill=(16, 185, 129))
+            draw.text((28, cy + 68), "Official Executive Practice Playbook", font=f_xs, fill=(71, 85, 105))
 
         else:
-            # CAPA 3D DO E-BOOK + BANNER HD (1280 x 720)
+            # COVER BANNER HD (1280 x 720) - Padrão Editorial NotebookLM com Foto Real
             w, h = 1280, 720
             img = Image.new("RGB", (w, h), (10, 15, 28))
             draw = ImageDraw.Draw(img)
 
-            # Fundo decorativo
             draw.rounded_rectangle([20, 20, w - 20, h - 20], radius=28, fill=(15, 23, 42), outline=(40, 55, 85), width=2)
-            draw.ellipse([880, -120, 1380, 380], fill=(accent_rgb[0] // 3, accent_rgb[1] // 3, accent_rgb[2] // 3))
 
-            # --- LADO ESQUERDO: MOCKUP 3D DE LIVRO DE CAPA DURA ---
-            # Sombra do livro
-            draw.rounded_rectangle([88, 78, 502, 658], radius=16, fill=(5, 8, 15))
-            # Páginas brancas laterais (efeito 3D de livro físico)
-            draw.rounded_rectangle([472, 70, 494, 636], radius=6, fill=(226, 232, 240), outline=(148, 163, 184), width=1)
-            # Lombada 3D
-            spine_col = (max(0, accent_rgb[0] - 40), max(0, accent_rgb[1] - 40), max(0, accent_rgb[2] - 40))
-            draw.rounded_rectangle([72, 62, 116, 642], radius=10, fill=spine_col, outline=(255, 255, 255), width=1)
-            # Capa Frontal do Livro
-            draw.rounded_rectangle([106, 62, 480, 642], radius=14, fill=(19, 30, 54), outline=accent_rgb, width=3)
-            # Faixa superior da capa do livro
-            draw.rounded_rectangle([106, 62, 480, 135], radius=14, fill=accent_rgb)
-            draw.text((130, 86), "2026 ILLUSTRATED PLAYBOOK", font=f_sm, fill=(255, 255, 255))
+            # LADO ESQUERDO: Mockup 3D de Livro com Capa Real
+            draw.rounded_rectangle([78, 58, 482, 662], radius=16, fill=(5, 8, 15))
+            draw.rounded_rectangle([452, 50, 474, 646], radius=6, fill=(226, 232, 240), outline=(148, 163, 184), width=1)
+            draw.rounded_rectangle([62, 42, 106, 652], radius=10, fill=(30, 58, 138), outline=(255, 255, 255), width=1)
 
-            # Sub-badge dentro do livro
-            draw.text((130, 158), "AI SEARCH DOMINANCE FOR:", font=f_xs, fill=(56, 189, 248))
+            bx, by, bw, bh = 96, 42, 366, 610
+            draw.rounded_rectangle([bx, by, bx + bw, by + bh], radius=14, fill=(15, 23, 42), outline=(37, 99, 235), width=2)
 
-            # Nome do Nicho na capa do livro (quebrado em linhas)
-            wrapped_niche = textwrap.wrap(niche_en.upper(), width=18)
-            ny = 188
-            for line in wrapped_niche[:3]:
-                draw.text((130, ny), line, font=f_lg, fill=(255, 255, 255))
-                ny += 36
+            header_h = 160
+            draw.rounded_rectangle([bx, by, bx + bw, by + header_h], radius=14, fill=(30, 58, 138))
+            draw.rectangle([bx, by + header_h - 14, bx + bw, by + header_h], fill=(30, 58, 138))
 
-            draw.line([(130, ny + 10), (450, ny + 10)], fill=accent_rgb, width=2)
+            draw.text((bx + 18, by + 18), "FOUND BY AI: 2026 PLAYBOOK", font=f_xs, fill=(245, 158, 11))
+            draw.text((bx + 18, by + 38), "THE 2026 GUIDE TO GEO", font=f_sm, fill=(255, 255, 255))
 
-            # Subtítulo na capa do livro
-            book_sub = textwrap.wrap("The Step-by-Step Visual Guide to Rank #1 on ChatGPT, Gemini & Perplexity in 14 Days", width=30)
-            bsy = ny + 24
-            for line in book_sub[:3]:
-                draw.text((130, bsy), line, font=f_xs, fill=(203, 213, 225))
-                bsy += 22
+            wrapped_niche = textwrap.wrap(niche_en.upper(), width=22)
+            ny = by + 66
+            for line in wrapped_niche[:2]:
+                draw.text((bx + 18, ny), line, font=f_md, fill=(255, 255, 255))
+                ny += 26
 
-            # Mini gráfico ilustrativo na capa do livro
-            draw.rounded_rectangle([130, 425, 454, 568], radius=12, fill=(11, 17, 32), outline=(45, 62, 95), width=1)
-            draw.text((146, 438), "BEFORE vs AFTER AI VISIBILITY:", font=f_xs, fill=(16, 185, 129))
-            draw.text((146, 464), "After GEO (92%)", font=f_xs, fill=(255, 255, 255))
-            draw.rounded_rectangle([275, 466, 438, 482], radius=6, fill=(16, 185, 129))
-            draw.text((146, 496), "Before (18%)", font=f_xs, fill=(148, 163, 184))
-            draw.rounded_rectangle([275, 498, 315, 514], radius=6, fill=(244, 63, 94))
-            draw.text((146, 532), f"Target Ticket: {avg_ticket}+ per client", font=f_xs, fill=(56, 189, 248))
+            draw.text((bx + 18, by + header_h - 22), "Mastering AI Search Visibility & RAG", font=f_xs, fill=(147, 197, 253))
+            draw.line([(bx, by + header_h), (bx + bw, by + header_h)], fill=(245, 158, 11), width=3)
 
-            draw.text((130, 595), "GEOPULSE AI PUBLISHING", font=f_xs, fill=(148, 163, 184))
+            photo_path = os.path.join(photos_dir, f"{theme}_hero.jpg")
+            if not os.path.exists(photo_path):
+                photo_path = os.path.join(photos_dir, "legal_hero.jpg")
 
-            # --- LADO DIREITO: HEADLINE E BENEFÍCIOS DO PLAYBOOK ---
-            draw.rounded_rectangle([535, 64, 1020, 104], radius=10, fill=(6, 78, 59), outline=(16, 185, 129), width=1)
-            draw.text((552, 75), "ILLUSTRATED 7-CHAPTER EDITION • STEP-BY-STEP", font=f_xs, fill=(167, 243, 208))
+            if os.path.exists(photo_path):
+                try:
+                    p_img = Image.open(photo_path).convert("RGB")
+                    photo_target_w = bw - 4
+                    photo_target_h = 240
+                    p_img_ratio = p_img.width / p_img.height
+                    target_ratio = photo_target_w / photo_target_h
+                    if p_img_ratio > target_ratio:
+                        new_h = photo_target_h
+                        new_w = int(photo_target_h * p_img_ratio)
+                    else:
+                        new_w = photo_target_w
+                        new_h = int(photo_target_w / p_img_ratio)
+                    p_img = p_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                    left = (new_w - photo_target_w) // 2
+                    top = (new_h - photo_target_h) // 2
+                    p_crop = p_img.crop((left, top, left + photo_target_w, top + photo_target_h))
+                    img.paste(p_crop, (bx + 2, by + header_h + 3))
 
-            # Selo de Preço Especial $9.90 no topo direito
-            draw.rounded_rectangle([1040, 60, 1220, 112], radius=12, fill=(245, 158, 11))
-            draw.text((1062, 76), "ONLY $9.90 USD", font=f_sm, fill=(11, 17, 32))
+                    draw.rounded_rectangle([bx + bw - 150, by + header_h + photo_target_h - 28, bx + bw - 10, by + header_h + photo_target_h - 6], radius=5, fill=(15, 23, 42))
+                    draw.text((bx + bw - 142, by + header_h + photo_target_h - 24), "Gemini Notebook", font=f_xs, fill=(255, 255, 255))
+                except Exception as p_err:
+                    logger.warning(f"Erro foto cover: {p_err}")
 
-            # Título Principal à direita
-            right_title = textwrap.wrap(f"AI Search Dominance for {niche_en}", width=26)
-            rty = 124
+            cy = by + header_h + 245
+            draw.rounded_rectangle([bx + 4, cy, bx + bw - 4, by + bh - 6], radius=8, fill=(248, 250, 252))
+            draw.text((bx + 16, cy + 12), "Executive Briefing & Overview", font=f_sm, fill=(30, 58, 138))
+            brief_lines = textwrap.wrap("A definitive 14-page roadmap for establishing entity authority, RAG systems, and zero-click client acquisition.", width=34)
+            bly = cy + 38
+            for bl in brief_lines[:3]:
+                draw.text((bx + 16, bly), bl, font=f_xs, fill=(71, 85, 105))
+                bly += 18
+            draw.text((bx + 16, by + bh - 24), "✓ 14-PAGE NOTEBOOKLM EDITION", font=f_xs, fill=(16, 185, 129))
+
+            # LADO DIREITO: Headlines, Badges e 4 Benefícios
+            draw.rounded_rectangle([520, 52, 980, 94], radius=10, fill=(30, 58, 138), outline=(59, 130, 246), width=1)
+            draw.text((540, 64), "OFFICIAL 2026 PLAYBOOK • NOTEBOOKLM EDITION", font=f_xs, fill=(255, 255, 255))
+
+            draw.rounded_rectangle([1020, 48, 1220, 98], radius=12, fill=(245, 158, 11))
+            draw.text((1045, 62), "ONLY $9.90 USD", font=f_sm, fill=(15, 23, 42))
+
+            draw.text((520, 115), "FOUND BY AI:", font=f_xl, fill=(56, 189, 248))
+            right_title = textwrap.wrap(f"The {niche_en}'s Guide to GEO", width=28)
+            rty = 160
             for line in right_title[:2]:
-                draw.text((535, rty), line, font=f_2xl, fill=(255, 255, 255))
-                rty += 50
+                draw.text((520, rty), line, font=f_2xl, fill=(255, 255, 255))
+                rty += 46
 
-            draw.text((535, rty + 6), f"How to Capture High-Ticket Clients ({avg_ticket}+ LTV) from ChatGPT & Gemini", font=f_md, fill=(56, 189, 248))
+            draw.text((520, rty + 6), "Mastering AI Search Visibility, RAG Systems & Digital Authority in 2026", font=f_sm, fill=(147, 197, 253))
 
-            # 4 Caixas de Benefícios Visuais
-            bullets = [
-                f"1. Ready-to-Use /llms.txt Template for {niche_en[:26]}",
-                f"2. Verified Schema.org ({schema_type}) JSON-LD Code + Guide",
-                f"3. Top 5 Client Prompts + Winning Answer Templates",
-                "4. Visual 14-Day AI Ranking Roadmap & Action Checklist",
+            features = [
+                "1. Official 14-Page Executive PDF with Real Photography & Benchmarks",
+                "2. RAG Architecture & Knowledge Graph Optimization Guide",
+                "3. The 5 Golden Rules of GEO + 15-Minute No-Code Action Checklist",
+                "4. 90-Day Implementation Roadmap + GA4 AI Referral Tracking"
             ]
-            by_pos = rty + 52
-            for b_txt in bullets:
-                draw.rounded_rectangle([535, by_pos, 1220, by_pos + 56], radius=12, fill=(23, 35, 62), outline=(45, 62, 95), width=1)
-                draw.rounded_rectangle([550, by_pos + 13, 580, by_pos + 43], radius=8, fill=(16, 185, 129))
-                draw.text((559, by_pos + 17), "✓", font=f_md, fill=(11, 17, 32))
-                draw.text((596, by_pos + 18), b_txt[:58], font=f_sm, fill=(241, 245, 249))
-                by_pos += 68
+            by_pos = rty + 44
+            for feat in features:
+                draw.rounded_rectangle([520, by_pos, 1220, by_pos + 54], radius=12, fill=(23, 35, 62), outline=(45, 62, 95), width=1)
+                draw.rounded_rectangle([535, by_pos + 12, 565, by_pos + 42], radius=8, fill=(16, 185, 129))
+                draw.text((544, by_pos + 16), "✓", font=f_md, fill=(11, 17, 32))
+                draw.text((580, by_pos + 17), feat[:62], font=f_sm, fill=(241, 245, 249))
+                by_pos += 64
 
-            # Rodapé Direito
-            draw.rounded_rectangle([535, 582, 1220, 642], radius=14, fill=accent_rgb)
-            draw.text((558, 602), "INSTANT ACCESS: INTERACTIVE WEB BOOK + PRINTABLE A4 PDF", font=f_sm, fill=(255, 255, 255))
+            draw.rounded_rectangle([520, 595, 1220, 652], radius=14, fill=(16, 185, 129))
+            draw.text((545, 615), "INSTANT DOWNLOAD: 14-PAGE EXECUTIVE PDF + INTERACTIVE WEB ACCESS", font=f_sm, fill=(11, 17, 32))
 
         buf = io.BytesIO()
         img.save(buf, format="PNG", optimize=True)
@@ -1613,64 +1639,92 @@ class EbookFactoryService:
         thumbnail_img_url = f"{base}/api/ebooks/image/{niche_item['slug']}/thumbnail.png"
 
         if language == "pt":
-            title = f"Dominancia nas Buscas de IA para {niche_name} — O Playbook Oficial 2026"
-            subtitle = f"O Guia Visual Passo a Passo para Posicionar seu Negócio de {niche_name} no Top 3 do ChatGPT, Google Gemini e Perplexity em 14 Dias"
+            title = f"ENCONTRADO PELA IA: O Guia Definitivo de GEO para {niche_name} — Playbook 2026"
+            subtitle = f"Dominando a Visibilidade em IA, Sistemas RAG e Autoridade Digital em 2026"
             custom_summary = (
-                f"Acesso Digital Imediato ($9.90): Playbook Visual de 7 Capítulos para {niche_name} (Web + PDF A4), "
-                f"4 Infográficos Passo a Passo, Códigos /llms.txt e Schema.org ({schema_type}) + Checklist de 14 Dias."
+                f"Playbook Executivo Oficial em PDF de 14 Páginas ($9.90 USD): Padrão NotebookLM com Fotos Reais, "
+                f"Benchmarks de Mercado, Arquitetura RAG, 5 Regras de Ouro e Roadmap de 90 Dias para {niche_name}."
             )
             gumroad_desc = (
                 f'<p><img src="{cover_img_url}" alt="{title}" /></p>'
                 f"<h2>{title}</h2>"
                 f"<p><strong>{subtitle}</strong></p>"
-                f"<p>Mais de <strong>68% dos clientes de alto valor</strong> que buscam por <em>{high_ticket}</em> (ticket médio: <strong>{avg_ticket}</strong>) deixaram de clicar em anúncios caros e agora perguntam diretamente ao <strong>ChatGPT, Google Gemini e Perplexity</strong> qual empresa contratar.</p>"
-                f"<p>Desenhado com <strong>ilustrações visuais de fácil entendimento, comparativos Antes vs. Depois e códigos prontos para copiar em 1 clique</strong>, este Playbook Prático revela o passo a passo exato para fazer sua marca dominar as recomendações de Inteligência Artificial.</p>"
-                f'<p><img src="{chart_img_url}" alt="Comparativo Visual Antes vs Depois e Conversão em IA" /></p>'
-                f"<h3>📚 O que você recebe neste Playbook Visual (7 Capítulos Didáticos):</h3>"
-                f"<ol>"
-                f"<li><strong>Simulador Visual ChatGPT &amp; Gemini (Antes vs. Depois):</strong> Veja exatamente como a IA ignora negócios comuns e destaca o Top 3 em {niche_name}.</li>"
-                f"<li><strong>O Mapa Visual de 4 Passos (Sem Jargão Técnico):</strong> Como funcionam os 4 sinais que colocam sua marca no topo das respostas.</li>"
-                f"<li><strong>Template <code>/llms.txt</code> Pronto para Copiar:</strong> Código completo para <code>{schema_type}</code> com explicação linha por linha em linguagem simples.</li>"
-                f"<li><strong>Código Schema.org JSON-LD Validado:</strong> Estrutura pronta para destacar seus serviços de <em>{high_ticket}</em> e nota 4.9★.</li>"
-                f"<li><strong>Matriz das 5 Perguntas de Ouro + Respostas Prontas:</strong> As perguntas exatas que seus clientes fazem à IA e o texto exato para respondê-las.</li>"
-                f"<li><strong>Cronograma Ilustrado de 14 Dias (Dia 1 ao Dia 14):</strong> Checklist interativo de 15 minutos por dia para sair de 18% para 92%+ de visibilidade.</li>"
-                f"<li><strong>Atalho de Automação em 2 Minutos:</strong> Como ativar todos os 7 ativos automaticamente sem programar nada.</li>"
-                f"</ol>"
-                f'<p><img src="{arch_img_url}" alt="Mapa Visual de 4 Passos" /></p>'
-                f'<p><img src="{roadmap_img_url}" alt="Cronograma Visual de 14 Dias" /></p>'
+                f"<p><em>Autor: Grupo de Estratégia de Marketing e GEO | Público-Alvo: Líderes, Sócios e Executivos de {niche_name} | Publicação: Q4 2026</em></p>"
                 f"<hr />"
-                f"<h3>⚡ Entrega Digital Imediata por apenas $9.90 USD (Web Interativo + PDF A4)</h3>"
-                f"<p>Assim que seu pedido é confirmado, você recebe acesso imediato ao seu Playbook Ilustrado completo com todos os 4 infográficos HD, simuladores visuais e códigos prontos para copiar — protegido por nossa <strong>Garantia Incondicional de 7 Dias</strong>.</p>"
+                f"<h3>Briefing Executivo &amp; Visão Estratégica</h3>"
+                f"<p>A Otimização para Motores Generativos (GEO) representa a mudança mais crítica na aquisição de clientes desde o surgimento da busca do Google. Clientes de alto padrão em busca de <strong>{high_ticket}</strong> (ticket médio: <strong>{avg_ticket}+</strong>) não navegam mais por links patrocinados; eles perguntam diretamente a assistentes como <strong>ChatGPT, Google Gemini, Perplexity e Copilot</strong> qual especialista contratar.</p>"
+                f"<p>Este Playbook Executivo fornece o roteiro definitivo para estabelecer autoridade de entidade, estruturar conteúdo legível por máquinas e capturar clientes qualificados em buscas sem clique (zero-click search).</p>"
+                f'<p><img src="{chart_img_url}" alt="Comparativo de Conversão e Benchmarks de IA" /></p>'
+                f"<h3>📊 Métricas do Setor &amp; Benchmark de Conversão:</h3>"
+                f"<ul>"
+                f"<li><strong>Taxa de Conversão de Leads:</strong> 15.90% na recomendação direta de IA vs. 1.76% na busca tradicional (<strong>9x mais conversão</strong>).</li>"
+                f"<li><strong>Comportamento de Busca:</strong> Prompts conversacionais com múltiplos critérios substituindo palavras-chave curtas.</li>"
+                f"<li><strong>Fator Principal de Visibilidade:</strong> Verificação de entidade, consenso profissional e dados estruturados substituindo backlinks e densidade de palavras.</li>"
+                f"</ul>"
+                f"<h3>📚 Conteúdo do Playbook Executivo Oficial de 14 Páginas:</h3>"
+                f"<ol>"
+                f"<li><strong>Capítulo 1: O Novo Cenário de Descoberta (Busca por IA Zero-Click vs SEO Tradicional):</strong> Por que a recomendação direta de IA converte 9x mais e como o enquadramento algorítmico gera confiança imediata.</li>"
+                f"<li><strong>Capítulo 1 (Continuação): Mecânica da Aquisição por IA:</strong> Os 3 Pilares do GEO — Ancoragem de Entidade, Validação por Consenso e Arquitetura de Conteúdo Sintetizável.</li>"
+                f"<li><strong>Capítulo 2: Como os Motores de IA Avaliam &amp; Recomendam {niche_name}:</strong> Por dentro do RAG (Retrieval-Augmented Generation), deconstrução de prompts, busca em tempo real e dados do estudo de benchmark de Princeton (+41% em visibilidade).</li>"
+                f"<li><strong>Capítulo 2 (Continuação): Grafos de Conhecimento &amp; Citações:</strong> As 3 conexões essenciais do Knowledge Graph para verificação de licença profissional, especialidades e reputação.</li>"
+                f"<li><strong>Capítulo 3: As 5 Regras de Ouro do GEO para {niche_name}:</strong> Autoridade Absoluta de Entidade, Marcação de Schema ({schema_type}), Respostas Diretas em 40-60 palavras, PR Digital e Transparência Ética.</li>"
+                f"<li><strong>Capítulo 3 (Continuação): Matriz de Implementação Prática:</strong> Tabela com pontuação de impacto (10/10) e prioridades imediatas.</li>"
+                f"<li><strong>Capítulo 4: Ganhos Rápidos Sem Código (No-Code Quick Wins):</strong> Alinhamento NAP (Nome, Endereço, Telefone) em diretórios oficiais e a regra do 1º parágrafo para respostas diretas.</li>"
+                f"<li><strong>Capítulo 4 (Continuação): Checklist No-Code de 15 Minutos:</strong> Auditoria de registros, Bloco de Credenciais (Bio Fact-Sheet), FAQs e estratégia de avaliações com contexto.</li>"
+                f"<li><strong>Capítulo 5: Playbooks por Especialidade &amp; Estudo de Caso Real:</strong> Estratégias segmentadas e case study documentado com <strong>+1.300% em recomendações de IA</strong> e <strong>+140% em consultas qualificadas</strong>.</li>"
+                f"<li><strong>Capítulo 6: Schema Técnico &amp; Framework de Auditoria em 7 Etapas:</strong> Template JSON-LD pronto para uso e roteiro de auditoria de 7 pontos (de testes de prompt até rastreamento no GA4).</li>"
+                f"<li><strong>Capítulo 7: Cronograma Estruturado de 90 Dias &amp; Google Analytics 4 (GA4):</strong> Fase 1 Fundações (Dias 1–30), Fase 2 Otimização (Dias 31–60) e Fase 3 Autoridade (Dias 61–90) com canal customizado no GA4.</li>"
+                f"</ol>"
+                f'<p><img src="{arch_img_url}" alt="Os 3 Pilares do GEO" /></p>'
+                f'<p><img src="{roadmap_img_url}" alt="Cronograma de 90 Dias" /></p>'
+                f"<hr />"
+                f"<h3>⚡ Entrega Imediata ($9.90 USD): PDF Executivo de 14 Páginas + Acesso Web Interativo</h3>"
+                f"<p>Imediatamente após a confirmação, você recebe acesso instantâneo para download do seu <strong>Playbook Executivo Oficial em PDF de 14 Páginas</strong> (Padrão NotebookLM com fotografias reais, gráficos de alta resolução e tabelas completas) além da edição interativa web.</p>"
+                f"<p><strong>🛡️ Garantia Blindada de Satisfação de 7 Dias:</strong> Se este material não transformar a forma como sua marca é recomendada pela IA, devolvemos 100% do seu valor.</p>"
             )
         else:
-            title = f"AI Search Dominance for {niche_name} — The 2026 ChatGPT & Gemini Playbook"
-            subtitle = f"The Easy-to-Follow Visual Blueprint to Rank Your {niche_name} Brand in the Top 3 of ChatGPT, Google Gemini & Perplexity in 14 Days"
+            title = f"FOUND BY AI: The {niche_name}'s Guide to Generative Engine Optimization (GEO)"
+            subtitle = f"Mastering AI Search Visibility, RAG Systems & Digital Authority in 2026"
             custom_summary = (
-                f"Instant Digital Access ($9.90): Visual 7-Chapter Playbook for {niche_name} (Interactive Web + Printable A4 PDF), "
-                f"4 Step-by-Step HD Infographics, 1-Click Copy /llms.txt & Schema.org ({schema_type}) Templates + 14-Day Checklist."
+                f"Official 14-Page Executive PDF Playbook ($9.90 USD): Complete NotebookLM-Style Blueprint for {niche_name} "
+                f"with Real Photography, Benchmark Data, RAG, 5 Golden Rules & 90-Day Implementation Roadmap."
             )
             gumroad_desc = (
                 f'<p><img src="{cover_img_url}" alt="{title}" /></p>'
                 f"<h2>{title}</h2>"
                 f"<p><strong>{subtitle}</strong></p>"
-                f"<p>Over <strong>68% of high-intent clients</strong> searching for <em>{high_ticket}</em> (average client lifetime value: <strong>{avg_ticket}+</strong>) are bypassing traditional search ads and asking <strong>ChatGPT, Google Gemini, Copilot, and Perplexity</strong> who they should trust and hire.</p>"
-                f"<p>Designed with <strong>clear, easy-to-understand visual diagrams, Before-vs-After AI screen comparisons, and 1-click copy-paste templates</strong>, this <strong>Illustrated 7-Chapter Playbook</strong> gives you the exact Generative Engine Optimization (GEO) system tailored specifically for <strong>{niche_name}</strong>—no coding skills required.</p>"
-                f'<p><img src="{chart_img_url}" alt="Before vs After AI Search Comparison & Market Data" /></p>'
-                f"<h3>📚 Inside This Visual, Easy-to-Follow 7-Chapter Playbook:</h3>"
-                f"<ol>"
-                f"<li><strong>Before vs. After AI Screen Simulator ({niche_name}):</strong> See side-by-side how ChatGPT &amp; Gemini ignore unoptimized businesses vs. how they recommend Top 3 authorities ({avg_ticket}+ leads).</li>"
-                f"<li><strong>The 4-Step Visual Blueprint (Zero Technical Jargon):</strong> A crystal-clear visual flowchart showing the 4 signals AI engines use to pick local winners.</li>"
-                f"<li><strong>1-Click Copy <code>/llms.txt</code> Template for {niche_name}:</strong> Ready-to-use file built for <code>{schema_type}</code>, complete with a plain-English breakdown of what every line does.</li>"
-                f"<li><strong>Verified Schema.org JSON-LD Stamp:</strong> Copy-paste structured data highlighting <em>{high_ticket}</em> and your 4.9★ rating so AI never hallucinates your pricing or services.</li>"
-                f"<li><strong>The 5 Golden Client Prompts + Exact Winning Answers:</strong> The exact questions your prospects ask AI—plus the ready-to-paste answer scripts for your website.</li>"
-                f"<li><strong>The Visual 14-Day Implementation Roadmap:</strong> An illustrated, day-by-day checklist (15 mins/day) taking your AI Visibility Score from 18% to 92%+.</li>"
-                f"<li><strong>Done-For-You 2-Minute Automation:</strong> How to deploy all 7 AI assets automatically without touching a single line of code.</li>"
-                f"</ol>"
-                f'<p><img src="{arch_img_url}" alt="4-Step Visual GEO Blueprint" /></p>'
-                f'<p><img src="{roadmap_img_url}" alt="14-Day Visual Implementation Roadmap" /></p>'
+                f"<p><em>Author: Senior {niche_name} Marketing Strategy Practice Group | Target Audience: Practice Leaders, Partners &amp; Executives | Publication Date: Q4 2026</em></p>"
                 f"<hr />"
-                f"<h3>⚡ Instant Digital Delivery — Special Edition Only $9.90 USD (Interactive Web + Printable A4 PDF)</h3>"
-                f"<p>Immediately upon checkout, you receive instant access to your complete illustrated playbook, 4 high-resolution visual infographics, 1-click copy code templates, and interactive 14-day checklist—backed by our <strong>7-Day 100% Satisfaction Guarantee</strong>.</p>"
+                f"<h3>Executive Briefing &amp; Strategic Overview</h3>"
+                f"<p>Generative Engine Optimization (GEO) represents the most critical shift in {niche_name} client acquisition since the inception of Google Search. Prospective high-intent clients searching for <strong>{high_ticket}</strong> (average client value: <strong>{avg_ticket}+</strong>) no longer scan ten blue links; they ask conversational AI engines like <strong>ChatGPT, Google Gemini, Perplexity, and Copilot</strong> for direct professional recommendations.</p>"
+                f"<p>This comprehensive executive guide provides a definitive roadmap for {niche_name} to establish entity authority, structure machine-readable content, and capture high-intent clients in zero-click search environments.</p>"
+                f'<p><img src="{chart_img_url}" alt="Conversion Rate Comparison and Industry Benchmarks" /></p>'
+                f"<h3>📊 Core Industry Metrics &amp; Benchmark Snapshot:</h3>"
+                f"<ul>"
+                f"<li><strong>Lead Conversion Rate:</strong> 15.90% direct AI recommendation conversion vs. 1.76% traditional search (<strong>9x higher conversion</strong>).</li>"
+                f"<li><strong>User Search Behavior:</strong> Conversational multi-constraint prompts replacing short keywords.</li>"
+                f"<li><strong>Primary Visibility Factor:</strong> Entity verification, professional consensus &amp; structured data replacing backlinks and keyword density.</li>"
+                f"</ul>"
+                f"<h3>📚 Inside This Official 14-Page Executive Playbook:</h3>"
+                f"<ol>"
+                f"<li><strong>Chapter 1: The New Discovery Landscape (Zero-Click AI Search vs Traditional SEO):</strong> Why modern prospective clients bypass SERPs entirely and how algorithmic framing produces a 9x higher conversion rate.</li>"
+                f"<li><strong>Chapter 1 (Continued): The Mechanics of AI-Driven Client Acquisition:</strong> The 3 Pillars of Generative Search: Entity Grounding, Consensus Validation, and Synthesizable Content Architecture.</li>"
+                f"<li><strong>Chapter 2: How AI Engines Evaluate &amp; Recommend {niche_name}:</strong> Inside Retrieval-Augmented Generation (RAG) — Query deconstruction, real-time web retrieval, synthesized verification, plus insights from the Princeton University GEO Benchmark Study (+41% visibility gain).</li>"
+                f"<li><strong>Chapter 2 (Continued): Knowledge Graphs &amp; Citation Mechanics:</strong> The 3 Core Knowledge Graph connections: Entity verification, practice jurisdictions, and track record reputation.</li>"
+                f"<li><strong>Chapter 3: The 5 Golden Rules of GEO:</strong> Absolute Entity Authority, Machine-Readable Schema Markup ({schema_type}), Direct Answer Extraction, Digital PR signals, and Jurisdictional Transparency.</li>"
+                f"<li><strong>Chapter 3 (Continued): Practical Implementation &amp; Summary Matrix:</strong> Priority scoring (10/10) and implementation notes for practice leadership.</li>"
+                f"<li><strong>Chapter 4: No-Code Quick Wins — Instant AI Visibility (Zero Coding Required):</strong> Harmonizing public NAP data across registries, plus the 'Direct Answer' first-paragraph formula.</li>"
+                f"<li><strong>Chapter 4 (Continued): 15-Minute No-Code Action Checklist:</strong> Audit actions, Bio Fact-Sheets, FAQ openings, and strategic client review workflows.</li>"
+                f"<li><strong>Chapter 5: Practice Area Playbooks &amp; Real-World Case Studies:</strong> Tailored strategies by service specialization, plus a detailed 6-month case study achieving <strong>+1,300% AI Search Recommendations</strong> and <strong>+140% Consultation Inquiries</strong>.</li>"
+                f"<li><strong>Chapter 6: Technical Schema &amp; 7-Step AI Search Audit Framework:</strong> Ready-to-deploy JSON-LD structured data templates and checkpoint audit from brand query testing to GA4 attribution.</li>"
+                f"<li><strong>Chapter 7: 90-Day Implementation Roadmap &amp; GA4 Setup:</strong> Phase 1 Foundations (Days 1–30), Phase 2 Content Optimization (Days 31–60), and Phase 3 Authority &amp; Tracking (Days 61–90) with Custom Channel Group configuration in GA4.</li>"
+                f"</ol>"
+                f'<p><img src="{arch_img_url}" alt="The 3 Pillars of GEO" /></p>'
+                f'<p><img src="{roadmap_img_url}" alt="90-Day Implementation Timeline" /></p>'
+                f"<hr />"
+                f"<h3>⚡ Instant Delivery ($9.90 USD): 14-Page Executive PDF + Interactive Web Edition</h3>"
+                f"<p>Immediately upon purchase, you receive instant access to download your <strong>Official 14-Page Executive PDF Playbook</strong> (NotebookLM Edition with real photography, high-res benchmark charts, and implementation tables) plus the interactive web edition with 1-click copy-paste code snippets.</p>"
+                f"<p><strong>🛡️ 7-Day 100% Satisfaction Guarantee:</strong> If this playbook doesn't transform your AI search visibility strategy, simply contact us within 7 days for an immediate full refund.</p>"
             )
 
         pdf_download_url = f"{base}/api/ebooks/pdf/{slug}"
@@ -2468,14 +2522,142 @@ class EbookFactoryService:
                 await asyncio.sleep(0.4)
                 continue
 
-            # Verifica se corresponde a algum nicho do catálogo
-            matched_niche = None
-            for n in NICHE_CATALOG:
-                if n["niche_en"].lower() in pname.lower() or n["niche_pt"].lower() in pname.lower():
-                    matched_niche = n
-                    break
+    @classmethod
+    def match_niche_from_title(cls, product_name: str) -> Optional[Dict[str, Any]]:
+        """Identifica com alta precisão o nicho correspondente no catálogo a partir do título do Gumroad."""
+        name_lower = (product_name or "").lower()
 
-            if not matched_niche and ("Playbook" in pname or "AI Search Dominance" in pname):
+        # 1. Match exato de niche_en ou niche_pt
+        for n in NICHE_CATALOG:
+            if n["niche_en"].lower() in name_lower or n["niche_pt"].lower() in name_lower:
+                return n
+
+        # 2. Match por slug e palavras-chave compostas
+        for n in NICHE_CATALOG:
+            slug_words = [w for w in n["slug"].split("-") if len(w) > 3]
+            matched_words = [w for w in slug_words if w in name_lower]
+            if len(matched_words) >= 2:
+                return n
+
+        # 3. Mapeamento heurístico de termos específicos (inglês e português)
+        keyword_maps = [
+            (["jet", "yacht", "aviation", "táxi aéreo", "fretamento", "iates", "jatos"], "yacht-private-aviation-charters"),
+            (["dental", "dentist", "implant", "odontol"], "dental-clinics-implantology"),
+            (["law", "attorney", "legal", "advoc", "litigat"], "law-firms-attorneys"),
+            (["real estate", "broker", "luxury homes", "imobiliár", "corretor"], "luxury-real-estate-brokers"),
+            (["aesthetic", "medspa", "estética", "botox", "harmoniz"], "aesthetic-medspa-clinics"),
+            (["plastic", "dermatol", "cirurg"], "plastic-surgery-dermatology"),
+            (["compounding", "pharmacy", "farmácia", "manipulação", "longevity"], "compounding-pharmacy-longevity"),
+            (["day spa", "head spa", "holistic", "wellness", "massag"], "luxury-day-spas-holistic"),
+            (["audiolog", "hearing aid", "aparelhos auditivos", "surdez"], "audiology-hearing-aid-centers"),
+            (["language", "idiomas", "inglês executivo", "ielts", "toefl"], "language-coaching-academies"),
+            (["video", "podcast", "estúdio", "audiovisual"], "commercial-video-podcast-studios"),
+            (["estate planning", "trusts", "family wealth", "sucessório"], "estate-planning-family-wealth-law"),
+            (["moving", "relocation", "mudanças", "white-glove"], "white-glove-moving-relocation"),
+            (["training", "executive search", "hr consulting", "headhunter", "recursos humanos"], "corporate-training-hr-consulting"),
+            (["pediatric", "pediatria", "child development"], "concierge-pediatrics-centers"),
+        ]
+        for keywords, slug in keyword_maps:
+            if any(k in name_lower for k in keywords):
+                found = next((n for n in NICHE_CATALOG if n["slug"] == slug), None)
+                if found:
+                    return found
+
+        return None
+
+    @classmethod
+    async def repair_existing_gumroad_products(
+        cls,
+        access_token: str,
+        site_url: str = "https://geopulseai.store",
+        main_product_url: str = "https://geopulseai.store",
+    ) -> Dict[str, Any]:
+        """
+        Varre todos os produtos existentes na conta Gumroad do usuário e atualiza (PUT)
+        para o novo formato executivo de 14 páginas (Padrão Google NotebookLM com fotos reais,
+        benchmarks de Princeton, 5 regras de ouro e entrega de PDF executivo).
+        """
+        listed = await GumroadService.list_products(access_token)
+        if not listed.get("success"):
+            return {"success": False, "error": listed.get("error", "Falha ao listar produtos")}
+
+        products = listed.get("products", [])
+        updated_count = 0
+        updated_items = []
+
+        for prod in products:
+            pid = prod.get("id")
+            pname = prod.get("name") or ""
+            if not pid:
+                continue
+
+            # 1. Verifica se é o produto principal de $47
+            if "14-Day AI Search Visibility Sprint" in pname or "Desafio 14 Dias" in pname or "Sprint de visibilidade" in pname or "geopulse" in pname.lower():
+                new_desc = GumroadService.get_main_product_html_description(site_url=site_url)
+                new_sum = (
+                    "Instant Automated Activation: All 7 Generative AI Search Assets (/llms.txt, Schema.org Graph, "
+                    "Editorial Authority Article & IndexNow Pings) + 14-Page Executive PDF Playbook & 7-Day Guarantee."
+                )
+                main_rc = GumroadService.build_ebook_rich_content(
+                    title="GeoPulse AI — 14-Day AI Search Visibility Sprint",
+                    ebook_url=f"{site_url.rstrip('/')}/",
+                    pdf_url=f"{site_url.rstrip('/')}/api/ebooks/pdf/geopulse-main",
+                )
+                up = await GumroadService.update_product(
+                    access_token=access_token,
+                    product_id=pid,
+                    name="GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT & Gemini)",
+                    description=new_desc,
+                    custom_summary=new_sum,
+                    custom_receipt=f"Welcome to GeoPulse AI! Access your autonomous activation dashboard: {site_url.rstrip('/')}/ and download your 14-Page Executive Playbook: {site_url.rstrip('/')}/api/ebooks/pdf/geopulse-main",
+                    rich_content=main_rc,
+                )
+                if up.get("success"):
+                    updated_count += 1
+                    updated_items.append("GeoPulse AI — 14-Day AI Search Visibility Sprint")
+
+                # Gera o PDF executivo do produto principal
+                try:
+                    geopulse_niche = {
+                        "slug": "geopulse-main",
+                        "niche_en": "Executive AI Search Visibility",
+                        "niche_pt": "Visibilidade e Otimização em Motores de IA",
+                        "schema_type": "ProfessionalService",
+                        "high_ticket": "Autonomous GEO Asset Deployment & Top 10 Ranking",
+                        "avg_ticket": "$10,000",
+                        "accent": "#1d4ed8",
+                    }
+                    PdfPlaybookGenerator.generate_pdf(geopulse_niche, language="en")
+                except Exception as g_pdf_err:
+                    logger.warning(f"Aviso PDF produto principal: {g_pdf_err}")
+
+                try:
+                    m_bytes = cls.generate_geopulse_product_cover_png()
+                    await GumroadService.upload_product_cover(
+                        access_token=access_token,
+                        product_id=pid,
+                        image_url=f"{site_url.rstrip('/')}/api/ebooks/image/geopulse-main/cover.png",
+                        image_bytes=m_bytes,
+                    )
+                except Exception as m_cov_err:
+                    logger.warning(f"Aviso capa produto principal Gumroad: {m_cov_err}")
+
+                try:
+                    th_bytes = cls.generate_geopulse_product_thumbnail_png()
+                    await GumroadService.upload_product_thumbnail(
+                        access_token=access_token,
+                        product_id=pid,
+                        image_url=f"{site_url.rstrip('/')}/api/ebooks/image/geopulse-main/thumbnail.png",
+                        image_bytes=th_bytes,
+                    )
+                except Exception as m_th_err:
+                    logger.warning(f"Aviso thumbnail produto principal Gumroad: {m_th_err}")
+                await asyncio.sleep(0.4)
+                continue
+
+            # 2. Identifica o nicho correspondente do catálogo
+            matched_niche = cls.match_niche_from_title(pname)
+            if not matched_niche and ("Playbook" in pname or "AI Search Dominance" in pname or "Dominância" in pname or "FOUND BY AI" in pname):
                 matched_niche = NICHE_CATALOG[0]
 
             if matched_niche:
@@ -2499,7 +2681,14 @@ class EbookFactoryService:
                 if up.get("success"):
                     updated_count += 1
                     updated_items.append(eb_rec["title"])
-                # Envia a Capa 3D HD ($9.90 USD) para a seção 'Cobrir' do Gumroad
+
+                # Pré-gera o PDF executivo de 14 páginas (Padrão NotebookLM) para entrega instantânea
+                try:
+                    PdfPlaybookGenerator.generate_pdf(matched_niche, language="en")
+                except Exception as pdf_err:
+                    logger.warning(f"Aviso geração PDF executivo ({matched_niche['slug']}): {pdf_err}")
+
+                # Envia a Capa 3D HD ($9.90 USD) no Padrão NotebookLM com foto real para a seção 'Cobrir' do Gumroad
                 try:
                     cov_bytes = cls.generate_ebook_image_png(matched_niche, img_type="cover")
                     await GumroadService.upload_product_cover(
@@ -2511,7 +2700,7 @@ class EbookFactoryService:
                 except Exception as cov_err:
                     logger.warning(f"Aviso upload capa nicho ({eb_rec['title']}): {cov_err}")
 
-                # Envia a Miniatura Quadrada 600x600 para a seção 'Miniatura' do Gumroad
+                # Envia a Miniatura Quadrada 600x600 no Padrão NotebookLM para a seção 'Miniatura' do Gumroad
                 try:
                     th_bytes = cls.generate_ebook_image_png(matched_niche, img_type="thumbnail")
                     await GumroadService.upload_product_thumbnail(

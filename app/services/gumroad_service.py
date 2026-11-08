@@ -398,15 +398,30 @@ class GumroadService:
 
     @classmethod
     async def list_products(cls, access_token: str) -> Dict[str, Any]:
-        """Consulta os produtos existentes na conta Gumroad."""
+        """Consulta todos os produtos existentes na conta Gumroad (com paginação automática)."""
         if not access_token:
             return {"success": False, "error": "Token ausente."}
         headers = {"Authorization": f"Bearer {access_token.strip()}"}
+        all_products = []
         try:
-            async with httpx.AsyncClient(timeout=15.0, verify=False) as client:
-                res = await client.get(f"{cls.BASE_URL}/products", headers=headers)
-                if res.status_code == 200:
-                    return {"success": True, "products": res.json().get("products", [])}
-                return {"success": False, "error": res.text[:200]}
+            async with httpx.AsyncClient(timeout=35.0, verify=False) as client:
+                page = 1
+                while True:
+                    res = await client.get(f"{cls.BASE_URL}/products?page={page}", headers=headers)
+                    if res.status_code != 200:
+                        if not all_products:
+                            return {"success": False, "error": res.text[:200]}
+                        break
+                    data = res.json()
+                    prods = data.get("products", [])
+                    if not prods:
+                        break
+                    all_products.extend(prods)
+                    if len(prods) < 10:
+                        break
+                    page += 1
+                    if page > 20:
+                        break
+                return {"success": True, "products": all_products}
         except Exception as e:
             return {"success": False, "error": str(e)}

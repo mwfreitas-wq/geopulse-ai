@@ -17,23 +17,22 @@ class GumroadService:
     def get_main_product_html_description(cls, site_url: str = "https://geopulseai.store") -> str:
         base = site_url.rstrip("/")
         return (
-            f'<p><img src="{base}/api/ebooks/image/dental-clinics-implantology/cover.png" alt="GeoPulse AI — 14-Day AI Search Visibility Sprint" /></p>'
-            f"<h2>GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT &amp; Google Gemini)</h2>"
-            f"<p>Secure your business at the forefront of the <strong>Generative AI Search Revolution</strong>. When potential clients ask <strong>ChatGPT, Google Gemini, Copilot, or Perplexity</strong> for the top providers in your city and industry, ensure your brand gets recommended first.</p>"
-            f'<p><img src="{base}/api/ebooks/image/dental-clinics-implantology/chart.png" alt="AI Search Conversion Data" /></p>'
+            f'<p><img src="{base}/api/ebooks/image/geopulse-main/cover.png" alt="GeoPulse AI — 14-Day AI Search Visibility Sprint" /></p>'
+            f"<h2>GeoPulse AI — 14-Day AI Search Visibility Sprint (Top 10 on ChatGPT, Google Gemini &amp; Perplexity)</h2>"
+            f"<p>Secure your business at the forefront of the <strong>Generative AI Search Revolution</strong>. When potential high-ticket clients ask <strong>ChatGPT, Google Gemini, Copilot, or Perplexity</strong> for the top providers in your city and industry, ensure your brand gets recommended first.</p>"
             f"<h3>🚀 What is Included in Your 14-Day Autonomous Sprint:</h3>"
             f"<ul>"
             f"<li><strong>Official <code>/llms.txt</code> &amp; <code>/llms-full.txt</code> Entity Asset:</strong> Standardized machine-readable context file hosted for AI crawlers to accurately cite and prioritize your business.</li>"
             f"<li><strong>Verified Schema.org JSON-LD Knowledge Graph:</strong> Multi-type rich structured entity data for Google Gemini &amp; Microsoft Copilot.</li>"
             f"<li><strong>High-Authority AI Editorial Article &amp; FAQ:</strong> Optimized for retrieval-augmented generation (RAG) and direct conversational answers.</li>"
             f"<li><strong>Priority IndexNow Protocol Pings:</strong> Instant notifications sent to Microsoft Bing and ChatGPT Search indices within minutes.</li>"
+            f"<li><strong>Official 14-Page Executive GEO Playbook in PDF:</strong> Complete NotebookLM-style blueprint with real photography and benchmark data.</li>"
             f"<li><strong>Live Visibility &amp; Sentiment Score (0–100):</strong> Real-time monitoring of your entity ranking across all major AI engines.</li>"
-            f"<li><strong>Zero Tech Friction:</strong> No changes to your existing website codebase or expensive developer hours required.</li>"
+            f"<li><strong>Zero Tech Friction:</strong> 100% autonomous — no changes to your existing website codebase or developer hours required.</li>"
             f"</ul>"
-            f'<p><img src="{base}/api/ebooks/image/dental-clinics-implantology/architecture.png" alt="4-Pillar GEO Architecture" /></p>'
             f"<hr />"
             f"<h3>🛡️ Ironclad 7-Day Money-Back Guarantee</h3>"
-            f"<p>Try <strong>GeoPulse AI</strong> 100% risk-free. Once your order is completed, our autonomous engine immediately activates your 7 entity assets and sends your private dashboard credentials to your email. If you are not completely satisfied within 7 days, request an immediate full refund—no questions asked.</p>"
+            f"<p>Try <strong>GeoPulse AI</strong> 100% risk-free. Once your order is completed, our autonomous engine immediately activates your 7 entity assets, delivers your private dashboard access, and provides instant download of your official 14-Page Executive PDF Playbook. If you are not completely satisfied within 7 days, request an immediate full refund—no questions asked.</p>"
         )
 
     @classmethod
@@ -215,49 +214,66 @@ class GumroadService:
         rich_content: Optional[list] = None,
     ) -> Dict[str, Any]:
         """
-        Atualiza um produto existente no Gumroad via PUT /v2/products/{id},
-        preenchendo automaticamente a aba Conteúdo (rich_content).
+        Atualiza um produto existente no Gumroad via PUT /v2/products/{id}.
+        Garante que os dados textuais principais (nome, descrição HTML, preço, resumo, recibo)
+        sejam enviados via form-urlencoded (requisito do Gumroad) e o rich_content via JSON complementar.
         """
         if not access_token or not product_id:
             return {"success": False, "error": "Token ou product_id ausente."}
 
-        payload: Dict[str, Any] = {}
+        token = access_token.strip()
+        form_payload: Dict[str, Any] = {}
         if name is not None:
-            payload["name"] = name
+            form_payload["name"] = name
         if price_cents is not None:
-            payload["price"] = str(price_cents)
+            form_payload["price"] = str(price_cents)
         if description is not None:
-            payload["description"] = description
+            form_payload["description"] = description
         if custom_summary is not None:
-            payload["custom_summary"] = custom_summary
+            form_payload["custom_summary"] = custom_summary
         if custom_receipt is not None:
-            payload["custom_receipt"] = custom_receipt
-        if rich_content is not None:
-            payload["rich_content"] = rich_content
+            form_payload["custom_receipt"] = custom_receipt
 
-        use_json = (rich_content is not None)
-        headers = {
-            "Authorization": f"Bearer {access_token.strip()}",
-            "Content-Type": "application/json" if use_json else "application/x-www-form-urlencoded",
+        headers_form = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
+
         try:
-            async with httpx.AsyncClient(timeout=25.0, verify=False) as client:
+            async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
+                # 1. Atualiza os campos principais via form-urlencoded
                 res = await client.put(
                     f"{cls.BASE_URL}/products/{product_id}",
-                    json=payload if use_json else None,
-                    data=None if use_json else payload,
-                    headers=headers,
+                    data=form_payload,
+                    headers=headers_form,
                 )
-                if res.status_code in (200, 201):
-                    data = res.json()
-                    product = data.get("product", {})
-                    return {
-                        "success": True,
-                        "product_id": product.get("id"),
-                        "short_url": product.get("short_url"),
-                        "raw": product,
-                    }
-                return {"success": False, "error": f"HTTP {res.status_code}: {res.text[:250]}"}
+                if res.status_code not in (200, 201):
+                    err_msg = f"HTTP {res.status_code}: {res.text[:250]}"
+                    logger.warning(f"[Gumroad PUT Error] {err_msg}")
+                    return {"success": False, "error": err_msg}
+
+                product = res.json().get("product", {})
+
+                # 2. Se houver rich_content (aba Conteúdo), envia chamada JSON complementar
+                if rich_content:
+                    try:
+                        await client.put(
+                            f"{cls.BASE_URL}/products/{product_id}",
+                            json={"rich_content": rich_content},
+                            headers={
+                                "Authorization": f"Bearer {token}",
+                                "Content-Type": "application/json",
+                            },
+                        )
+                    except Exception as rc_err:
+                        logger.warning(f"[Gumroad rich_content notice] {rc_err}")
+
+                return {
+                    "success": True,
+                    "product_id": product.get("id"),
+                    "short_url": product.get("short_url"),
+                    "raw": product,
+                }
         except Exception as e:
             return {"success": False, "error": str(e)}
 

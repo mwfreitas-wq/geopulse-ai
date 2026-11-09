@@ -2979,7 +2979,10 @@ async def support_ai_chat(data: SupportChatRequest, db: AsyncSession = Depends(g
 
     context_info = ""
     if data.company_name:
-        context_info = f" Company: '{data.company_name}', niche: '{data.niche or ""}', city: '{data.city_region or ""}', score: {data.score or "N/A"}%."
+        niche_val = data.niche or ""
+        city_val = data.city_region or ""
+        score_val = f"{data.score}%" if data.score is not None else "N/A"
+        context_info = f" Company: '{data.company_name}', niche: '{niche_val}', city: '{city_val}', score: {score_val}."
 
     if lang == "en":
         prompt = f"""You are the Support and Growth Specialist for GeoPulse AI, a platform that ranks local businesses and professionals #1 on ChatGPT, Google Gemini, and Perplexity.

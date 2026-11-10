@@ -2090,7 +2090,7 @@
 
         async advanceSprintDay(companyId, name) {
           try {
-            const res = await fetch(`/api/admin/companies/${companyId}/sprint-advance`, { method: 'POST' });
+            const res = await fetch(`/api/admin/companies/${companyId}/sprint-advance`, { method: 'POST', headers: { 'x-admin-password': this.password } });
             if (res.ok) {
               const data = await res.json();
               this.toastMessage = `Avançado para o Dia ${data.advanced_to_day}/14 para "${name}"!`;
@@ -2108,7 +2108,7 @@
             return;
           }
           try {
-            const res = await fetch(`/api/admin/companies/${companyId}/activate`, { method: 'POST' });
+            const res = await fetch(`/api/admin/companies/${companyId}/activate`, { method: 'POST', headers: { 'x-admin-password': this.password } });
             if (res.ok) {
               this.toastMessage = `Cliente "${name}" ativado com sucesso! Os 7 artefatos e o Artigo Top 5 foram gerados.`;
               await this.loadOverview();
@@ -2123,7 +2123,7 @@
             return;
           }
           try {
-            const res = await fetch(`/api/admin/companies/${companyId}`, { method: 'DELETE' });
+            const res = await fetch(`/api/admin/companies/${companyId}`, { method: 'DELETE', headers: { 'x-admin-password': this.password } });
             if (res.ok) {
               this.toastMessage = `Registro "${name}" removido do histórico.`;
               await this.loadOverview();

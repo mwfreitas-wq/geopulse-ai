@@ -87,3 +87,12 @@ async def init_db():
         rows = (await conn.execute(text("SELECT id FROM companies WHERE access_token IS NULL OR access_token = ''"))).fetchall()
         for (cid,) in rows:
             await conn.execute(text("UPDATE companies SET access_token = :t WHERE id = :i"), {"t": secrets.token_urlsafe(24), "i": cid})
+
+        # Auto-seed blindado se o banco estiver vazio (ex: novo container no Cloud Run após inatividade)
+        cnt = (await conn.execute(text("SELECT COUNT(*) FROM companies"))).scalar() or 0
+        if cnt == 0:
+            try:
+                from app.seed_vault import restore_seed_vault
+                await restore_seed_vault(conn)
+            except Exception:
+                pass

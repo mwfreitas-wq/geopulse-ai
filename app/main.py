@@ -49,6 +49,7 @@ from app.services.auditor import AuditorService
 from app.services.generator import ArtifactGeneratorService
 from app.services.spark_bridge import SparkSyndicatorBridge
 from app.services.gumroad_service import GumroadService
+from app.services.lemonsqueezy_service import LemonSqueezyService
 from app.services.ebook_factory_service import EbookFactoryService, NICHE_CATALOG
 from app.services.security import (
     SecurityHeadersMiddleware, rate_limit, audit_slot, detect_image_ext, client_ip
@@ -123,10 +124,10 @@ async def _monitoring_loop():
 
 
 async def _self_keep_alive_loop():
-    """Mantém a instância acordada no Render a cada 8 minutos para evitar spin-down (tempo de espera de 50s)."""
-    target_urls = ["https://geopulseai.store/health", "https://geopulse-ai-q6w1.onrender.com/health"]
+    """Mantém a instância acordada no Cloud Run com ping a cada 4 minutos para evitar inatividade."""
+    target_urls = ["https://geopulseai.store/health"]
     while True:
-        await asyncio.sleep(480)
+        await asyncio.sleep(240)
         try:
             async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
                 for u in target_urls:
@@ -602,6 +603,9 @@ async def get_all_configured_keys(db: AsyncSession) -> dict:
         "resend_from",
         "gumroad_access_token",
         "gumroad_product_url",
+        "lemonsqueezy_api_key",
+        "lemonsqueezy_store_id",
+        "lemonsqueezy_product_url",
         "spark_webhook_url",
         "mercadopago_access_token",
         "mercadopago_public_key",
@@ -755,6 +759,9 @@ async def get_api_keys_status(db: AsyncSession = Depends(get_db)):
         spark_configured=bool(keys.get("spark_webhook_url")),
         gumroad_configured=bool(keys.get("gumroad_access_token")),
         gumroad_product_url=keys.get("gumroad_product_url"),
+        lemonsqueezy_configured=bool(keys.get("lemonsqueezy_api_key")),
+        lemonsqueezy_store_id=keys.get("lemonsqueezy_store_id"),
+        lemonsqueezy_product_url=keys.get("lemonsqueezy_product_url"),
         smtp_configured=bool(keys.get("smtp_user") and keys.get("smtp_pass")),
         smtp_host=keys.get("smtp_host") or "smtp.titan.email",
         smtp_port=int(keys.get("smtp_port") or 465),
@@ -791,6 +798,9 @@ async def update_api_keys(keys_data: ApiKeysUpdate, db: AsyncSession = Depends(g
         "resend_api_key",
         "gumroad_access_token",
         "gumroad_product_url",
+        "lemonsqueezy_api_key",
+        "lemonsqueezy_store_id",
+        "lemonsqueezy_product_url",
         "spark_webhook_url",
         "mercadopago_access_token",
         "mercadopago_public_key",
@@ -1807,7 +1817,7 @@ async def create_mercadopago_preference(
         }
 
     base_url = str(request.base_url).rstrip("/")
-    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "onrender.com" in base_url):
+    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "run.app" in base_url or "localhost" not in base_url):
         base_url = "https://" + base_url[len("http://"):]
 
     items_list = [
@@ -2066,6 +2076,67 @@ async def admin_create_gumroad_product(request: Request, db: AsyncSession = Depe
         "name": res.get("name"),
         "short_url": short_url,
     }
+
+
+@app.post("/api/admin/lemonsqueezy/test", dependencies=[Depends(verify_admin_password_header)])
+async def test_lemonsqueezy_connection(db: AsyncSession = Depends(get_db)):
+    """Testa a chave de API do Lemon Squeezy e lista lojas associadas."""
+    keys = await get_all_configured_keys(db)
+    api_key = (keys.get("lemonsqueezy_api_key") or "").strip()
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Chave de API do Lemon Squeezy não informada.")
+    user_res = await LemonSqueezyService.get_current_user(api_key)
+    if not user_res.get("success"):
+        return {"success": False, "message": user_res.get("error", "Erro ao validar chave de API.")}
+    stores_res = await LemonSqueezyService.list_stores(api_key)
+    stores = stores_res.get("stores", []) if stores_res.get("success") else []
+    if stores and not keys.get("lemonsqueezy_store_id"):
+        await set_system_key(db, "lemonsqueezy_store_id", stores[0]["id"])
+    return {
+        "success": True,
+        "message": f"Conexão com Lemon Squeezy validada com sucesso! Conta: {user_res.get('email')}",
+        "user": user_res,
+        "stores": stores
+    }
+
+
+@app.post("/api/admin/lemonsqueezy/create-checkout", dependencies=[Depends(verify_admin_password_header)])
+async def create_lemonsqueezy_checkout(payload: dict, db: AsyncSession = Depends(get_db)):
+    """Gera link de checkout customizado na loja Lemon Squeezy."""
+    keys = await get_all_configured_keys(db)
+    api_key = (keys.get("lemonsqueezy_api_key") or "").strip()
+    store_id = payload.get("store_id") or keys.get("lemonsqueezy_store_id")
+    variant_id = payload.get("variant_id")
+    price = float(payload.get("price") or 47.0)
+    name = payload.get("name") or "GeoPulse AI — 14-Day AI Search Visibility Sprint"
+    desc = payload.get("description") or "Ativação de Autoridade #1 em Inteligência Artificial para motores generativos."
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Chave de API do Lemon Squeezy não configurada.")
+    if not store_id:
+        raise HTTPException(status_code=400, detail="Store ID não configurado no Lemon Squeezy.")
+    if not variant_id:
+        prods = await LemonSqueezyService.list_products(api_key, store_id)
+        if prods.get("success") and prods.get("products"):
+            first_p = prods["products"][0]
+            if first_p.get("buy_now_url"):
+                await set_system_key(db, "lemonsqueezy_product_url", first_p["buy_now_url"])
+                return {
+                    "success": True,
+                    "checkout_url": first_p["buy_now_url"],
+                    "product_name": first_p["name"]
+                }
+    res = await LemonSqueezyService.create_checkout(
+        api_key=api_key,
+        store_id=str(store_id),
+        variant_id=str(variant_id or "1"),
+        custom_price_usd=price,
+        product_name=name,
+        custom_description=desc,
+        redirect_url="https://geopulseai.store"
+    )
+    if res.get("success") and res.get("checkout_url"):
+        await set_system_key(db, "lemonsqueezy_product_url", res["checkout_url"])
+    return res
 
 
 @app.post("/api/webhooks/gumroad")
@@ -2831,7 +2902,7 @@ async def dynamic_sitemap_xml(request: Request, db: AsyncSession = Depends(get_d
     """
     from fastapi.responses import Response
     base_url = str(request.base_url).rstrip("/")
-    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "onrender.com" in base_url):
+    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "run.app" in base_url or "localhost" not in base_url):
         base_url = "https://" + base_url[len("http://"):]
 
     result = await db.execute(select(Company).where(Company.is_paid == True).order_by(desc(Company.paid_at)))
@@ -2890,7 +2961,7 @@ async def dynamic_robots_txt(request: Request):
     """
     from fastapi.responses import PlainTextResponse
     base_url = str(request.base_url).rstrip("/")
-    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "onrender.com" in base_url):
+    if base_url.startswith("http://") and ("geopulseai.store" in base_url or "run.app" in base_url or "localhost" not in base_url):
         base_url = "https://" + base_url[len("http://"):]
     content = f"""# Robots.txt — GeoPulse AI Engine
 User-agent: *

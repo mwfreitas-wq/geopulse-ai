@@ -144,6 +144,9 @@ class ApiKeysUpdate(BaseModel):
     resend_api_key: Optional[str] = None
     gumroad_access_token: Optional[str] = None
     gumroad_product_url: Optional[str] = None
+    lemonsqueezy_api_key: Optional[str] = None
+    lemonsqueezy_store_id: Optional[str] = None
+    lemonsqueezy_product_url: Optional[str] = None
     spark_webhook_url: Optional[str] = None
     mercadopago_access_token: Optional[str] = None
     mercadopago_public_key: Optional[str] = None
@@ -175,6 +178,9 @@ class ApiKeysStatus(BaseModel):
     spark_configured: bool = False
     gumroad_configured: bool = False
     gumroad_product_url: Optional[str] = None
+    lemonsqueezy_configured: bool = False
+    lemonsqueezy_store_id: Optional[str] = None
+    lemonsqueezy_product_url: Optional[str] = None
     mercadopago_configured: bool = False
     mercadopago_public_key: Optional[str] = None
     pix_key: str = "contato@geopulse.ai"

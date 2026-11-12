@@ -1043,6 +1043,62 @@
             </div>
           </div>
 
+          <!-- Card Lemon Squeezy Store -->
+          <div class="bg-white border border-amber-300 rounded-3xl p-6 space-y-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-extrabold text-xs flex items-center gap-1.5">
+                <span>🍋</span> LOJA LEMON SQUEEZY (USD / GLOBAL)
+              </span>
+              <span class="text-xs font-bold" :class="overview.api_status?.lemonsqueezy_configured ? 'text-emerald-700' : 'text-amber-700'"
+                x-text="overview.api_status?.lemonsqueezy_configured ? '● Loja Conectada' : '○ Não Configurado'"></span>
+            </div>
+
+            <div class="space-y-2">
+              <h3 class="text-lg font-extrabold text-slate-900">Loja Lemon Squeezy (Cartão Global / USD / E-books)</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Conecte sua conta do Lemon Squeezy para vender o Desafio de 14 Dias e E-books em USD. Para pegar sua API Key:
+                acesse <a href="https://app.lemonsqueezy.com/settings/api" target="_blank" class="text-amber-600 underline font-bold">app.lemonsqueezy.com/settings/api ↗</a>,
+                crie uma chave chamada <strong>GeoPulse AI</strong> e cole abaixo:
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Chave de API Lemon Squeezy (`lemonsqueezy_api_key`):</label>
+                  <input type="password" x-model="keyForm.lemonsqueezy_api_key"
+                    :placeholder="overview.api_status?.lemonsqueezy_configured ? '•••••••••••••••• (Configurada)' : 'Cole sua API Key do Lemon Squeezy...'"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-amber-500 focus:bg-white shadow-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Store ID (Opcional - detectado automaticamente):</label>
+                  <input type="text" x-model="keyForm.lemonsqueezy_store_id"
+                    placeholder="Ex: 12345 (ou deixe em branco para auto-detectar)"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:border-amber-500 focus:bg-white shadow-sm" />
+                </div>
+              </div>
+
+              <div class="pt-2 flex flex-wrap items-center justify-between gap-3 bg-amber-50/70 p-4 rounded-2xl border border-amber-200">
+                <div class="space-y-1">
+                  <div class="text-xs font-extrabold text-amber-900">Validação e Integração da Loja</div>
+                  <div class="text-[11px] text-amber-800">Testa sua API Key com o Lemon Squeezy, valida sua conta e detecta sua loja automaticamente:</div>
+                </div>
+                <button type="button" @click="testLemonSqueezy()" :disabled="savingKeys"
+                  class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
+                  <span>🍋</span>
+                  <span>Testar Conexão Lemon Squeezy</span>
+                </button>
+              </div>
+
+              <template x-if="keyForm.lemonsqueezy_product_url || overview.api_status?.lemonsqueezy_product_url">
+                <div class="p-3 bg-slate-900 text-white rounded-xl text-xs space-y-1">
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Link Oficial de Checkout Lemon Squeezy:</span>
+                  <div class="font-mono text-amber-400 break-all select-all font-bold" x-text="keyForm.lemonsqueezy_product_url || overview.api_status?.lemonsqueezy_product_url"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+
           <!-- Card Preço do Plano & Chave PIX Direta -->
           <div class="bg-white border border-emerald-300 rounded-3xl p-6 space-y-5 shadow-sm">
             <div class="flex items-center justify-between">
@@ -1665,6 +1721,9 @@
           mercadopago_public_key: '',
           gumroad_access_token: '',
           gumroad_product_url: '',
+          lemonsqueezy_api_key: '',
+          lemonsqueezy_store_id: '',
+          lemonsqueezy_product_url: '',
           pix_key: '',
           pix_beneficiary: '',
           plan_price: '197.00'
@@ -1752,6 +1811,12 @@
               }
               if (this.overview.api_status.gumroad_product_url) {
                 this.keyForm.gumroad_product_url = this.overview.api_status.gumroad_product_url;
+              }
+              if (this.overview.api_status.lemonsqueezy_store_id) {
+                this.keyForm.lemonsqueezy_store_id = this.overview.api_status.lemonsqueezy_store_id;
+              }
+              if (this.overview.api_status.lemonsqueezy_product_url) {
+                this.keyForm.lemonsqueezy_product_url = this.overview.api_status.lemonsqueezy_product_url;
               }
               this.keyForm.pix_key = this.overview.api_status.pix_key || 'contato@geopulse.ai';
               this.keyForm.pix_beneficiary = this.overview.api_status.pix_beneficiary || 'GeoPulse AI Tecnologia';
@@ -1904,6 +1969,40 @@
             }
           } catch (e) {
             this.toastMessage = '⚠️ ' + 'Erro ao excluir lead.'; setTimeout(() => { this.toastMessage = ''; }, 5000);
+          }
+        },
+
+        async testLemonSqueezy() {
+          const key = (this.keyForm.lemonsqueezy_api_key || '').trim();
+          if (!key && !this.overview.api_status?.lemonsqueezy_configured) {
+            alert('⚠️ Digite sua Chave de API do Lemon Squeezy primeiro.');
+            return;
+          }
+          this.savingKeys = true;
+          this.toastMessage = '⏳ Testando conexão com Lemon Squeezy...';
+          try {
+            if (key) {
+              await fetch('/api/settings/keys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lemonsqueezy_api_key: key, lemonsqueezy_store_id: this.keyForm.lemonsqueezy_store_id })
+              });
+            }
+            const res = await fetch('/api/admin/lemonsqueezy/test', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+              alert('🎉 ' + data.message + (data.stores && data.stores.length ? '\nLoja detectada: ' + data.stores[0].name : ''));
+              await this.loadOverview();
+            } else {
+              alert('⚠️ ' + (data.message || data.detail || 'Erro ao conectar.'));
+            }
+          } catch (e) {
+            alert('Erro: ' + e.message);
+          } finally {
+            this.savingKeys = false;
           }
         },
 

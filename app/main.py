@@ -6,6 +6,7 @@ import os
 import re
 import secrets
 import shutil
+import time
 import uuid
 from urllib.parse import quote
 from contextlib import asynccontextmanager
@@ -170,273 +171,297 @@ GLOBAL_CITIES_PIPELINE = [
     {"niche_pt": "Dental Practice", "city": "London, UK", "region": "eu", "lang": "en"},
 ]
 
+_salesbot_lock = asyncio.Lock()
+_salesbot_state = {"city_idx": 0, "last_run_ts": 0.0}
+
+
+async def _run_salesbot_cycle(respect_cooldown: bool = True) -> dict:
+    """
+    Executa 1 ciclo controlado do Robô de Vendas (prospecção + auditoria + 1º e-mail + follow-up).
+    Compartilhado entre o worker em background e o pulso do /health (cron-job.org no Cloud Run).
+    """
+    if _salesbot_lock.locked():
+        return {"ran": False, "reason": "busy"}
+
+    async with _salesbot_lock:
+        try:
+            async with AsyncSessionLocal() as db:
+                keys = await get_all_configured_keys(db)
+                is_active = (keys.get("salesbot_active") == "1")
+                if not is_active:
+                    return {"ran": False, "reason": "inactive"}
+
+                interval_min = max(2, int(keys.get("salesbot_interval_min") or 4))
+                now_ts = time.monotonic()
+                cooldown_sec = max(90, interval_min * 60 - 15)
+                if respect_cooldown and _salesbot_state["last_run_ts"] > 0 and (now_ts - _salesbot_state["last_run_ts"]) < cooldown_sec:
+                    return {"ran": False, "reason": "cooldown"}
+
+                _salesbot_state["last_run_ts"] = now_ts
+                custom_niche = (keys.get("salesbot_niche") or "").strip()
+                allowed_regions = (keys.get("salesbot_regions") or "br,us,eu").lower().split(",")
+
+                # Filtra cidades pelas regiões permitidas
+                eligible_cities = [c for c in GLOBAL_CITIES_PIPELINE if c["region"] in allowed_regions]
+                if not eligible_cities:
+                    eligible_cities = GLOBAL_CITIES_PIPELINE
+
+                city_idx = _salesbot_state["city_idx"]
+                target_entry = eligible_cities[city_idx % len(eligible_cities)]
+                _salesbot_state["city_idx"] += 1
+                city_idx = _salesbot_state["city_idx"]
+
+                # Se custom_niche for o padrão genérico "Clínica Odontológica", usa a rotação multi-nicho da lista
+                if not custom_niche or custom_niche == "Clínica Odontológica":
+                    niche_to_search = target_entry["niche_pt"]
+                else:
+                    niche_to_search = custom_niche
+
+                logger.info(f"🤖 [SalesBot 24/7] Iniciando ciclo autônomo: {niche_to_search} em {target_entry['city']} ({target_entry['region'].upper()})")
+
+                raw_leads = await SalesBotService.hunt_leads(
+                    niche=niche_to_search,
+                    city_region=target_entry["city"],
+                    quantity=2,
+                    keys=keys
+                )
+
+                base_site = settings.SITE_URL.rstrip("/")
+                for item in raw_leads:
+                    c_name = item["company_name"]
+                    slug_name = re.sub(r"[^a-zA-Z0-9]", "", c_name).lower() or "empresa"
+                    c_url = item.get("url") or f"https://www.{slug_name}.com"
+                    c_email = item.get("email", "")
+                    c_phone = item.get("phone", "")
+                    c_instagram = item.get("instagram", "")
+
+                    # Localiza ou cadastra
+                    comp_res = await db.execute(select(Company).filter_by(name=c_name, city_region=target_entry["city"]))
+                    company = comp_res.scalars().first()
+                    if not company:
+                        company = Company(
+                            name=c_name,
+                            url=c_url,
+                            niche=niche_to_search,
+                            city_region=target_entry["city"],
+                            whatsapp=c_phone,
+                            email=c_email,
+                            entity_type="company",
+                            is_paid=False
+                        )
+                        db.add(company)
+                        await db.commit()
+                        await db.refresh(company)
+
+                    other_names = [x["company_name"] for x in raw_leads if x["company_name"] != c_name]
+                    top_comp = other_names[0] if other_names else f"Líderes de Referência em {target_entry['city'].split(',')[0]}"
+                    score_val = 32.5
+                    try:
+                        profile = AuditorService.compute_real_site_profile(c_name, niche_to_search, target_entry["city"], c_url, "", {})
+                        score_val = round(float(profile.get("visibility_score", 32.5)), 1)
+                        existing_audits = (await db.execute(select(AuditRun).filter_by(company_id=company.id))).scalars().all()
+                        if not existing_audits:
+                            audit_items = await AuditorService.run_audit_suite(
+                                company_name=c_name,
+                                niche=niche_to_search,
+                                city_region=target_entry["city"],
+                                competitors=top_comp,
+                                url=c_url,
+                                api_keys={},
+                                is_paid=False,
+                                scraped_content="",
+                                entity_type="company",
+                                professional_registry=""
+                            )
+                            for a_item in audit_items:
+                                db.add(AuditRun(
+                                    company_id=company.id,
+                                    model_provider=a_item["model_provider"],
+                                    prompt_category=a_item["prompt_category"],
+                                    prompt_text=a_item["prompt_text"],
+                                    response_text=a_item["response_text"],
+                                    is_cited=a_item["is_cited"],
+                                    rank_position=a_item["rank_position"],
+                                    sentiment=a_item["sentiment"],
+                                    sources=a_item["sources"]
+                                ))
+                            await db.commit()
+                    except Exception:
+                        pass
+
+                    report_url = f"{base_site}/?report={company.id}"
+                    outreach = SalesBotService.build_cold_outreach(
+                        company_name=c_name,
+                        niche=niche_to_search,
+                        city_region=target_entry["city"],
+                        score=score_val,
+                        top_competitor=top_comp,
+                        report_url=report_url,
+                        phone=c_phone,
+                        instagram=c_instagram
+                    )
+
+                    email_sent = False
+                    if c_email and "@" in c_email and not c_email.endswith("exemplo.com.br"):
+                        email_sent = await send_email(c_email, outreach["email_subject"], outreach["email_html"], keys=keys)
+
+                    status_label = "✉️ E-mail Enviado" if email_sent else ("📱 WhatsApp Extraído" if c_phone else "📄 Relatório Gerado")
+                    notes_str = f"IG:@{c_instagram} • {report_url}" if c_instagram else f"AutoBot 24/7 • {report_url}"
+                    existing_lead = (await db.execute(select(LeadCapture).filter_by(company_id=company.id))).scalars().first()
+                    if not existing_lead:
+                        lead_cap = LeadCapture(
+                            company_id=company.id,
+                            company_name=c_name,
+                            contact_name=item.get("decision_maker", "Diretoria"),
+                            contact_email=c_email,
+                            contact_phone=c_phone,
+                            niche=niche_to_search,
+                            city_region=target_entry["city"],
+                            score=score_val,
+                            status=status_label,
+                            notes=notes_str
+                        )
+                        db.add(lead_cap)
+                        await db.commit()
+
+                        # Dispara Webhook Make.com / n8n / Evolution API em tempo real para automação de WhatsApp!
+                        spark_wh = keys.get("spark_webhook_url")
+                        if spark_wh and (c_phone or c_email):
+                            try:
+                                async with httpx.AsyncClient(timeout=6.0, verify=False) as wh_client:
+                                    await wh_client.post(spark_wh, json={
+                                        "event": "geopulse.salesbot_lead",
+                                        "company_id": company.id,
+                                        "company_name": c_name,
+                                        "niche": niche_to_search,
+                                        "city_region": target_entry["city"],
+                                        "score": score_val,
+                                        "top_competitor": top_comp,
+                                        "whatsapp": c_phone,
+                                        "email": c_email,
+                                        "instagram": c_instagram,
+                                        "report_url": report_url,
+                                        "checkout_url": f"{report_url}&checkout=1",
+                                        "whatsapp_link": outreach.get("whatsapp_link", ""),
+                                        "whatsapp_text": outreach.get("whatsapp_text", ""),
+                                        "instagram_link": outreach.get("instagram_link", ""),
+                                        "email_sent": email_sent,
+                                    })
+                            except Exception:
+                                pass
+
+                    logger.info(f"🤖 [SalesBot 24/7] Lead processado: {c_name} ({target_entry['city']}) | Status: {status_label}")
+
+                    if email_sent:
+                        # Limita a 1 envio por ciclo; o cooldown garante o intervalo seguro entre ciclos
+                        break
+
+                # 1B. Máquina Inbound Autônoma (IndexNow + Portal Público + Dev.to):
+                # A cada 8 rodadas, publica um Guia Oficial de Ranking Regional com backlink para atrair empresários via Google/ChatGPT!
+                if city_idx % 8 == 1 and raw_leads:
+                    try:
+                        lead_sample = raw_leads[0]
+                        city_short = target_entry["city"].split(",")[0].strip()
+                        inbound_title = f"Ranking 2026: Melhores de {niche_to_search} em {city_short} segundo ChatGPT e Gemini"
+                        inbound_md = (
+                            f"# {inbound_title}\n\n"
+                            f"As buscas por **{niche_to_search} em {target_entry['city']}** estão migrando rapidamente do Google tradicional para motores generativos como **ChatGPT Search, Google Gemini e Perplexity**.\n\n"
+                            f"## Por que algumas empresas de {city_short} dominam as recomendações da IA?\n"
+                            f"Nossa auditoria técnica analisou empresas reais de {niche_to_search} em {target_entry['city']} (incluindo *{lead_sample['company_name']}* e concorrentes locais) nos 4 pilares de **GEO (Generative Engine Optimization)**:\n"
+                            f"1. **Protocolo `/llms.txt` público**\n"
+                            f"2. **Grafo de Entidade Schema.org JSON-LD (`LocalBusiness` / `MedicalBusiness` / `LegalService`)**\n"
+                            f"3. **Densidade de Citação e Provas Sociais Verificadas**\n"
+                            f"4. **FAQ Semântico Conversacional**\n\n"
+                            f"---\n\n"
+                            f"### 🚀 Sua empresa de {niche_to_search} em {city_short} aparece no ChatGPT?\n"
+                            f"Faça agora o **Diagnóstico Gratuito de Visibilidade em IA** em 30 segundos e descubra sua nota oficial (0 a 100) e qual concorrente está recebendo seus clientes:\n\n"
+                            f"👉 **[Testar Minha Empresa Grátis no GeoPulse AI]({base_site})**\n"
+                        )
+                        await SparkSyndicatorBridge.process_syndication_event(
+                            {
+                                "company_name": f"Guia {niche_to_search} {city_short}",
+                                "niche": niche_to_search,
+                                "city_region": target_entry["city"],
+                                "url": base_site,
+                                "article_title": inbound_title,
+                                "article_markdown": inbound_md,
+                                "visibility_score": 92.0,
+                            },
+                            medium_token=keys.get("medium_api_token"),
+                            devto_api_key=keys.get("devto_api_key") if city_idx % 24 == 1 else None,
+                        )
+                    except Exception as e_inb:
+                        logger.warning(f"Inbound syndication warning: {e_inb}")
+
+                # 2. Cadência Automática (2º Toque / Follow-up) para leads que ainda não receberam ou abriram e-mail
+                pending_leads = (await db.execute(
+                    select(LeadCapture).where(
+                        LeadCapture.contact_email.isnot(None),
+                        LeadCapture.contact_email != "",
+                        LeadCapture.status.in_(["📱 WhatsApp Extraído", "📄 Relatório Gerado", "✉️ E-mail Enviado"])
+                    ).order_by(LeadCapture.id.asc()).limit(5)
+                )).scalars().all()
+
+                for p_lead in pending_leads:
+                    if not p_lead.contact_email or "@" not in p_lead.contact_email or p_lead.contact_email.endswith("exemplo.com.br"):
+                        continue
+                    # Se ainda não recebeu o 1º e-mail (estava com WhatsApp Extraído), envia agora pelo domínio verificado!
+                    if p_lead.status in ("📱 WhatsApp Extraído", "📄 Relatório Gerado"):
+                        rep_url = f"{base_site}/?report={p_lead.company_id}" if p_lead.company_id else base_site
+                        outreach_p = SalesBotService.build_cold_outreach(
+                            company_name=p_lead.company_name,
+                            niche=p_lead.niche or "Especialidades",
+                            city_region=p_lead.city_region or "Brasil",
+                            score=p_lead.score or 35.0,
+                            top_competitor=f"Líderes locais em {(p_lead.city_region or 'sua cidade').split(',')[0]}",
+                            report_url=rep_url,
+                            phone=p_lead.contact_phone or ""
+                        )
+                        ok_p = await send_email(p_lead.contact_email, outreach_p["email_subject"], outreach_p["email_html"], keys=keys)
+                        if ok_p:
+                            p_lead.status = "✉️ E-mail Enviado"
+                            await db.commit()
+                            logger.info(f"🤖 [SalesBot Follow-up] 1º E-mail disparado para {p_lead.company_name} ({p_lead.contact_email})")
+                            break
+                    # Se já recebeu o 1º e-mail há mais de 24h e ainda não abriu o relatório, envia o 2º Toque (Follow-up de Escassez)
+                    elif p_lead.status == "✉️ E-mail Enviado" and p_lead.created_at and (datetime.utcnow() - p_lead.created_at).total_seconds() > 86400:
+                        rep_url = f"{base_site}/?report={p_lead.company_id}" if p_lead.company_id else base_site
+                        chk_url = f"{rep_url}&checkout=1" if "?" in rep_url else f"{rep_url}?checkout=1"
+                        subj_2 = f"Re: Dossiê de IA da {p_lead.company_name} ({p_lead.city_region or 'Sua Região'}) — Último aviso"
+                        html_2 = (
+                            f"<div style='font-family:Arial,sans-serif;max-width:600px;line-height:1.6;color:#1e293b;padding:24px;border:1px solid #e2e8f0;border-radius:16px;'>"
+                            f"<p>Olá, diretoria da <strong>{p_lead.company_name}</strong>!</p>"
+                            f"<p>Enviei ontem o diagnóstico de visibilidade da sua empresa no <strong>ChatGPT e Google Gemini</strong> para <em>{p_lead.niche}</em> em <em>{p_lead.city_region}</em> (Nota atual: <strong style='color:#dc2626;'>{round(float(p_lead.score or 35.0), 1)}/100</strong>).</p>"
+                            f"<p>Como limitamos o <strong>Desafio de 14 Dias (Top 10 nas IAs)</strong> a poucas empresas por cidade para garantir exclusividade semântica, estou passando para confirmar se vocês conseguiram abrir o dossiê:</p>"
+                            f"<div style='margin:22px 0;'>"
+                            f"<a href='{rep_url}' style='background:#16a34a;color:#ffffff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;margin-right:10px;'>📄 Abrir Dossiê da {p_lead.company_name}</a>"
+                            f"<a href='{chk_url}' style='background:#0f172a;color:#ffffff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;'>⚡ Garantir Vaga no Top 10</a>"
+                            f"</div>"
+                            f"<p style='font-size:12px;color:#64748b;'>Atenciosamente,<br>Equipe GeoPulse AI (<a href='https://geopulseai.store'>geopulseai.store</a>)</p>"
+                            f"</div>"
+                        )
+                        ok_2 = await send_email(p_lead.contact_email, subj_2, html_2, keys=keys)
+                        if ok_2:
+                            p_lead.status = "🔁 2º E-mail (Follow-up)"
+                            await db.commit()
+                            logger.info(f"🤖 [SalesBot Follow-up] 2º Toque enviado para {p_lead.company_name} ({p_lead.contact_email})")
+                            break
+            return {"ran": True, "city": target_entry["city"], "leads_found": len(raw_leads)}
+        except Exception as e:
+            logger.warning(f"Erro no ciclo do SalesBot 24/7: {e}")
+            return {"ran": False, "error": str(e)}
+
+
 async def _salesbot_autonomous_worker():
     """
     Loop Contínuo do Robô de Vendas 24/7.
     Quando ativado pelo admin, percorre infinitamente cidades no Brasil, EUA e Europa,
     localiza empresas reais, executa auditoria e envia e-mail frio consultivo + follow-up automático
-    respeitando o intervalo seguro anti-spam (ex: a cada 3 a 5 minutos).
+    respeitando o intervalo seguro anti-spam.
     """
-    city_idx = 0
     await asyncio.sleep(15)  # Aguarda inicialização completa do app
     while True:
-        try:
-            async with AsyncSessionLocal() as db:
-                keys = await get_all_configured_keys(db)
-                is_active = (keys.get("salesbot_active") == "1")
-                if is_active:
-                    custom_niche = (keys.get("salesbot_niche") or "").strip()
-                    allowed_regions = (keys.get("salesbot_regions") or "br,us,eu").lower().split(",")
-                    interval_min = max(2, int(keys.get("salesbot_interval_min") or 4))
-
-                    # Filtra cidades pelas regiões permitidas
-                    eligible_cities = [c for c in GLOBAL_CITIES_PIPELINE if c["region"] in allowed_regions]
-                    if not eligible_cities:
-                        eligible_cities = GLOBAL_CITIES_PIPELINE
-
-                    target_entry = eligible_cities[city_idx % len(eligible_cities)]
-                    city_idx += 1
-
-                    # Se custom_niche for o padrão genérico "Clínica Odontológica", usa a rotação multi-nicho da lista
-                    if not custom_niche or custom_niche == "Clínica Odontológica":
-                        niche_to_search = target_entry["niche_pt"]
-                    else:
-                        niche_to_search = custom_niche
-
-                    logger.info(f"🤖 [SalesBot 24/7] Iniciando ciclo autônomo: {niche_to_search} em {target_entry['city']} ({target_entry['region'].upper()})")
-
-                    raw_leads = await SalesBotService.hunt_leads(
-                        niche=niche_to_search,
-                        city_region=target_entry["city"],
-                        quantity=2,
-                        keys=keys
-                    )
-
-                    base_site = settings.SITE_URL.rstrip("/")
-                    for item in raw_leads:
-                        c_name = item["company_name"]
-                        slug_name = re.sub(r"[^a-zA-Z0-9]", "", c_name).lower() or "empresa"
-                        c_url = item.get("url") or f"https://www.{slug_name}.com"
-                        c_email = item.get("email", "")
-                        c_phone = item.get("phone", "")
-                        c_instagram = item.get("instagram", "")
-
-                        # Localiza ou cadastra
-                        comp_res = await db.execute(select(Company).filter_by(name=c_name, city_region=target_entry["city"]))
-                        company = comp_res.scalars().first()
-                        if not company:
-                            company = Company(
-                                name=c_name,
-                                url=c_url,
-                                niche=niche_to_search,
-                                city_region=target_entry["city"],
-                                whatsapp=c_phone,
-                                email=c_email,
-                                entity_type="company",
-                                is_paid=False
-                            )
-                            db.add(company)
-                            await db.commit()
-                            await db.refresh(company)
-
-                        other_names = [x["company_name"] for x in raw_leads if x["company_name"] != c_name]
-                        top_comp = other_names[0] if other_names else f"Líderes de Referência em {target_entry['city'].split(',')[0]}"
-                        score_val = 32.5
-                        try:
-                            profile = AuditorService.compute_real_site_profile(c_name, niche_to_search, target_entry["city"], c_url, "", {})
-                            score_val = round(float(profile.get("visibility_score", 32.5)), 1)
-                            existing_audits = (await db.execute(select(AuditRun).filter_by(company_id=company.id))).scalars().all()
-                            if not existing_audits:
-                                audit_items = await AuditorService.run_audit_suite(
-                                    company_name=c_name,
-                                    niche=niche_to_search,
-                                    city_region=target_entry["city"],
-                                    competitors=top_comp,
-                                    url=c_url,
-                                    api_keys={},
-                                    is_paid=False,
-                                    scraped_content="",
-                                    entity_type="company",
-                                    professional_registry=""
-                                )
-                                for a_item in audit_items:
-                                    db.add(AuditRun(
-                                        company_id=company.id,
-                                        model_provider=a_item["model_provider"],
-                                        prompt_category=a_item["prompt_category"],
-                                        prompt_text=a_item["prompt_text"],
-                                        response_text=a_item["response_text"],
-                                        is_cited=a_item["is_cited"],
-                                        rank_position=a_item["rank_position"],
-                                        sentiment=a_item["sentiment"],
-                                        sources=a_item["sources"]
-                                    ))
-                                await db.commit()
-                        except Exception:
-                            pass
-
-                        report_url = f"{base_site}/?report={company.id}"
-                        outreach = SalesBotService.build_cold_outreach(
-                            company_name=c_name,
-                            niche=niche_to_search,
-                            city_region=target_entry["city"],
-                            score=score_val,
-                            top_competitor=top_comp,
-                            report_url=report_url,
-                            phone=c_phone,
-                            instagram=c_instagram
-                        )
-
-                        email_sent = False
-                        if c_email and "@" in c_email and not c_email.endswith("exemplo.com.br"):
-                            email_sent = await send_email(c_email, outreach["email_subject"], outreach["email_html"], keys=keys)
-
-                        status_label = "✉️ E-mail Enviado" if email_sent else ("📱 WhatsApp Extraído" if c_phone else "📄 Relatório Gerado")
-                        notes_str = f"IG:@{c_instagram} • {report_url}" if c_instagram else f"AutoBot 24/7 • {report_url}"
-                        existing_lead = (await db.execute(select(LeadCapture).filter_by(company_id=company.id))).scalars().first()
-                        if not existing_lead:
-                            lead_cap = LeadCapture(
-                                company_id=company.id,
-                                company_name=c_name,
-                                contact_name=item.get("decision_maker", "Diretoria"),
-                                contact_email=c_email,
-                                contact_phone=c_phone,
-                                niche=niche_to_search,
-                                city_region=target_entry["city"],
-                                score=score_val,
-                                status=status_label,
-                                notes=notes_str
-                            )
-                            db.add(lead_cap)
-                            await db.commit()
-
-                            # Dispara Webhook Make.com / n8n / Evolution API em tempo real para automação de WhatsApp!
-                            spark_wh = keys.get("spark_webhook_url")
-                            if spark_wh and (c_phone or c_email):
-                                try:
-                                    async with httpx.AsyncClient(timeout=6.0, verify=False) as wh_client:
-                                        await wh_client.post(spark_wh, json={
-                                            "event": "geopulse.salesbot_lead",
-                                            "company_id": company.id,
-                                            "company_name": c_name,
-                                            "niche": niche_to_search,
-                                            "city_region": target_entry["city"],
-                                            "score": score_val,
-                                            "top_competitor": top_comp,
-                                            "whatsapp": c_phone,
-                                            "email": c_email,
-                                            "instagram": c_instagram,
-                                            "report_url": report_url,
-                                            "checkout_url": f"{report_url}&checkout=1",
-                                            "whatsapp_link": outreach.get("whatsapp_link", ""),
-                                            "whatsapp_text": outreach.get("whatsapp_text", ""),
-                                            "instagram_link": outreach.get("instagram_link", ""),
-                                            "email_sent": email_sent,
-                                        })
-                                except Exception:
-                                    pass
-
-                        logger.info(f"🤖 [SalesBot 24/7] Lead processado: {c_name} ({target_entry['city']}) | Status: {status_label}")
-
-                        if email_sent:
-                            # Aguarda intervalo seguro entre cada envio individual
-                            await asyncio.sleep(interval_min * 60)
-                            break
-
-                    # 1B. Máquina Inbound Autônoma (IndexNow + Portal Público + Dev.to):
-                    # A cada 8 rodadas, publica um Guia Oficial de Ranking Regional com backlink para atrair empresários via Google/ChatGPT!
-                    if city_idx % 8 == 1 and raw_leads:
-                        try:
-                            lead_sample = raw_leads[0]
-                            city_short = target_entry["city"].split(",")[0].strip()
-                            inbound_title = f"Ranking 2026: Melhores de {niche_to_search} em {city_short} segundo ChatGPT e Gemini"
-                            inbound_md = (
-                                f"# {inbound_title}\n\n"
-                                f"As buscas por **{niche_to_search} em {target_entry['city']}** estão migrando rapidamente do Google tradicional para motores generativos como **ChatGPT Search, Google Gemini e Perplexity**.\n\n"
-                                f"## Por que algumas empresas de {city_short} dominam as recomendações da IA?\n"
-                                f"Nossa auditoria técnica analisou empresas reais de {niche_to_search} em {target_entry['city']} (incluindo *{lead_sample['company_name']}* e concorrentes locais) nos 4 pilares de **GEO (Generative Engine Optimization)**:\n"
-                                f"1. **Protocolo `/llms.txt` público**\n"
-                                f"2. **Grafo de Entidade Schema.org JSON-LD (`LocalBusiness` / `MedicalBusiness` / `LegalService`)**\n"
-                                f"3. **Densidade de Citação e Provas Sociais Verificadas**\n"
-                                f"4. **FAQ Semântico Conversacional**\n\n"
-                                f"---\n\n"
-                                f"### 🚀 Sua empresa de {niche_to_search} em {city_short} aparece no ChatGPT?\n"
-                                f"Faça agora o **Diagnóstico Gratuito de Visibilidade em IA** em 30 segundos e descubra sua nota oficial (0 a 100) e qual concorrente está recebendo seus clientes:\n\n"
-                                f"👉 **[Testar Minha Empresa Grátis no GeoPulse AI]({base_site})**\n"
-                            )
-                            await SparkSyndicatorBridge.process_syndication_event(
-                                {
-                                    "company_name": f"Guia {niche_to_search} {city_short}",
-                                    "niche": niche_to_search,
-                                    "city_region": target_entry["city"],
-                                    "url": base_site,
-                                    "article_title": inbound_title,
-                                    "article_markdown": inbound_md,
-                                    "visibility_score": 92.0,
-                                },
-                                medium_token=keys.get("medium_api_token"),
-                                devto_api_key=keys.get("devto_api_key") if city_idx % 24 == 1 else None,
-                            )
-                        except Exception as e_inb:
-                            logger.warning(f"Inbound syndication warning: {e_inb}")
-
-                    # 2. Cadência Automática (2º Toque / Follow-up) para leads que ainda não receberam ou abriram e-mail
-                    pending_leads = (await db.execute(
-                        select(LeadCapture).where(
-                            LeadCapture.contact_email.isnot(None),
-                            LeadCapture.contact_email != "",
-                            LeadCapture.status.in_(["📱 WhatsApp Extraído", "📄 Relatório Gerado", "✉️ E-mail Enviado"])
-                        ).order_by(LeadCapture.id.asc()).limit(5)
-                    )).scalars().all()
-
-                    for p_lead in pending_leads:
-                        if not p_lead.contact_email or "@" not in p_lead.contact_email or p_lead.contact_email.endswith("exemplo.com.br"):
-                            continue
-                        # Se ainda não recebeu o 1º e-mail (estava com WhatsApp Extraído), envia agora pelo domínio verificado!
-                        if p_lead.status in ("📱 WhatsApp Extraído", "📄 Relatório Gerado"):
-                            rep_url = f"{base_site}/?report={p_lead.company_id}" if p_lead.company_id else base_site
-                            outreach_p = SalesBotService.build_cold_outreach(
-                                company_name=p_lead.company_name,
-                                niche=p_lead.niche or "Especialidades",
-                                city_region=p_lead.city_region or "Brasil",
-                                score=p_lead.score or 35.0,
-                                top_competitor=f"Líderes locais em {(p_lead.city_region or 'sua cidade').split(',')[0]}",
-                                report_url=rep_url,
-                                phone=p_lead.contact_phone or ""
-                            )
-                            ok_p = await send_email(p_lead.contact_email, outreach_p["email_subject"], outreach_p["email_html"], keys=keys)
-                            if ok_p:
-                                p_lead.status = "✉️ E-mail Enviado"
-                                await db.commit()
-                                logger.info(f"🤖 [SalesBot Follow-up] 1º E-mail disparado para {p_lead.company_name} ({p_lead.contact_email})")
-                                break
-                        # Se já recebeu o 1º e-mail há mais de 24h e ainda não abriu o relatório, envia o 2º Toque (Follow-up de Escassez)
-                        elif p_lead.status == "✉️ E-mail Enviado" and p_lead.created_at and (datetime.utcnow() - p_lead.created_at).total_seconds() > 86400:
-                            rep_url = f"{base_site}/?report={p_lead.company_id}" if p_lead.company_id else base_site
-                            chk_url = f"{rep_url}&checkout=1" if "?" in rep_url else f"{rep_url}?checkout=1"
-                            subj_2 = f"Re: Dossiê de IA da {p_lead.company_name} ({p_lead.city_region or 'Sua Região'}) — Último aviso"
-                            html_2 = (
-                                f"<div style='font-family:Arial,sans-serif;max-width:600px;line-height:1.6;color:#1e293b;padding:24px;border:1px solid #e2e8f0;border-radius:16px;'>"
-                                f"<p>Olá, diretoria da <strong>{p_lead.company_name}</strong>!</p>"
-                                f"<p>Enviei ontem o diagnóstico de visibilidade da sua empresa no <strong>ChatGPT e Google Gemini</strong> para <em>{p_lead.niche}</em> em <em>{p_lead.city_region}</em> (Nota atual: <strong style='color:#dc2626;'>{round(float(p_lead.score or 35.0), 1)}/100</strong>).</p>"
-                                f"<p>Como limitamos o <strong>Desafio de 14 Dias (Top 10 nas IAs)</strong> a poucas empresas por cidade para garantir exclusividade semântica, estou passando para confirmar se vocês conseguiram abrir o dossiê:</p>"
-                                f"<div style='margin:22px 0;'>"
-                                f"<a href='{rep_url}' style='background:#16a34a;color:#ffffff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;margin-right:10px;'>📄 Abrir Dossiê da {p_lead.company_name}</a>"
-                                f"<a href='{chk_url}' style='background:#0f172a;color:#ffffff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;'>⚡ Garantir Vaga no Top 10</a>"
-                                f"</div>"
-                                f"<p style='font-size:12px;color:#64748b;'>Atenciosamente,<br>Equipe GeoPulse AI (<a href='https://geopulseai.store'>geopulseai.store</a>)</p>"
-                                f"</div>"
-                            )
-                            ok_2 = await send_email(p_lead.contact_email, subj_2, html_2, keys=keys)
-                            if ok_2:
-                                p_lead.status = "🔁 2º E-mail (Follow-up)"
-                                await db.commit()
-                                logger.info(f"🤖 [SalesBot Follow-up] 2º Toque enviado para {p_lead.company_name} ({p_lead.contact_email})")
-                                break
-        except Exception as e:
-            logger.warning(f"Erro no loop do SalesBot 24/7: {e}")
-
-        # Intervalo entre rodadas do loop
+        await _run_salesbot_cycle(respect_cooldown=True)
         await asyncio.sleep(180)
 
 
@@ -3520,7 +3545,7 @@ async def generate_agency_proposal(data: ProposalGenerateRequest):
 @app.get("/health")
 @app.get("/api/health")
 async def health_check(db: AsyncSession = Depends(get_db)):
-    """Verifica status da aplicação, conectividade com o banco SQLite e tempo de atividade."""
+    """Verifica status da aplicação, conectividade com o banco SQLite e dispara 1 pulso do SalesBot se estiver no intervalo."""
     db_ok = False
     try:
         await db.execute(select(1))
@@ -3528,10 +3553,20 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     except Exception as e:
         logger.error(f"Falha no healthcheck do banco: {e}")
 
+    pulse_info = {"ran": False, "reason": "db_error"}
+    if db_ok:
+        try:
+            pulse_info = await asyncio.wait_for(_run_salesbot_cycle(respect_cooldown=True), timeout=22.0)
+        except asyncio.TimeoutError:
+            pulse_info = {"ran": False, "reason": "timeout"}
+        except Exception as e_pulse:
+            pulse_info = {"ran": False, "reason": str(e_pulse)}
+
     return {
         "status": "healthy" if db_ok else "degraded",
         "timestamp": datetime.utcnow().isoformat(),
         "database": "connected" if db_ok else "error",
+        "salesbot_pulse": pulse_info,
         "version": "1.0.0"
     }
 

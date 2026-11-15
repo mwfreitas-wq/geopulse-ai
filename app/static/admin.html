@@ -681,13 +681,19 @@
 
                     <td class="py-4 px-4">
                       <select :value="lead.status" @change="updateLeadStatus(lead.id, $event.target.value)"
-                        class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-800 focus:outline-none focus:border-emerald-500">
+                        class="px-2.5 py-1 rounded-lg text-xs font-bold border focus:outline-none"
+                        :class="lead.status && lead.status.includes('🔥') ? 'border-amber-500 bg-amber-50 text-amber-900 font-black ring-2 ring-amber-300' : (lead.status && lead.status.includes('👀') ? 'border-sky-400 bg-sky-50 text-sky-900 font-extrabold' : 'border-slate-300 bg-white text-slate-800')">
                         <option value="Novo Lead">⏳ Novo Lead</option>
+                        <option value="🔥 Clicou no Relatório (Quente!)">🔥 Clicou no Relatório (Quente!)</option>
+                        <option value="👀 E-mail Aberto">👀 E-mail Aberto</option>
+                        <option value="✉️ E-mail Enviado">✉️ E-mail Enviado</option>
+                        <option value="📱 WhatsApp Extraído">📱 WhatsApp Extraído</option>
                         <option value="Em Contato">💬 Em Contato</option>
                         <option value="Proposta Enviada">📑 Proposta Enviada</option>
                         <option value="Convertido">✅ Convertido / Fechou</option>
                         <option value="Perdido">❌ Perdido</option>
                       </select>
+                      <div x-show="lead.notes && lead.notes.includes('Clicou')" class="text-[10px] text-amber-700 font-bold mt-1" x-text="lead.notes.split('•')[0]"></div>
                     </td>
 
                     <td class="py-4 px-4 text-right space-x-1.5 whitespace-nowrap">

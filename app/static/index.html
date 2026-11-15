@@ -2367,16 +2367,66 @@ function extractTopCompetitor(data) {
             if (autoCheckout === '1') {
               setTimeout(() => {
                 if (typeof openCheckoutModal === 'function') openCheckoutModal();
-              }, 700);
+              }, 500);
             } else if (!repData.company?.is_paid) {
-              // Se o cliente está lendo o relatório, abre o Consultor Closer IA automaticamente após 5 segundos para quebrar objeções e fechar a venda!
+              const cName = repData.company?.name || 'Sua Empresa';
+              const cCity = repData.company?.city_region || 'sua região';
+              const cScore = Math.round(repData.metrics?.visibility_score || 22);
+
+              // 1. Auto-Closer Flutuante: surge aos 15 segundos de leitura destacando escassez e link de checkout direto
+              setTimeout(() => {
+                const checkoutModal = document.getElementById('checkout-modal');
+                if ((!checkoutModal || checkoutModal.classList.contains('hidden')) && !document.getElementById('auto-closer-floating-card')) {
+                  const closerCard = document.createElement('div');
+                  closerCard.id = 'auto-closer-floating-card';
+                  closerCard.className = 'fixed bottom-5 right-5 z-40 max-w-sm w-[calc(100vw-40px)] bg-slate-900/95 text-white p-4 sm:p-5 rounded-3xl border-2 border-emerald-400 shadow-2xl backdrop-blur-md transition-all duration-500 transform translate-y-0';
+                  closerCard.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping"></span> Vaga Pré-Reservada
+                      </div>
+                      <button onclick="document.getElementById('auto-closer-floating-card').remove()" class="text-slate-400 hover:text-white text-xs font-bold px-1.5 py-0.5 rounded-full hover:bg-slate-800">✕</button>
+                    </div>
+                    <h4 class="text-xs sm:text-sm font-extrabold text-white leading-snug">
+                      Garantir o Top 10 para ${cName} em ${cCity}
+                    </h4>
+                    <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+                      Sua pontuação atual é <strong class="text-rose-400">${cScore}/100</strong>. Ative agora a implementação técnica de 14 dias para assumir as respostas do ChatGPT e Gemini antes dos concorrentes.
+                    </p>
+                    <div class="mt-3.5 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                      <div class="text-left">
+                        <span class="text-[9px] uppercase font-bold text-slate-400 block">Taxa Única</span>
+                        <strong class="text-emerald-400 text-sm font-mono font-black">R$ 197,00</strong>
+                      </div>
+                      <button onclick="document.getElementById('auto-closer-floating-card').remove(); openCheckoutModal();" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-lg transition flex items-center gap-1">
+                        <span>⚡ Ativar com PIX</span>
+                      </button>
+                    </div>
+                  `;
+                  document.body.appendChild(closerCard);
+                }
+              }, 15000);
+
+              // 2. Exit-Intent no Desktop: detecta saída do mouse para o topo e abre o checkout antes de perder a visita
+              let exitCloserFired = false;
+              document.addEventListener('mouseleave', (e) => {
+                if (e.clientY <= 12 && !exitCloserFired) {
+                  const checkoutModal = document.getElementById('checkout-modal');
+                  if (!checkoutModal || checkoutModal.classList.contains('hidden')) {
+                    exitCloserFired = true;
+                    if (typeof openCheckoutModal === 'function') openCheckoutModal();
+                  }
+                }
+              });
+
+              // 3. Abre também o chat closer de IA após 6 segundos para quebrar objeções
               setTimeout(() => {
                 const chatPanel = document.getElementById('ai-chat-panel');
                 const checkoutModal = document.getElementById('checkout-modal');
                 if (chatPanel && chatPanel.classList.contains('hidden') && (!checkoutModal || checkoutModal.classList.contains('hidden'))) {
                   chatPanel.classList.remove('hidden');
                 }
-              }, 5000);
+              }, 6000);
             }
           }
         } catch (e) {

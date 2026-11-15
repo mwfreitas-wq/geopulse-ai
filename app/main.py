@@ -2248,6 +2248,166 @@ async def gumroad_webhook_ping(request: Request, db: AsyncSession = Depends(get_
     return {"status": "activated", "company_id": comp.id, "sale_id": sale_id}
 
 
+# ==============================================================================
+# WEBHOOK OFICIAL RESEND (RASTREAMENTO DE CLIQUES E ABERTURAS EM TEMPO REAL)
+# ==============================================================================
+
+@app.get("/api/webhooks/resend")
+async def resend_webhook_ping():
+    """Endpoint de verificação/healthcheck para o webhook da Resend."""
+    return {"status": "active", "service": "resend_webhook", "supported_events": ["email.clicked", "email.opened"]}
+
+
+@app.post("/api/webhooks/resend")
+async def resend_webhook_handler(request: Request, db: AsyncSession = Depends(get_db)):
+    """
+    Webhook Oficial da Resend para Rastreamento em Tempo Real:
+    Quando o lead abre ou clica no link do relatório enviado por e-mail:
+    1. Atualiza status no banco e CRM para '🔥 Clicou no Relatório (Quente!)' ou '👀 E-mail Aberto'.
+    2. Se for clique (intenção imediata), dispara gatilho de fechamento automático com link direto para o checkout (?report=ID&checkout=1).
+    3. Notifica o webhook do Make.com / n8n para automação paralela de WhatsApp e alerta imediato.
+    """
+    from app.services.notifier import send_email
+    try:
+        payload = await request.json()
+    except Exception as e:
+        logger.warning(f"[Resend Webhook] Payload inválido: {e}")
+        return {"status": "invalid_payload"}
+
+    event_type = str(payload.get("type") or "").strip().lower()
+    data = payload.get("data") or {}
+
+    to_list = data.get("to") or []
+    if isinstance(to_list, list) and to_list:
+        recipient = str(to_list[0]).strip().lower()
+    elif isinstance(to_list, str):
+        recipient = to_list.strip().lower()
+    else:
+        recipient = ""
+
+    click_data = data.get("click") or {}
+    clicked_url = str(click_data.get("link") or "").strip()
+
+    # Tenta extrair o ID da empresa da URL clicada (?report=123)
+    comp_id_match = re.search(r"[?&](?:report|relatorio|diag)=(\d+)", clicked_url)
+    target_comp_id = int(comp_id_match.group(1)) if comp_id_match else None
+
+    company = None
+    if target_comp_id:
+        comp_res = await db.execute(select(Company).filter_by(id=target_comp_id))
+        company = comp_res.scalars().first()
+
+    if not company and recipient:
+        comp_res_e = await db.execute(select(Company).where(Company.email == recipient).order_by(Company.id.desc()))
+        company = comp_res_e.scalars().first()
+
+    lead = None
+    if company:
+        lead_res = await db.execute(select(LeadCapture).filter_by(company_id=company.id))
+        lead = lead_res.scalars().first()
+    if not lead and recipient:
+        lead_res_e = await db.execute(select(LeadCapture).where(LeadCapture.contact_email == recipient).order_by(LeadCapture.id.desc()))
+        lead = lead_res_e.scalars().first()
+    if lead and not company and lead.company_id:
+        comp_res_l = await db.execute(select(Company).filter_by(id=lead.company_id))
+        company = comp_res_l.scalars().first()
+
+    base_site = settings.SITE_URL.rstrip("/")
+    keys = await get_all_configured_keys(db)
+
+    # 1. Trata evento de CLIQUE (Lead Quente de Alta Conversão)
+    if "clicked" in event_type:
+        now_str = datetime.utcnow().strftime("%d/%m %H:%M")
+        if lead:
+            lead.status = "🔥 Clicou no Relatório (Quente!)"
+            prev_notes = lead.notes or ""
+            if "Clicou" not in prev_notes:
+                lead.notes = f"Clicou em {now_str} • {prev_notes}"[:250]
+            await db.commit()
+
+        # Dispara e-mail de fechamento imediato com vaga reservada e link direto de checkout
+        if company and not company.is_paid and recipient and "@" in recipient and not recipient.endswith("exemplo.com.br"):
+            already_pitched = "⚡ Fechamento Disparado" in (lead.notes if lead else "")
+            if not already_pitched:
+                rep_url = f"{base_site}/?report={company.id}"
+                chk_url = f"{base_site}/?report={company.id}&checkout=1"
+                c_name = company.name or "Sua Empresa"
+                c_city = company.city_region or "sua região"
+
+                pitch_subject = f"⚡ Vaga Reservada: Implementação Top 10 para {c_name} ({c_city})"
+                pitch_html = (
+                    f"<div style='font-family:Arial,sans-serif;max-width:620px;line-height:1.6;color:#1e293b;padding:26px;border:1px solid #cbd5e1;border-radius:18px;background:#ffffff;'>"
+                    f"<div style='margin-bottom:16px;'><span style='background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:900;text-transform:uppercase;'>🔥 Alerta de Reserva Regional</span></div>"
+                    f"<p style='font-size:16px;margin:0 0 12px;'>Olá, diretoria da <strong>{c_name}</strong>!</p>"
+                    f"<p style='margin:0 0 14px;'>Identificamos que você acabou de acessar o <strong>Dossiê Técnico de Visibilidade em IA</strong> da sua empresa em {c_city}.</p>"
+                    f"<p style='margin:0 0 14px;'>Para manter a exclusividade dos nossos clientes e garantir que as IAs (ChatGPT, Google Gemini e Perplexity) recomendem a sua clínica com autoridade máxima, limitamos a implementação semântica a <strong>poucas empresas por cidade</strong>.</p>"
+                    f"<div style='background:#f8fafc;border-left:4px solid #16a34a;padding:16px;border-radius:8px;margin:18px 0;'>"
+                    f"<p style='margin:0 0 6px;font-size:13px;font-weight:bold;color:#0f172a;'>Status da Reserva:</p>"
+                    f"<p style='margin:0;font-size:13px;color:#334155;'>Vaga para o <strong>Desafio de 14 Dias (Top 10 nas IAs)</strong> pré-reservada para a <strong>{c_name}</strong> por tempo limitado. O protocolo gera 7 ativos semânticos e conecta seu site diretamente às respostas dos motores generativos.</p>"
+                    f"</div>"
+                    f"<div style='text-align:center;margin:24px 0;'>"
+                    f"<a href='{chk_url}' style='background:#16a34a;color:#ffffff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:bold;font-size:14px;display:inline-block;box-shadow:0 4px 14px rgba(22,163,74,0.35);'>⚡ Garantir Vaga com Taxa Única de R$ 197</a>"
+                    f"</div>"
+                    f"<p style='font-size:12px;color:#64748b;text-align:center;margin:0 0 20px;'>Sem mensalidades • Ativação imediata via PIX ou Cartão em até 12x • Garantia incondicional de 7 dias</p>"
+                    f"<hr style='border:none;border-top:1px solid #e2e8f0;margin:20px 0;'/>"
+                    f"<p style='font-size:11px;color:#94a3b8;margin:0;'>Você recebeu esta mensagem porque acessou o diagnóstico técnico em <a href='{base_site}' style='color:#64748b;'>geopulseai.store</a>.</p>"
+                    f"</div>"
+                )
+                try:
+                    sent_ok = await send_email(recipient, pitch_subject, pitch_html, keys=keys)
+                    if sent_ok and lead:
+                        lead.notes = f"⚡ Fechamento Disparado ({now_str}) • {lead.notes or ''}"[:250]
+                        await db.commit()
+                        logger.info(f"[Resend Webhook] Fechamento imediato disparado para {recipient}")
+                except Exception as e_send:
+                    logger.warning(f"[Resend Webhook] Erro ao disparar fechamento para {recipient}: {e_send}")
+
+        # Dispara notificação externa Make.com / n8n se configurado
+        spark_wh = keys.get("spark_webhook_url")
+        if spark_wh:
+            try:
+                async with httpx.AsyncClient(timeout=4.0, verify=False) as wh_c:
+                    await wh_c.post(spark_wh, json={
+                        "event": "geopulse.lead_clicked",
+                        "email": recipient,
+                        "company_name": company.name if company else (lead.company_name if lead else ""),
+                        "city_region": company.city_region if company else "",
+                        "link": clicked_url,
+                        "report_url": f"{base_site}/?report={company.id}" if company else clicked_url,
+                        "checkout_url": f"{base_site}/?report={company.id}&checkout=1" if company else "",
+                        "whatsapp": company.whatsapp if company else (lead.contact_phone if lead else ""),
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+            except Exception:
+                pass
+
+        return {"status": "processed", "event": event_type, "recipient": recipient, "hot_lead": True}
+
+    # 2. Trata evento de ABERTURA (Open Tracking)
+    elif "opened" in event_type:
+        if lead and lead.status in ("✉️ E-mail Enviado", "📱 WhatsApp Extraído", "📄 Relatório Gerado"):
+            lead.status = "👀 E-mail Aberto"
+            await db.commit()
+            logger.info(f"[Resend Webhook] Lead {lead.company_name} ({recipient}) abriu o e-mail!")
+
+        spark_wh = keys.get("spark_webhook_url")
+        if spark_wh:
+            try:
+                async with httpx.AsyncClient(timeout=4.0, verify=False) as wh_c:
+                    await wh_c.post(spark_wh, json={
+                        "event": "geopulse.lead_opened",
+                        "email": recipient,
+                        "company_name": company.name if company else (lead.company_name if lead else ""),
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+            except Exception:
+                pass
+
+        return {"status": "processed", "event": event_type, "recipient": recipient}
+
+    return {"status": "ignored", "event": event_type}
+
+
 @app.post("/api/admin/companies/{company_id}/activate", dependencies=[Depends(verify_admin_password_header)])
 async def admin_manual_activate_company(company_id: int, db: AsyncSession = Depends(get_db)):
     """
